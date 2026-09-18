@@ -1,0 +1,3 @@
+@echo off
+echo Opening WeatherWise in your default browser...
+start "" "%~dp0index.html"
