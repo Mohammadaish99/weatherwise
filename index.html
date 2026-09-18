@@ -99,26 +99,26 @@
                 <div class="weather-top">
                     <div class="location-meta">
                         <p class="small-title">CURRENT WEATHER</p>
-                        <h2 id="cityName">Loading...</h2>
-                        <p id="date">--</p>
+                        <h2 id="cityName">London, United Kingdom</h2>
+                        <p id="date">Live Weather</p>
                     </div>
 
                     <div id="weatherIcon" class="weather-icon">
-                        ☀️
+                        ⛅
                     </div>
                 </div>
 
                 <div class="temperature-section">
                     <div class="temp-wrapper">
-                        <span id="temperature">--</span>
+                        <span id="temperature">18</span>
                         <span id="tempUnit" class="degree">°C</span>
                     </div>
                     <div class="high-low-box">
-                        <span id="tempHighLow">H: --° • L: --°</span>
+                        <span id="tempHighLow">H: 21°C • L: 12°C</span>
                     </div>
                 </div>
 
-                <p id="condition" class="condition">Loading conditions...</p>
+                <p id="condition" class="condition">Partly Cloudy</p>
 
                 <!-- DETAILED WEATHER METRICS -->
                 <div class="weather-details">
@@ -127,7 +127,7 @@
                         <span class="detail-icon">🌡️</span>
                         <div>
                             <p>Feels Like</p>
-                            <strong id="feelsLike">--</strong>
+                            <strong id="feelsLike">18°C</strong>
                         </div>
                     </div>
 
@@ -135,7 +135,7 @@
                         <span class="detail-icon">💧</span>
                         <div>
                             <p>Humidity</p>
-                            <strong id="humidity">--</strong>
+                            <strong id="humidity">68%</strong>
                         </div>
                     </div>
 
@@ -143,7 +143,7 @@
                         <span class="detail-icon">💨</span>
                         <div>
                             <p>Wind Speed</p>
-                            <strong id="wind">--</strong>
+                            <strong id="wind">14 km/h</strong>
                         </div>
                     </div>
 
@@ -151,7 +151,7 @@
                         <span class="detail-icon">☀️</span>
                         <div>
                             <p>UV Index</p>
-                            <strong id="uvIndex">--</strong>
+                            <strong id="uvIndex">3 (Mod)</strong>
                         </div>
                     </div>
 
@@ -159,7 +159,7 @@
                         <span class="detail-icon">🌧️</span>
                         <div>
                             <p>Precipitation</p>
-                            <strong id="rainChance">--</strong>
+                            <strong id="rainChance">10% chance</strong>
                         </div>
                     </div>
 
@@ -167,7 +167,7 @@
                         <span class="detail-icon">🌅</span>
                         <div>
                             <p>Sun Schedule</p>
-                            <strong id="sunSchedule">--</strong>
+                            <strong id="sunSchedule">↑06:45  ↓19:10</strong>
                         </div>
                     </div>
 
@@ -175,7 +175,7 @@
                         <span class="detail-icon">🧭</span>
                         <div>
                             <p>Air Pressure</p>
-                            <strong id="pressure">--</strong>
+                            <strong id="pressure">1014 hPa</strong>
                         </div>
                     </div>
 
@@ -183,7 +183,7 @@
                         <span class="detail-icon">🌐</span>
                         <div>
                             <p>Timezone</p>
-                            <strong id="timezone">--</strong>
+                            <strong id="timezone">Europe/London</strong>
                         </div>
                     </div>
 
@@ -200,7 +200,50 @@
                 </div>
 
                 <div id="forecastContainer" class="forecast-container">
-                    <!-- Dynamic forecast cards will be injected here via JavaScript -->
+                    <div class="forecast-card today">
+                        <div><p class="day-name">Today</p><p class="day-date">Live</p></div>
+                        <div class="forecast-icon">⛅</div>
+                        <div class="forecast-temps"><span class="temp-max">21°</span><span class="temp-min">12°</span></div>
+                        <div class="forecast-condition">Partly Cloudy</div>
+                    </div>
+                    <div class="forecast-card">
+                        <div><p class="day-name">Sun</p><p class="day-date">Day 2</p></div>
+                        <div class="forecast-icon">🌤️</div>
+                        <div class="forecast-temps"><span class="temp-max">22°</span><span class="temp-min">13°</span></div>
+                        <div class="forecast-condition">Mainly Clear</div>
+                    </div>
+                    <div class="forecast-card">
+                        <div><p class="day-name">Mon</p><p class="day-date">Day 3</p></div>
+                        <div class="forecast-icon">🌧️</div>
+                        <div class="forecast-temps"><span class="temp-max">18°</span><span class="temp-min">11°</span></div>
+                        <div class="forecast-condition">Rain Showers</div>
+                        <div class="rain-chance">💧 65%</div>
+                    </div>
+                    <div class="forecast-card">
+                        <div><p class="day-name">Tue</p><p class="day-date">Day 4</p></div>
+                        <div class="forecast-icon">☀️</div>
+                        <div class="forecast-temps"><span class="temp-max">23°</span><span class="temp-min">14°</span></div>
+                        <div class="forecast-condition">Clear Sky</div>
+                    </div>
+                    <div class="forecast-card">
+                        <div><p class="day-name">Wed</p><p class="day-date">Day 5</p></div>
+                        <div class="forecast-icon">⛅</div>
+                        <div class="forecast-temps"><span class="temp-max">20°</span><span class="temp-min">13°</span></div>
+                        <div class="forecast-condition">Partly Cloudy</div>
+                    </div>
+                    <div class="forecast-card">
+                        <div><p class="day-name">Thu</p><p class="day-date">Day 6</p></div>
+                        <div class="forecast-icon">🌦️</div>
+                        <div class="forecast-temps"><span class="temp-max">19°</span><span class="temp-min">12°</span></div>
+                        <div class="forecast-condition">Drizzle</div>
+                        <div class="rain-chance">💧 35%</div>
+                    </div>
+                    <div class="forecast-card">
+                        <div><p class="day-name">Fri</p><p class="day-date">Day 7</p></div>
+                        <div class="forecast-icon">☀️</div>
+                        <div class="forecast-temps"><span class="temp-max">24°</span><span class="temp-min">15°</span></div>
+                        <div class="forecast-condition">Sunny</div>
+                    </div>
                 </div>
             </section>
 
