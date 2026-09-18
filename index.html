@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="WeatherWise - Free real-time weather forecasts, UV index, rain probability, and 7-day outlook for any city worldwide.">
+    <meta name="theme-color" content="#3182ce">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌦️</text></svg>">
+
+    <title>WeatherWise | Real-Time Weather Forecast</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app">
+
+        <!-- HEADER -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">🌦️</span>
+                <span class="logo-text">WeatherWise</span>
+            </div>
+
+            <div class="header-actions">
+                <button id="unitBtn" class="action-btn unit-btn" title="Toggle °C / °F">
+                    °C
+                </button>
+
+                <button id="themeBtn" class="action-btn theme-btn" title="Toggle Dark/Light Mode">
+                    🌙
+                </button>
+            </div>
+        </header>
+
+
+        <!-- MAIN -->
+        <main>
+
+            <!-- HERO -->
+            <section class="hero">
+                <h1>Weather at your fingertips</h1>
+                <p>
+                    Instant, real-time weather forecasts and 7-day outlook for every city on Earth.
+                </p>
+            </section>
+
+
+            <!-- SEARCH SECTION -->
+            <section class="search-section">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input
+                        type="text"
+                        id="cityInput"
+                        placeholder="Search city (e.g., Tokyo, London, New York)..."
+                        autocomplete="off"
+                    >
+                    <button id="searchBtn">
+                        Search
+                    </button>
+                </div>
+
+                <div class="search-controls">
+                    <button id="locationBtn" class="location-btn">
+                        <span>📍</span> Use My Current Location
+                    </button>
+                </div>
+
+                <!-- QUICK CITY PILLS -->
+                <div class="quick-cities">
+                    <span class="quick-label">Popular:</span>
+                    <button class="city-pill" data-city="New York">New York</button>
+                    <button class="city-pill" data-city="London">London</button>
+                    <button class="city-pill" data-city="Tokyo">Tokyo</button>
+                    <button class="city-pill" data-city="Paris">Paris</button>
+                    <button class="city-pill" data-city="Dubai">Dubai</button>
+                    <button class="city-pill" data-city="Mumbai">Mumbai</button>
+                </div>
+            </section>
+
+
+            <!-- ERROR & STATUS MESSAGE -->
+            <div id="error" class="error-box" style="display: none;"></div>
+
+            <!-- LOADING SPINNER -->
+            <div id="loading" class="loading-box" style="display: none;">
+                <div class="spinner"></div>
+                <p>Fetching real-time weather data...</p>
+            </div>
+
+
+            <!-- CURRENT WEATHER CARD -->
+            <section id="weatherCard" class="weather-card">
+
+                <div class="weather-top">
+                    <div class="location-meta">
+                        <p class="small-title">CURRENT WEATHER</p>
+                        <h2 id="cityName">Loading...</h2>
+                        <p id="date">--</p>
+                    </div>
+
+                    <div id="weatherIcon" class="weather-icon">
+                        ☀️
+                    </div>
+                </div>
+
+                <div class="temperature-section">
+                    <div class="temp-wrapper">
+                        <span id="temperature">--</span>
+                        <span id="tempUnit" class="degree">°C</span>
+                    </div>
+                    <div class="high-low-box">
+                        <span id="tempHighLow">H: --° • L: --°</span>
+                    </div>
+                </div>
+
+                <p id="condition" class="condition">Loading conditions...</p>
+
+                <!-- DETAILED WEATHER METRICS -->
+                <div class="weather-details">
+
+                    <div class="detail-card">
+                        <span class="detail-icon">🌡️</span>
+                        <div>
+                            <p>Feels Like</p>
+                            <strong id="feelsLike">--</strong>
+                        </div>
+                    </div>
+
+                    <div class="detail-card">
+                        <span class="detail-icon">💧</span>
+                        <div>
+                            <p>Humidity</p>
+                            <strong id="humidity">--</strong>
+                        </div>
+                    </div>
+
+                    <div class="detail-card">
+                        <span class="detail-icon">💨</span>
+                        <div>
+                            <p>Wind Speed</p>
+                            <strong id="wind">--</strong>
+                        </div>
+                    </div>
+
+                    <div class="detail-card">
+                        <span class="detail-icon">☀️</span>
+                        <div>
+                            <p>UV Index</p>
+                            <strong id="uvIndex">--</strong>
+                        </div>
+                    </div>
+
+                    <div class="detail-card">
+                        <span class="detail-icon">🌧️</span>
+                        <div>
+                            <p>Precipitation</p>
+                            <strong id="rainChance">--</strong>
+                        </div>
+                    </div>
+
+                    <div class="detail-card">
+                        <span class="detail-icon">🌅</span>
+                        <div>
+                            <p>Sun Schedule</p>
+                            <strong id="sunSchedule">--</strong>
+                        </div>
+                    </div>
+
+                    <div class="detail-card">
+                        <span class="detail-icon">🧭</span>
+                        <div>
+                            <p>Air Pressure</p>
+                            <strong id="pressure">--</strong>
+                        </div>
+                    </div>
+
+                    <div class="detail-card">
+                        <span class="detail-icon">🌐</span>
+                        <div>
+                            <p>Timezone</p>
+                            <strong id="timezone">--</strong>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- 7-DAY FORECAST SECTION -->
+            <section class="forecast-section">
+                <div class="section-title">
+                    <h2>7-Day Outlook</h2>
+                    <span class="forecast-badge">📅 Accurate Live Forecast</span>
+                </div>
+
+                <div id="forecastContainer" class="forecast-container">
+                    <!-- Dynamic forecast cards will be injected here via JavaScript -->
+                </div>
+            </section>
+
+        </main>
+
+
+        <!-- FOOTER -->
+        <footer>
+            <p>
+                <strong>WeatherWise</strong> • Real-time weather for everyone
+            </p>
+            <p class="sub-footer">
+                Data provided by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> • Free & Open-Source
+            </p>
+        </footer>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
