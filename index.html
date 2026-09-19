@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="WeatherWise 3D - High-Accuracy Real-Time Atmospheric Station, 3D Celestial Sun & Moon Horizon Dome, and 3D Wind Compass.">
+    <meta name="description" content="WeatherWise 3D - Real-Time Atmospheric Station, 3D Wind Compass, Celestial Horizon Dome, and Detailed Hourly Telemetry.">
     <meta name="theme-color" content="#0f172a">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌦️</text></svg>">
@@ -14,23 +14,23 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Three.js for 3D WebGL -->
+    <!-- Lightweight Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-    <title>WeatherWise 3D | Real-Time Weather Station</title>
+    <title>WeatherWise 3D | Real-Time Atmospheric Station</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <!-- 3D WEBGL FULL CANVAS -->
+    <!-- 3D AMBIENT BACKGROUND CANVAS -->
     <canvas id="threeCanvas"></canvas>
 
     <div class="app">
 
         <!-- HEADER -->
-        <header class="header scroll-3d-item">
+        <header class="header">
             <div class="logo">
                 <span class="logo-icon-3d">🌦️</span>
                 <span class="logo-text">Weather<span class="gradient-text">Wise 3D</span></span>
@@ -41,16 +41,16 @@
                 <span class="clock-icon">🕒</span>
                 <div class="clock-details">
                     <span id="localTimeDisplay" class="clock-time">--:--:--</span>
-                    <span id="localDateDisplay" class="clock-date">Synchronizing...</span>
+                    <span id="localDateDisplay" class="clock-date">Live Local Time</span>
                 </div>
             </div>
 
             <div class="header-actions">
-                <button id="unitBtn" class="action-btn-3d unit-btn" title="Toggle °C / °F">
+                <button id="unitBtn" class="action-btn-3d unit-btn" title="Toggle °C / °F" aria-label="Toggle Temperature Unit">
                     <span class="btn-text">°C</span>
                 </button>
 
-                <button id="themeBtn" class="action-btn-3d theme-btn" title="Toggle Dark/Light Mode">
+                <button id="themeBtn" class="action-btn-3d theme-btn" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">
                     <span class="btn-icon">🌙</span>
                 </button>
             </div>
@@ -60,8 +60,8 @@
         <!-- MAIN -->
         <main>
 
-            <!-- HERO & MONITORING STATUS -->
-            <section class="hero scroll-3d-item">
+            <!-- HERO & REAL-TIME MONITOR BAR -->
+            <section class="hero">
                 <div class="monitor-live-bar">
                     <div class="monitor-pulse">
                         <span class="pulse-dot"></span>
@@ -75,13 +75,13 @@
 
                 <h1>Atmospheric Station in <span class="gradient-text">Smooth 3D</span></h1>
                 <p>
-                    Precision barometric pressure monitoring, real-time 3D wind compass, and live day/night astronomical horizon dome.
+                    Live barometric pressure tracking, 3D rotating wind compass, and full day/night astronomical horizon dome.
                 </p>
             </section>
 
 
             <!-- SEARCH & ADD CITY SECTION -->
-            <section class="search-section scroll-3d-item">
+            <section class="search-section">
                 <div class="search-box-3d" id="searchBox3D">
                     <span class="search-icon">🔍</span>
                     <input
@@ -118,7 +118,7 @@
 
 
             <!-- SAVED CITIES DRAWER -->
-            <section id="savedCitiesSection" class="saved-cities-section scroll-3d-item">
+            <section id="savedCitiesSection" class="saved-cities-section">
                 <div class="section-header-compact">
                     <h3>⭐ My Saved Cities</h3>
                     <span id="savedCountBadge" class="count-badge">0 saved</span>
@@ -139,7 +139,7 @@
 
 
             <!-- MAIN 3D WEATHER CARD -->
-            <section id="weatherCard" class="weather-card-3d card-tilt scroll-3d-item" data-tilt>
+            <section id="weatherCard" class="weather-card-3d card-tilt" data-tilt>
                 <div class="card-glare"></div>
 
                 <div class="weather-top">
@@ -174,7 +174,7 @@
 
 
             <!-- ================= REAL-TIME ATMOSPHERIC MONITORING DASHBOARD ================= -->
-            <section class="monitoring-section scroll-3d-item">
+            <section class="monitoring-section">
                 <div class="section-title">
                     <h2>⚡ Real-Time Atmospheric Monitoring</h2>
                     <span class="refresh-badge-3d">
@@ -204,9 +204,7 @@
                                 
                                 <!-- 3D ROTATING NEEDLE -->
                                 <div id="compassNeedle" class="compass-needle" style="transform: rotate(0deg);">
-                                    <div class="needle-north">
-                                        <span class="needle-tip-n">▲</span>
-                                    </div>
+                                    <div class="needle-north"></div>
                                     <div class="needle-center-pin"></div>
                                     <div class="needle-south"></div>
                                 </div>
@@ -322,7 +320,7 @@
 
 
             <!-- ================= PROMINENT 3D SUN & MOON HORIZON DOME (BELOW) ================= -->
-            <section class="celestial-section-below scroll-3d-item">
+            <section class="celestial-section-below">
                 <div class="section-title">
                     <h2>🌅 3D Celestial Horizon Dome: Sunrise to Sunset & Night Cycle</h2>
                     <span class="refresh-badge-3d">
@@ -355,17 +353,12 @@
                         <svg class="dome-svg" viewBox="0 0 700 240" preserveAspectRatio="none">
                             <defs>
                                 <linearGradient id="domeArcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                                    <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.8" />
+                                    <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.85" />
                                     <stop offset="50%" stop-color="#38bdf8" stop-opacity="1" />
-                                    <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.8" />
-                                </linearGradient>
-                                <linearGradient id="domeNightGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                                    <stop offset="0%" stop-color="#6366f1" stop-opacity="0.5" />
-                                    <stop offset="50%" stop-color="#a855f7" stop-opacity="0.9" />
-                                    <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.5" />
+                                    <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.85" />
                                 </linearGradient>
                                 <radialGradient id="skyGlowGrad" cx="50%" cy="100%" r="90%">
-                                    <stop offset="0%" stop-color="rgba(56, 189, 248, 0.25)" />
+                                    <stop offset="0%" stop-color="rgba(56, 189, 248, 0.22)" />
                                     <stop offset="100%" stop-color="rgba(56, 189, 248, 0.0)" />
                                 </radialGradient>
                             </defs>
@@ -378,11 +371,10 @@
                         </svg>
 
                         <!-- 3D GLOWING CELESTIAL ORBITER (SUN / MOON) -->
-                        <div id="celestialOrbiter" class="celestial-orbiter-3d" style="left: 50%; top: 40px;">
+                        <div id="celestialOrbiter" class="celestial-orbiter-3d" style="left: 50%; top: 25%;">
                             <div id="celestialBody" class="celestial-sphere-3d sun-sphere">
                                 <span id="celestialEmoji">☀️</span>
                             </div>
-                            <div id="celestialRayRings" class="celestial-ray-rings"></div>
                         </div>
 
                         <!-- 3D HORIZON BASE -->
@@ -415,7 +407,7 @@
 
 
             <!-- ================= DETAILED HOURLY TIMELINE (TODAY vs TOMORROW) ================= -->
-            <section class="hourly-section scroll-3d-item">
+            <section class="hourly-section">
                 <div class="section-title">
                     <h2>⏳ Detailed Hourly Telemetry</h2>
 
@@ -426,7 +418,7 @@
                 </div>
 
                 <div class="open-new-page-row">
-                    <p class="hourly-subtitle">Showing 24-hour hour-by-hour continuous metrics.</p>
+                    <p class="hourly-subtitle">Showing 24-hour hour-by-hour continuous telemetry.</p>
                     <a id="openDetailsPageBtn" href="details.html" target="_blank" class="open-page-link" title="Open complete table and charts in a new window">
                         <span>📄</span> Open Complete View on New Page ↗
                     </a>
@@ -441,7 +433,7 @@
 
 
         <!-- FOOTER -->
-        <footer class="footer-3d scroll-3d-item">
+        <footer class="footer-3d">
             <p>
                 <strong>WeatherWise 3D Station</strong> • High-Accuracy Global Atmospheric Intelligence
             </p>
