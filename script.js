@@ -13,6 +13,13 @@ const safeStorage = {
                 window.localStorage.setItem(key, value);
             }
         } catch (e) {}
+    },
+    removeItem(key) {
+        try {
+            if (window.localStorage) {
+                window.localStorage.removeItem(key);
+            }
+        } catch (e) {}
     }
 };
 
@@ -28,217 +35,48 @@ let autoRefreshTimer = null;
 let autoRefreshSeconds = 900;
 let clockInterval = null;
 let selectedHourlyDay = "today"; // 'today' or 'tomorrow'
+let selectedSpecialTag = "Home";
 
 // 3D Celestial Simulation State
 let isSimulating = false;
 let simInterval = null;
 let simProgress = 0; // 0 to 1
 
-/* ================= DOM ELEMENTS ================= */
-const cityInput = document.getElementById("cityInput");
-const searchBtn = document.getElementById("searchBtn");
-const locationBtn = document.getElementById("locationBtn");
-const saveCityBtn = document.getElementById("saveCityBtn");
-const saveCityIcon = document.getElementById("saveCityIcon");
-const saveCityText = document.getElementById("saveCityText");
-const manualRefreshBtn = document.getElementById("manualRefreshBtn");
-const refreshTimerText = document.getElementById("refreshTimerText");
-const quickCityBtns = document.querySelectorAll(".city-pill-3d");
-const unitBtn = document.getElementById("unitBtn");
-const themeBtn = document.getElementById("themeBtn");
+// Three.js Scene References
+let threeParticles = null;
+let threeMaterial = null;
 
-const localTimeDisplay = document.getElementById("localTimeDisplay");
-const localDateDisplay = document.getElementById("localDateDisplay");
+/* ================= EXPOSE CORE HANDLERS ON WINDOW IMMEDIATELY ================= */
+window.toggleTheme = toggleTheme;
+window.toggleUnit = toggleUnit;
+window.switchHourlyDay = switchHourlyDay;
+window.openAuthModal = openAuthModal;
+window.closeAuthModal = closeAuthModal;
+window.switchAuthTab = switchAuthTab;
+window.handleSignIn = handleSignIn;
+window.handleSignUp = handleSignUp;
+window.handleLogout = handleLogout;
+window.handleSaveCityClick = handleSaveCityClick;
+window.openSaveSpecialModal = openSaveSpecialModal;
+window.closeSaveSpecialModal = closeSaveSpecialModal;
+window.selectSpecialTag = selectSpecialTag;
+window.confirmSaveSpecialCity = confirmSaveSpecialCity;
+window.toggleCelestialSimulation = toggleCelestialSimulation;
+window.resetCelestialSimulation = resetCelestialSimulation;
+window.handleScrubberInput = handleScrubberInput;
+window.dismissWelcomeBanner = dismissWelcomeBanner;
+window.forceRefreshWeather = forceRefreshWeather;
+window.fetchWeatherByLocation = fetchWeatherByLocation;
+window.fetchWeatherByCity = fetchWeatherByCity;
+window.searchCurrentInput = searchCurrentInput;
+window.navigateToDetails = navigateToDetails;
 
-const errorBox = document.getElementById("error");
-const loadingBox = document.getElementById("loading");
-const loadingMsg = document.getElementById("loadingMsg");
-const weatherCard = document.getElementById("weatherCard");
-
-const cityNameEl = document.getElementById("cityName");
-const timezoneTextEl = document.getElementById("timezoneText");
-const weatherIconEl = document.getElementById("weatherIcon");
-const temperatureEl = document.getElementById("temperature");
-const tempUnitEl = document.getElementById("tempUnit");
-const tempHighLowEl = document.getElementById("tempHighLow");
-const conditionEl = document.getElementById("condition");
-
-// 3D Celestial Horizon Dome Elements
-const celestialModeIcon = document.getElementById("celestialModeIcon");
-const celestialModeName = document.getElementById("celestialModeName");
-const celestialHeading = document.getElementById("celestialHeading");
-const celestialRemainingText = document.getElementById("celestialRemainingText");
-const celestialOrbiter = document.getElementById("celestialOrbiter");
-const celestialBody = document.getElementById("celestialBody");
-const celestialEmoji = document.getElementById("celestialEmoji");
-const sunriseTimeEl = document.getElementById("sunriseTime");
-const sunsetTimeEl = document.getElementById("sunsetTime");
-const solarProgressBadge = document.getElementById("solarProgressBadge");
-const simPlayBtn = document.getElementById("simPlayBtn");
-const simResetBtn = document.getElementById("simResetBtn");
-const celestialScrubber = document.getElementById("celestialScrubber");
-
-// Real-Time Monitoring Dashboard Elements
-const compassNeedle = document.getElementById("compassNeedle");
-const windBearingText = document.getElementById("windBearingText");
-const windSpeedVal = document.getElementById("windSpeedVal");
-const windGustsVal = document.getElementById("windGustsVal");
-
-const pressureNumber = document.getElementById("pressureNumber");
-const pressureTrendPill = document.getElementById("pressureTrendPill");
-const trendIcon = document.getElementById("trendIcon");
-const trendText = document.getElementById("trendText");
-const pressureFillBar = document.getElementById("pressureFillBar");
-const pressureMsl = document.getElementById("pressureMsl");
-const elevationText = document.getElementById("elevationText");
-
-const humidityVal = document.getElementById("humidityVal");
-const uvVal = document.getElementById("uvVal");
-const precipVal = document.getElementById("precipVal");
-const feelsLikeVal = document.getElementById("feelsLikeVal");
-
-// Hourly Timeline Elements
-const hourlyContainer = document.getElementById("hourlyContainer");
-const btnToday = document.getElementById("btnToday");
-const btnTomorrow = document.getElementById("btnTomorrow");
-const openDetailsPageBtn = document.getElementById("openDetailsPageBtn");
-
-// Saved Cities
-const savedCitiesSection = document.getElementById("savedCitiesSection");
-const savedCitiesContainer = document.getElementById("savedCitiesContainer");
-const savedCountBadge = document.getElementById("savedCountBadge");
-
-/* ================= 1. ATTACH ALL CORE EVENT LISTENERS IMMEDIATELY ================= */
-function setupCoreListeners() {
-    // 1. Theme Toggle
-    if (themeBtn) {
-        themeBtn.onclick = toggleTheme;
-    }
-
-    // 2. Unit Toggle (°C / °F)
-    if (unitBtn) {
-        unitBtn.onclick = toggleUnit;
-    }
-
-    // 3. Search City
-    if (searchBtn) {
-        searchBtn.onclick = () => {
-            const city = cityInput.value.trim();
-            if (city) fetchWeatherByCity(city);
-            else showError("Please enter a city name.");
-        };
-    }
-
-    if (cityInput) {
-        cityInput.onkeydown = (e) => {
-            if (e.key === "Enter") {
-                const city = cityInput.value.trim();
-                if (city) fetchWeatherByCity(city);
-                else showError("Please enter a city name.");
-            }
-        };
-    }
-
-    // 4. Use My Location
-    if (locationBtn) {
-        locationBtn.onclick = fetchWeatherByLocation;
-    }
-
-    // 5. Popular City Quick Pills
-    if (quickCityBtns) {
-        quickCityBtns.forEach((btn) => {
-            btn.onclick = () => {
-                const city = btn.getAttribute("data-city");
-                if (cityInput) cityInput.value = city;
-                fetchWeatherByCity(city);
-            };
-        });
-    }
-
-    // 6. Today vs Tomorrow Tabs
-    if (btnToday) {
-        btnToday.onclick = () => {
-            selectedHourlyDay = "today";
-            btnToday.classList.add("active");
-            btnTomorrow.classList.remove("active");
-            if (lastWeatherData) renderHourlyStream(lastWeatherData.hourly, currentTimezone, "today");
-        };
-    }
-
-    if (btnTomorrow) {
-        btnTomorrow.onclick = () => {
-            selectedHourlyDay = "tomorrow";
-            btnTomorrow.classList.add("active");
-            btnToday.classList.remove("active");
-            if (lastWeatherData) renderHourlyStream(lastWeatherData.hourly, currentTimezone, "tomorrow");
-        };
-    }
-
-    // 7. Manual Refresh
-    if (manualRefreshBtn) {
-        manualRefreshBtn.onclick = () => {
-            const icon = manualRefreshBtn.querySelector(".refresh-icon");
-            if (icon) icon.style.transform = "rotate(360deg)";
-            setTimeout(() => { if (icon) icon.style.transform = "none"; }, 600);
-
-            if (currentLat && currentLon) {
-                loadWeatherCoordinates(currentLat, currentLon, currentCityLabel, true);
-                autoRefreshSeconds = 900;
-            }
-        };
-    }
-
-    // 8. Save City Button
-    if (saveCityBtn) {
-        saveCityBtn.onclick = () => {
-            const baseName = currentCityLabel.split(",")[0].trim();
-            const list = getSavedCities();
-            const isSaved = list.some(c => c.name.toLowerCase() === baseName.toLowerCase());
-
-            if (isSaved) {
-                removeCityFromStorage(baseName);
-            } else {
-                saveCityToStorage({
-                    name: baseName,
-                    lat: currentLat,
-                    lon: currentLon,
-                    temp: temperatureEl ? temperatureEl.textContent : ""
-                });
-            }
-        };
-    }
-
-    // 9. Celestial Horizon Dome Simulation Controls
-    if (simPlayBtn) {
-        simPlayBtn.onclick = toggleCelestialSimulation;
-    }
-
-    if (simResetBtn) {
-        simResetBtn.onclick = resetCelestialSimulation;
-    }
-
-    if (celestialScrubber) {
-        celestialScrubber.oninput = (e) => {
-            if (simInterval) clearInterval(simInterval);
-            isSimulating = false;
-            if (simPlayBtn) simPlayBtn.innerHTML = "<span>▶️</span> Play 24h Arc";
-
-            const val = parseFloat(e.target.value) / 100;
-            if (lastWeatherData) {
-                updateCelestialHorizonDome(lastWeatherData.daily, currentTimezone, val);
-                if (celestialRemainingText) {
-                    celestialRemainingText.textContent = `Scrubber Position: ${Math.round(val * 100)}%`;
-                }
-            }
-        };
-    }
-}
-
-/* ================= 2. THEME CONTROLLER ================= */
+/* ================= 1. THEME CONTROLLER ================= */
 function initTheme() {
     const saved = safeStorage.getItem("weatherwise_theme");
     const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
 
+    const themeBtn = document.getElementById("themeBtn");
     if (saved === "dark" || (!saved && prefersDark)) {
         document.body.classList.add("dark");
         if (themeBtn) themeBtn.innerHTML = '<span class="btn-icon">☀️</span>';
@@ -246,19 +84,28 @@ function initTheme() {
         document.body.classList.remove("dark");
         if (themeBtn) themeBtn.innerHTML = '<span class="btn-icon">🌙</span>';
     }
+    updateThreeJSParticleColors();
 }
 
 function toggleTheme() {
     document.body.classList.toggle("dark");
     const isDark = document.body.classList.contains("dark");
+    const themeBtn = document.getElementById("themeBtn");
     if (themeBtn) themeBtn.innerHTML = isDark ? '<span class="btn-icon">☀️</span>' : '<span class="btn-icon">🌙</span>';
     safeStorage.setItem("weatherwise_theme", isDark ? "dark" : "light");
+    updateThreeJSParticleColors();
+
+    // Re-render celestial dome to apply day/night ambient palette
+    if (lastWeatherData) {
+        updateCelestialHorizonDome(lastWeatherData.daily, currentTimezone);
+    }
 }
 
-/* ================= 3. UNIT CONTROLLER (°C / °F) ================= */
+/* ================= 2. UNIT CONTROLLER (°C / °F) ================= */
 function toggleUnit() {
     currentUnit = currentUnit === "C" ? "F" : "C";
     safeStorage.setItem("weatherwise_unit", currentUnit);
+    const unitBtn = document.getElementById("unitBtn");
     if (unitBtn) {
         unitBtn.innerHTML = `<span class="btn-text">°${currentUnit}</span>`;
     }
@@ -266,6 +113,7 @@ function toggleUnit() {
     if (lastWeatherData) {
         renderAllWeather(currentCityLabel, lastWeatherData);
     }
+    updateOpenDetailsLink();
 }
 
 function formatTemp(c) {
@@ -290,9 +138,532 @@ function getUVDescription(uv) {
     return "Extreme";
 }
 
-/* ================= 4. LOCATION LIVE CLOCK ================= */
+/* ================= 3. UPLIFTING WELCOME & HAPPY MIND SYSTEM ================= */
+const UPLIFTING_AFFIRMATIONS = [
+    "Wherever you go, no matter what the weather, always bring your own sunshine. ☀️",
+    "Your potential is limitless — radiate peace, joy, and confidence today. ✨",
+    "Clear skies or rainy days, every morning brings a fresh new perspective. 🌈",
+    "Breathe deeply, smile warmly, and let calm positive energy guide you. 🌿",
+    "You are capable of wonderful things — embrace today with an open heart. 💫",
+    "A peaceful mind creates a beautiful life. Enjoy every moment today. 🌸",
+    "Let your inner light shine brighter than the sun today. ☀️✨"
+];
+
+function initWelcomeExperience() {
+    const banner = document.getElementById("welcomeBanner");
+    const greetingEl = document.getElementById("welcomeGreeting");
+    const userTag = document.getElementById("welcomeUserTag");
+    const quoteEl = document.getElementById("welcomeVibeQuote");
+    const emojiEl = document.getElementById("welcomeEmoji");
+
+    if (!banner) return;
+
+    const user = getCurrentUser();
+    const now = new Date();
+    const hour = now.getHours();
+
+    let greeting = "Good Morning!";
+    let emoji = "☀️";
+
+    if (hour >= 5 && hour < 12) {
+        greeting = "Good Morning!";
+        emoji = "☀️";
+    } else if (hour >= 12 && hour < 17) {
+        greeting = "Good Afternoon!";
+        emoji = "🌤️";
+    } else if (hour >= 17 && hour < 21) {
+        greeting = "Good Evening!";
+        emoji = "🌇";
+    } else {
+        greeting = "Good Night!";
+        emoji = "🌙";
+    }
+
+    if (greetingEl) greetingEl.textContent = user ? `Welcome back, ${user.name}!` : greeting;
+    if (userTag) {
+        if (user) {
+            userTag.style.display = "inline-block";
+            userTag.textContent = "⭐ Special Member";
+        } else {
+            userTag.style.display = "none";
+        }
+    }
+    if (emojiEl) emojiEl.textContent = emoji;
+
+    // Pick random affirmation
+    const randomAffirmation = UPLIFTING_AFFIRMATIONS[Math.floor(Math.random() * UPLIFTING_AFFIRMATIONS.length)];
+    if (quoteEl) quoteEl.textContent = `"${randomAffirmation}"`;
+
+    banner.style.display = "flex";
+
+    // Trigger gentle celebratory sparkles
+    triggerCelebratorySparkles();
+}
+
+function dismissWelcomeBanner() {
+    const banner = document.getElementById("welcomeBanner");
+    if (banner) {
+        banner.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+        banner.style.opacity = "0";
+        banner.style.transform = "translateY(-10px)";
+        setTimeout(() => { banner.style.display = "none"; }, 300);
+    }
+}
+
+function triggerCelebratorySparkles() {
+    const container = document.getElementById("sparkleContainer");
+    if (!container) return;
+
+    container.innerHTML = "";
+    const sparkles = ["✨", "⭐", "💫", "🌟", "☀️"];
+    const count = 14;
+
+    for (let i = 0; i < count; i++) {
+        const span = document.createElement("span");
+        span.className = "floating-sparkle";
+        span.textContent = sparkles[Math.floor(Math.random() * sparkles.length)];
+
+        const startX = Math.random() * 80 + 10;
+        const startY = Math.random() * 20 + 10;
+        const dx = (Math.random() - 0.5) * 80;
+        const dy = -(Math.random() * 60 + 20);
+
+        span.style.left = `${startX}vw`;
+        span.style.top = `${startY}vh`;
+        span.style.setProperty("--dx", `${dx}px`);
+        span.style.setProperty("--dy", `${dy}px`);
+        span.style.animationDelay = `${Math.random() * 0.8}s`;
+
+        container.appendChild(span);
+        setTimeout(() => span.remove(), 2800);
+    }
+}
+
+/* ================= 4. USER ACCOUNT & SPECIAL CITIES AUTH MANAGER ================= */
+function getUsers() {
+    const data = safeStorage.getItem("weatherwise_users");
+    if (!data) return [];
+    try { return JSON.parse(data); } catch (e) { return []; }
+}
+
+function saveUsers(users) {
+    safeStorage.setItem("weatherwise_users", JSON.stringify(users));
+}
+
+function getCurrentUser() {
+    const data = safeStorage.getItem("weatherwise_current_user");
+    if (!data) return null;
+    try { return JSON.parse(data); } catch (e) { return null; }
+}
+
+function setCurrentUser(user) {
+    if (user) safeStorage.setItem("weatherwise_current_user", JSON.stringify(user));
+    else safeStorage.removeItem("weatherwise_current_user");
+    updateAccountBtnUI();
+}
+
+function updateAccountBtnUI() {
+    const user = getCurrentUser();
+    const accountBtn = document.getElementById("accountBtn");
+    const accountBtnIcon = document.getElementById("accountBtnIcon");
+    const accountBtnText = document.getElementById("accountBtnText");
+
+    if (!accountBtn) return;
+
+    if (user) {
+        accountBtn.classList.add("logged-in");
+        if (accountBtnIcon) accountBtnIcon.textContent = "⭐";
+        if (accountBtnText) accountBtnText.textContent = user.name.split(" ")[0];
+    } else {
+        accountBtn.classList.remove("logged-in");
+        if (accountBtnIcon) accountBtnIcon.textContent = "👤";
+        if (accountBtnText) accountBtnText.textContent = "Log In";
+    }
+}
+
+function openAuthModal() {
+    const modal = document.getElementById("authModal");
+    if (!modal) return;
+
+    const user = getCurrentUser();
+    const authTabs = document.getElementById("authTabs");
+    const signInForm = document.getElementById("signInForm");
+    const signUpForm = document.getElementById("signUpForm");
+    const profileView = document.getElementById("profileView");
+    const modalTitle = document.getElementById("modalTitle");
+    const authAlert = document.getElementById("authAlert");
+
+    if (authAlert) authAlert.style.display = "none";
+
+    if (user) {
+        // Show Profile View
+        if (modalTitle) modalTitle.textContent = `Welcome, ${user.name}!`;
+        if (authTabs) authTabs.style.display = "none";
+        if (signInForm) signInForm.style.display = "none";
+        if (signUpForm) signUpForm.style.display = "none";
+        if (profileView) profileView.style.display = "flex";
+
+        const profileName = document.getElementById("profileUserName");
+        const profileEmail = document.getElementById("profileUserEmail");
+        const profileAvatar = document.getElementById("profileAvatar");
+
+        if (profileName) profileName.textContent = user.name;
+        if (profileEmail) profileEmail.textContent = user.email || "Special WeatherWise Member";
+        if (profileAvatar) profileAvatar.textContent = user.name.charAt(0).toUpperCase();
+
+        renderSpecialCitiesInProfile();
+    } else {
+        // Show Sign In / Register
+        if (modalTitle) modalTitle.textContent = "WeatherWise Account";
+        if (authTabs) authTabs.style.display = "flex";
+        if (profileView) profileView.style.display = "none";
+        switchAuthTab("signin");
+    }
+
+    modal.style.display = "flex";
+}
+
+function closeAuthModal() {
+    const modal = document.getElementById("authModal");
+    if (modal) modal.style.display = "none";
+}
+
+function switchAuthTab(tab) {
+    const tabSignIn = document.getElementById("tabSignIn");
+    const tabSignUp = document.getElementById("tabSignUp");
+    const signInForm = document.getElementById("signInForm");
+    const signUpForm = document.getElementById("signUpForm");
+    const authAlert = document.getElementById("authAlert");
+
+    if (authAlert) authAlert.style.display = "none";
+
+    if (tab === "signin") {
+        if (tabSignIn) tabSignIn.classList.add("active");
+        if (tabSignUp) tabSignUp.classList.remove("active");
+        if (signInForm) signInForm.style.display = "flex";
+        if (signUpForm) signUpForm.style.display = "none";
+    } else {
+        if (tabSignUp) tabSignUp.classList.add("active");
+        if (tabSignIn) tabSignIn.classList.remove("active");
+        if (signUpForm) signUpForm.style.display = "flex";
+        if (signInForm) signInForm.style.display = "none";
+    }
+}
+
+function handleSignIn(e) {
+    e.preventDefault();
+    const email = document.getElementById("signInEmail").value.trim();
+    const pass = document.getElementById("signInPassword").value.trim();
+    const authAlert = document.getElementById("authAlert");
+
+    const users = getUsers();
+    const found = users.find(u => (u.email.toLowerCase() === email.toLowerCase() || u.name.toLowerCase() === email.toLowerCase()) && u.pass === pass);
+
+    if (found) {
+        setCurrentUser(found);
+        openAuthModal();
+        triggerCelebratorySparkles();
+        renderSavedCities();
+        updateSaveButtonState();
+    } else {
+        // Allow instant sign-in for seamless experience if no user exists yet
+        if (users.length === 0) {
+            const newUser = { name: email, email: `${email}@weatherwise.app`, pass, specialCities: [] };
+            users.push(newUser);
+            saveUsers(users);
+            setCurrentUser(newUser);
+            openAuthModal();
+            triggerCelebratorySparkles();
+            renderSavedCities();
+            updateSaveButtonState();
+            return;
+        }
+
+        if (authAlert) {
+            authAlert.textContent = "Account not found or password incorrect. Please check your spelling or create a new account.";
+            authAlert.style.display = "block";
+        }
+    }
+}
+
+function handleSignUp(e) {
+    e.preventDefault();
+    const name = document.getElementById("signUpName").value.trim();
+    const email = document.getElementById("signUpEmail").value.trim();
+    const pass = document.getElementById("signUpPassword").value.trim();
+    const authAlert = document.getElementById("authAlert");
+
+    if (!name || !email || !pass) return;
+
+    const users = getUsers();
+    const existing = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+    if (existing) {
+        if (authAlert) {
+            authAlert.textContent = "An account with this email/ID already exists. Please Sign In.";
+            authAlert.style.display = "block";
+        }
+        return;
+    }
+
+    const newUser = {
+        name,
+        email,
+        pass,
+        specialCities: getSavedCities() // migrate any previously saved guest cities
+    };
+
+    users.push(newUser);
+    saveUsers(users);
+    setCurrentUser(newUser);
+
+    openAuthModal();
+    triggerCelebratorySparkles();
+    renderSavedCities();
+    updateSaveButtonState();
+}
+
+function handleLogout() {
+    setCurrentUser(null);
+    closeAuthModal();
+    renderSavedCities();
+    updateSaveButtonState();
+}
+
+/* ================= 5. SPECIAL & FAVORITE CITIES MANAGER ================= */
+function getSavedCities() {
+    const user = getCurrentUser();
+    if (user && user.specialCities) {
+        return user.specialCities;
+    }
+    const guestData = safeStorage.getItem("weatherwise_saved_cities");
+    if (!guestData) return [];
+    try { return JSON.parse(guestData); } catch (e) { return []; }
+}
+
+function saveCityWithTag(cityObj) {
+    const user = getCurrentUser();
+    let list = getSavedCities();
+
+    const existsIdx = list.findIndex(c => c.name.toLowerCase() === cityObj.name.toLowerCase());
+    if (existsIdx >= 0) {
+        list[existsIdx] = cityObj;
+    } else {
+        list.push(cityObj);
+    }
+
+    if (user) {
+        user.specialCities = list;
+        setCurrentUser(user);
+        // update in all users store
+        const users = getUsers();
+        const uIdx = users.findIndex(u => u.email === user.email);
+        if (uIdx >= 0) {
+            users[uIdx].specialCities = list;
+            saveUsers(users);
+        }
+    } else {
+        safeStorage.setItem("weatherwise_saved_cities", JSON.stringify(list));
+    }
+
+    renderSavedCities();
+    updateSaveButtonState();
+}
+
+function removeCityFromStorage(cityName) {
+    const user = getCurrentUser();
+    let list = getSavedCities().filter(c => c.name.toLowerCase() !== cityName.toLowerCase());
+
+    if (user) {
+        user.specialCities = list;
+        setCurrentUser(user);
+        const users = getUsers();
+        const uIdx = users.findIndex(u => u.email === user.email);
+        if (uIdx >= 0) {
+            users[uIdx].specialCities = list;
+            saveUsers(users);
+        }
+    } else {
+        safeStorage.setItem("weatherwise_saved_cities", JSON.stringify(list));
+    }
+
+    renderSavedCities();
+    updateSaveButtonState();
+    renderSpecialCitiesInProfile();
+}
+
+function handleSaveCityClick() {
+    const baseName = currentCityLabel.split(",")[0].trim();
+    const list = getSavedCities();
+    const isSaved = list.some(c => c.name.toLowerCase() === baseName.toLowerCase());
+
+    if (isSaved) {
+        removeCityFromStorage(baseName);
+    } else {
+        openSaveSpecialModal();
+    }
+}
+
+function openSaveSpecialModal() {
+    const modal = document.getElementById("saveSpecialModal");
+    const label = document.getElementById("saveSpecialCityLabel");
+    if (label) label.textContent = currentCityLabel;
+    selectedSpecialTag = "Home";
+
+    document.querySelectorAll(".tag-pill").forEach(pill => {
+        if (pill.getAttribute("data-tag") === "Home") pill.classList.add("active");
+        else pill.classList.remove("active");
+    });
+
+    if (modal) modal.style.display = "flex";
+}
+
+function closeSaveSpecialModal() {
+    const modal = document.getElementById("saveSpecialModal");
+    if (modal) modal.style.display = "none";
+}
+
+function selectSpecialTag(btn, tag) {
+    selectedSpecialTag = tag;
+    document.querySelectorAll(".tag-pill").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+}
+
+function confirmSaveSpecialCity() {
+    const baseName = currentCityLabel.split(",")[0].trim();
+    const tagEmoji = { Home: "🏠", Work: "💼", Vacation: "🏖️", Special: "⭐" }[selectedSpecialTag] || "⭐";
+
+    saveCityWithTag({
+        name: baseName,
+        fullLabel: currentCityLabel,
+        lat: currentLat,
+        lon: currentLon,
+        tag: selectedSpecialTag,
+        tagEmoji,
+        temp: currentDisplayedTemp
+    });
+
+    closeSaveSpecialModal();
+    triggerCelebratorySparkles();
+}
+
+function renderSavedCities() {
+    const container = document.getElementById("savedCitiesContainer");
+    const section = document.getElementById("savedCitiesSection");
+    const badge = document.getElementById("savedCountBadge");
+
+    if (!container || !section) return;
+    const list = getSavedCities();
+
+    if (list.length === 0) {
+        section.style.display = "none";
+        return;
+    }
+
+    section.style.display = "block";
+    if (badge) badge.textContent = `${list.length} saved`;
+    container.innerHTML = "";
+
+    list.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "saved-city-card";
+        const emoji = item.tagEmoji || "⭐";
+        const tag = item.tag || "Special";
+
+        card.innerHTML = `
+            <div class="saved-city-info">
+                <span class="saved-city-name">
+                    ${emoji} ${item.name}
+                    <span class="saved-city-tag">${tag}</span>
+                </span>
+                <span class="saved-city-temp">${item.temp ? item.temp + "°" : "Click to view"}</span>
+            </div>
+            <button class="saved-delete-btn" title="Remove city" aria-label="Remove city">✕</button>
+        `;
+
+        card.addEventListener("click", (e) => {
+            if (e.target.classList.contains("saved-delete-btn")) {
+                e.stopPropagation();
+                removeCityFromStorage(item.name);
+            } else {
+                fetchWeatherByCity(item.name);
+            }
+        });
+
+        container.appendChild(card);
+    });
+}
+
+function renderSpecialCitiesInProfile() {
+    const listEl = document.getElementById("specialCitiesList");
+    const countEl = document.getElementById("specialCitiesCount");
+    if (!listEl) return;
+
+    const list = getSavedCities();
+    if (countEl) countEl.textContent = `${list.length} cities`;
+
+    if (list.length === 0) {
+        listEl.innerHTML = `<p style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 12px;">No special cities saved yet. Search any city and click "Save Special City"!</p>`;
+        return;
+    }
+
+    listEl.innerHTML = "";
+    list.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "special-city-item";
+        const emoji = item.tagEmoji || "⭐";
+        const tag = item.tag || "Special";
+
+        row.innerHTML = `
+            <div class="special-city-main">
+                <span>${emoji}</span>
+                <span>${item.name}</span>
+                <span class="special-tag-badge">${tag}</span>
+            </div>
+            <button class="special-del-btn" title="Delete">✕</button>
+        `;
+
+        row.addEventListener("click", (e) => {
+            if (e.target.classList.contains("special-del-btn")) {
+                e.stopPropagation();
+                removeCityFromStorage(item.name);
+            } else {
+                closeAuthModal();
+                fetchWeatherByCity(item.name);
+            }
+        });
+
+        listEl.appendChild(row);
+    });
+}
+
+function updateSaveButtonState() {
+    const saveCityBtn = document.getElementById("saveCityBtn");
+    const saveCityIcon = document.getElementById("saveCityIcon");
+    const saveCityText = document.getElementById("saveCityText");
+
+    if (!saveCityBtn) return;
+    const list = getSavedCities();
+    const baseName = currentCityLabel.split(",")[0].trim();
+    const isSaved = list.some(c => c.name.toLowerCase() === baseName.toLowerCase());
+
+    if (isSaved) {
+        saveCityBtn.classList.add("saved");
+        if (saveCityIcon) saveCityIcon.textContent = "★";
+        if (saveCityText) saveCityText.textContent = "Saved Special";
+    } else {
+        saveCityBtn.classList.remove("saved");
+        if (saveCityIcon) saveCityIcon.textContent = "⭐";
+        if (saveCityText) saveCityText.textContent = "Save Special City";
+    }
+}
+
+/* ================= 6. LOCATION LIVE CLOCK ================= */
 function startLocationClock(timezone) {
     if (clockInterval) clearInterval(clockInterval);
+
+    const localTimeDisplay = document.getElementById("localTimeDisplay");
+    const localDateDisplay = document.getElementById("localDateDisplay");
 
     function tick() {
         try {
@@ -323,10 +694,28 @@ function startLocationClock(timezone) {
     clockInterval = setInterval(tick, 1000);
 }
 
-/* ================= 5. 3D ROTATING WIND COMPASS & MONITORING ================= */
+/* ================= 7. 3D ROTATING WIND COMPASS & REAL-TIME MONITORING ================= */
 function updateMonitoringDashboard(data) {
     if (!data || !data.current) return;
     const cur = data.current;
+
+    const compassNeedle = document.getElementById("compassNeedle");
+    const windBearingText = document.getElementById("windBearingText");
+    const windSpeedVal = document.getElementById("windSpeedVal");
+    const windGustsVal = document.getElementById("windGustsVal");
+
+    const pressureNumber = document.getElementById("pressureNumber");
+    const pressureTrendPill = document.getElementById("pressureTrendPill");
+    const trendIcon = document.getElementById("trendIcon");
+    const trendText = document.getElementById("trendText");
+    const pressureFillBar = document.getElementById("pressureFillBar");
+    const pressureMsl = document.getElementById("pressureMsl");
+    const elevationText = document.getElementById("elevationText");
+
+    const humidityVal = document.getElementById("humidityVal");
+    const uvVal = document.getElementById("uvVal");
+    const precipVal = document.getElementById("precipVal");
+    const feelsLikeVal = document.getElementById("feelsLikeVal");
 
     // 1. Compass Needle Rotation
     const bearing = Math.round(cur.wind_direction_10m ?? 0);
@@ -380,20 +769,35 @@ function getCompassCardinal(deg) {
     return directions[idx];
 }
 
-/* ================= 6. PROMINENT 3D SUN & MOON HORIZON DOME ================= */
+/* ================= 8. ZERO-JITTER 3D CELESTIAL HORIZON DOME ================= */
 function updateCelestialHorizonDome(daily, timezone, customProgress = null) {
     if (!daily || !daily.sunrise || !daily.sunset) return;
+
+    const celestialModeIcon = document.getElementById("celestialModeIcon");
+    const celestialModeName = document.getElementById("celestialModeName");
+    const celestialHeading = document.getElementById("celestialHeading");
+    const celestialRemainingText = document.getElementById("celestialRemainingText");
+    const celestialOrbiter = document.getElementById("celestialOrbiter");
+    const celestialBody = document.getElementById("celestialBody");
+    const celestialEmoji = document.getElementById("celestialEmoji");
+    const sunriseTimeEl = document.getElementById("sunriseTime");
+    const sunsetTimeEl = document.getElementById("sunsetTime");
+    const solarProgressBadge = document.getElementById("solarProgressBadge");
+    const celestialScrubber = document.getElementById("celestialScrubber");
+    const eastGateLabel = document.getElementById("eastGateLabel");
+    const westGateLabel = document.getElementById("westGateLabel");
+    const celestialSvgArc = document.getElementById("celestialSvgArc");
 
     try {
         const now = new Date();
         const srStr = daily.sunrise[0].split("T")[1];
         const ssStr = daily.sunset[0].split("T")[1];
 
-        if (sunriseTimeEl) sunriseTimeEl.textContent = srStr || "--:--";
-        if (sunsetTimeEl) sunsetTimeEl.textContent = ssStr || "--:--";
+        if (sunriseTimeEl) sunriseTimeEl.textContent = srStr || "06:00";
+        if (sunsetTimeEl) sunsetTimeEl.textContent = ssStr || "18:00";
 
-        const [srH, srM] = srStr.split(":").map(Number);
-        const [ssH, ssM] = ssStr.split(":").map(Number);
+        const [srH, srM] = (srStr || "06:00").split(":").map(Number);
+        const [ssH, ssM] = (ssStr || "18:00").split(":").map(Number);
         const srMins = srH * 60 + srM;
         const ssMins = ssH * 60 + ssM;
 
@@ -402,17 +806,17 @@ function updateCelestialHorizonDome(daily, timezone, customProgress = null) {
 
         if (customProgress !== null) {
             // Simulation progress (0 to 1)
-            // 0.0 to 0.5 represents Day (Sunrise -> Noon -> Sunset)
-            // 0.5 to 1.0 represents Night (Sunset -> Midnight -> Sunrise)
+            // 0.0 to 0.5: Day (Sunrise -> Noon Zenith -> Sunset)
+            // 0.5 to 1.0: Night (Sunset -> Midnight Apex -> Sunrise)
             if (customProgress <= 0.5) {
                 isDay = true;
-                progress = customProgress * 2; // scale 0..0.5 to 0..1
+                progress = customProgress * 2;
             } else {
                 isDay = false;
-                progress = (customProgress - 0.5) * 2; // scale 0.5..1.0 to 0..1
+                progress = (customProgress - 0.5) * 2;
             }
         } else {
-            // Real-time calculation
+            // Real-time astronomical calculation
             const timeParts = new Intl.DateTimeFormat("en-US", {
                 timeZone: timezone,
                 hour: "numeric",
@@ -424,12 +828,12 @@ function updateCelestialHorizonDome(daily, timezone, customProgress = null) {
             isDay = curMins >= srMins && curMins <= ssMins;
 
             if (isDay) {
-                progress = (curMins - srMins) / (ssMins - srMins);
+                progress = (curMins - srMins) / Math.max(1, ssMins - srMins);
                 progress = Math.max(0, Math.min(1, progress));
             } else {
                 const nightTotal = (1440 - ssMins) + srMins;
                 const nightElapsed = curMins > ssMins ? (curMins - ssMins) : ((1440 - ssMins) + curMins);
-                progress = nightElapsed / nightTotal;
+                progress = nightElapsed / Math.max(1, nightTotal);
                 progress = Math.max(0, Math.min(1, progress));
             }
         }
@@ -437,49 +841,70 @@ function updateCelestialHorizonDome(daily, timezone, customProgress = null) {
         // Apply Sun vs Moon styling
         if (isDay) {
             if (celestialModeIcon) celestialModeIcon.textContent = "☀️";
-            if (celestialModeName) celestialModeName.textContent = "Day Sun Orbit (Sunrise to Sunset)";
-            if (celestialHeading) celestialHeading.textContent = "Day Sun Orbit: Horizon Start to End";
+            if (celestialModeName) celestialModeName.textContent = "Day Solar Orbit (Sunrise to Sunset)";
+            if (celestialHeading) celestialHeading.textContent = "Sun Orbit Trajectory (Sunrise to Sunset)";
             if (celestialEmoji) celestialEmoji.textContent = "☀️";
             if (celestialBody) celestialBody.className = "celestial-sphere-3d sun-sphere";
+            if (celestialSvgArc) celestialSvgArc.setAttribute("stroke", "url(#domeArcGradDay)");
+            if (eastGateLabel) eastGateLabel.textContent = "East (Sunrise)";
+            if (westGateLabel) westGateLabel.textContent = "West (Sunset)";
 
             const percentText = Math.round(progress * 100);
             if (solarProgressBadge) solarProgressBadge.textContent = `${percentText}% Solar Zenith`;
             if (celestialRemainingText && customProgress === null) {
-                celestialRemainingText.textContent = `Sun is at ${percentText}% across daytime sky`;
+                celestialRemainingText.textContent = `Sun is at ${percentText}% across the daytime sky`;
             }
         } else {
             if (celestialModeIcon) celestialModeIcon.textContent = "🌙";
-            if (celestialModeName) celestialModeName.textContent = "Nocturnal Moon Orbit (Night to Dawn)";
-            if (celestialHeading) celestialHeading.textContent = "Moon Orbit: Sunset to Sunrise";
+            if (celestialModeName) celestialModeName.textContent = "Nocturnal Moon Orbit (Sunset to Dawn)";
+            if (celestialHeading) celestialHeading.textContent = "Moon Orbit Trajectory (Night Sky Arc)";
             if (celestialEmoji) celestialEmoji.textContent = "🌙";
             if (celestialBody) celestialBody.className = "celestial-sphere-3d moon-sphere";
+            if (celestialSvgArc) celestialSvgArc.setAttribute("stroke", "url(#domeArcGradNight)");
+            if (eastGateLabel) eastGateLabel.textContent = "East (Dawn)";
+            if (westGateLabel) westGateLabel.textContent = "West (Dusk)";
 
             const percentText = Math.round(progress * 100);
             if (solarProgressBadge) solarProgressBadge.textContent = `${percentText}% Lunar Apex`;
             if (celestialRemainingText && customProgress === null) {
-                celestialRemainingText.textContent = `Moon is at ${percentText}% across night sky`;
+                celestialRemainingText.textContent = `Moon is at ${percentText}% across the nocturnal sky`;
             }
         }
 
-        // Position along parabolic arch (percentage-based coordinates)
-        const leftPercent = 6 + progress * 88;
-        const topPercent = 82 - 4 * (82 - 14) * progress * (1 - progress);
+        // Pixel-perfect orbital positioning along curved dome
+        let leftPercent = 5.7 + progress * 88.5;
+        let topPercent = 87.5 - 158.3 * progress * (1 - progress);
+
+        if (celestialSvgArc && typeof celestialSvgArc.getPointAtLength === "function") {
+            try {
+                const totalLen = celestialSvgArc.getTotalLength();
+                if (totalLen > 0) {
+                    const pt = celestialSvgArc.getPointAtLength(progress * totalLen);
+                    leftPercent = (pt.x / 700) * 100;
+                    topPercent = (pt.y / 240) * 100;
+                }
+            } catch (err) {}
+        }
 
         if (celestialOrbiter) {
-            celestialOrbiter.style.left = `${leftPercent.toFixed(1)}%`;
-            celestialOrbiter.style.top = `${topPercent.toFixed(1)}%`;
+            celestialOrbiter.style.left = `${leftPercent.toFixed(2)}%`;
+            celestialOrbiter.style.top = `${topPercent.toFixed(2)}%`;
         }
 
         if (celestialScrubber && customProgress === null) {
-            const overallProgress = isDay ? (progress * 0.5) : (0.5 + progress * 0.5);
-            celestialScrubber.value = Math.round(overallProgress * 100);
+            const overall = isDay ? (progress * 0.5) : (0.5 + progress * 0.5);
+            celestialScrubber.value = Math.round(overall * 100);
         }
     } catch (e) {
-        console.warn("Celestial calc error:", e);
+        console.warn("Celestial calculation error:", e);
     }
 }
 
 function toggleCelestialSimulation() {
+    const simPlayBtn = document.getElementById("simPlayBtn");
+    const celestialRemainingText = document.getElementById("celestialRemainingText");
+    const celestialScrubber = document.getElementById("celestialScrubber");
+
     if (isSimulating) {
         if (simInterval) clearInterval(simInterval);
         isSimulating = false;
@@ -493,7 +918,7 @@ function toggleCelestialSimulation() {
     simProgress = 0;
 
     simInterval = setInterval(() => {
-        simProgress += 0.01;
+        simProgress += 0.008;
         if (simProgress > 1) simProgress = 0;
 
         if (lastWeatherData) {
@@ -504,18 +929,55 @@ function toggleCelestialSimulation() {
             const label = simProgress <= 0.5 ? "Day (Sun Orbit)" : "Night (Moon Orbit)";
             celestialRemainingText.textContent = `24h Simulation: ${label} - ${Math.round(simProgress * 100)}%`;
         }
-    }, 60);
+    }, 50);
 }
 
 function resetCelestialSimulation() {
     if (simInterval) clearInterval(simInterval);
     isSimulating = false;
+    const simPlayBtn = document.getElementById("simPlayBtn");
     if (simPlayBtn) simPlayBtn.innerHTML = "<span>▶️</span> Play 24h Arc";
     if (lastWeatherData) updateCelestialHorizonDome(lastWeatherData.daily, currentTimezone);
 }
 
-/* ================= 7. HOURLY TIMELINE (TODAY vs TOMORROW) ================= */
+function handleScrubberInput(e) {
+    if (simInterval) clearInterval(simInterval);
+    isSimulating = false;
+    const simPlayBtn = document.getElementById("simPlayBtn");
+    if (simPlayBtn) simPlayBtn.innerHTML = "<span>▶️</span> Play 24h Arc";
+
+    const val = parseFloat(e.target.value) / 100;
+    if (lastWeatherData) {
+        updateCelestialHorizonDome(lastWeatherData.daily, currentTimezone, val);
+        const celestialRemainingText = document.getElementById("celestialRemainingText");
+        if (celestialRemainingText) {
+            const label = val <= 0.5 ? "Day (Sun Orbit)" : "Night (Moon Orbit)";
+            celestialRemainingText.textContent = `Scrubber: ${label} at ${Math.round(val * 100)}%`;
+        }
+    }
+}
+
+/* ================= 9. HOURLY TIMELINE (TODAY vs TOMORROW) ================= */
+function switchHourlyDay(mode) {
+    selectedHourlyDay = mode;
+    const btnToday = document.getElementById("btnToday");
+    const btnTomorrow = document.getElementById("btnTomorrow");
+
+    if (mode === "today") {
+        if (btnToday) btnToday.classList.add("active");
+        if (btnTomorrow) btnTomorrow.classList.remove("active");
+    } else {
+        if (btnTomorrow) btnTomorrow.classList.add("active");
+        if (btnToday) btnToday.classList.remove("active");
+    }
+
+    if (lastWeatherData && lastWeatherData.hourly) {
+        renderHourlyStream(lastWeatherData.hourly, currentTimezone, selectedHourlyDay);
+    }
+}
+
 function renderHourlyStream(hourly, timezone, dayMode = "today") {
+    const hourlyContainer = document.getElementById("hourlyContainer");
     if (!hourlyContainer || !hourly || !hourly.time) return;
     hourlyContainer.innerHTML = "";
 
@@ -538,7 +1000,7 @@ function renderHourlyStream(hourly, timezone, dayMode = "today") {
             }
         }
     } else {
-        startIdx = 24;
+        startIdx = 24; // Tomorrow begins at hour 24
     }
 
     const endIdx = Math.min(startIdx + 24, hourly.time.length);
@@ -557,6 +1019,7 @@ function renderHourlyStream(hourly, timezone, dayMode = "today") {
 
         const card = document.createElement("div");
         card.className = `hourly-card-3d ${isCurrent ? "current-hour" : ""}`;
+        card.title = "Click to view complete details on full page";
         card.innerHTML = `
             <div class="hour-time">${timeLabel}</div>
             <div class="hour-icon">${info.icon}</div>
@@ -565,169 +1028,27 @@ function renderHourlyStream(hourly, timezone, dayMode = "today") {
             <div class="hour-wind">${wind}</div>
         `;
 
+        card.addEventListener("click", () => {
+            navigateToDetails();
+        });
+
         hourlyContainer.appendChild(card);
     }
 }
 
 function updateOpenDetailsLink() {
+    const openDetailsPageBtn = document.getElementById("openDetailsPageBtn");
     if (!openDetailsPageBtn) return;
-    openDetailsPageBtn.href = `details.html?city=${encodeURIComponent(currentCityLabel)}&lat=${currentLat}&lon=${currentLon}&unit=${currentUnit}`;
+    openDetailsPageBtn.href = `details.html?city=${encodeURIComponent(currentCityLabel)}&lat=${currentLat}&lon=${currentLon}&unit=${currentUnit}&day=${selectedHourlyDay}`;
 }
 
-/* ================= 8. SAVED CITIES MANAGER ================= */
-function getSavedCities() {
-    const data = safeStorage.getItem("weatherwise_saved_cities");
-    if (!data) return [];
-    try {
-        return JSON.parse(data);
-    } catch (e) {
-        return [];
-    }
+function navigateToDetails(e) {
+    if (e) e.preventDefault();
+    const targetUrl = `details.html?city=${encodeURIComponent(currentCityLabel)}&lat=${currentLat}&lon=${currentLon}&unit=${currentUnit}&day=${selectedHourlyDay}`;
+    window.location.href = targetUrl;
 }
 
-function saveCityToStorage(cityObj) {
-    const list = getSavedCities();
-    const exists = list.some(c => c.name.toLowerCase() === cityObj.name.toLowerCase());
-    if (!exists) {
-        list.push(cityObj);
-        safeStorage.setItem("weatherwise_saved_cities", JSON.stringify(list));
-    }
-    renderSavedCities();
-    updateSaveButtonState();
-}
-
-function removeCityFromStorage(cityName) {
-    let list = getSavedCities();
-    list = list.filter(c => c.name.toLowerCase() !== cityName.toLowerCase());
-    safeStorage.setItem("weatherwise_saved_cities", JSON.stringify(list));
-    renderSavedCities();
-    updateSaveButtonState();
-}
-
-function renderSavedCities() {
-    if (!savedCitiesContainer || !savedCitiesSection) return;
-    const list = getSavedCities();
-
-    if (list.length === 0) {
-        savedCitiesSection.style.display = "none";
-        return;
-    }
-
-    savedCitiesSection.style.display = "block";
-    if (savedCountBadge) savedCountBadge.textContent = `${list.length} saved`;
-    savedCitiesContainer.innerHTML = "";
-
-    list.forEach((item) => {
-        const card = document.createElement("div");
-        card.className = "saved-city-card";
-        card.innerHTML = `
-            <div class="saved-city-info">
-                <span class="saved-city-name">${item.name}</span>
-                <span class="saved-city-temp">${item.temp ? item.temp + "°" : "Click to view"}</span>
-            </div>
-            <button class="saved-delete-btn" title="Remove city">✕</button>
-        `;
-
-        card.addEventListener("click", (e) => {
-            if (e.target.classList.contains("saved-delete-btn")) {
-                e.stopPropagation();
-                removeCityFromStorage(item.name);
-            } else {
-                fetchWeatherByCity(item.name);
-            }
-        });
-
-        savedCitiesContainer.appendChild(card);
-    });
-}
-
-function updateSaveButtonState() {
-    if (!saveCityBtn) return;
-    const list = getSavedCities();
-    const baseName = currentCityLabel.split(",")[0].trim();
-    const isSaved = list.some(c => c.name.toLowerCase() === baseName.toLowerCase());
-
-    if (isSaved) {
-        saveCityBtn.classList.add("saved");
-        if (saveCityIcon) saveCityIcon.textContent = "★";
-        if (saveCityText) saveCityText.textContent = "Saved";
-    } else {
-        saveCityBtn.classList.remove("saved");
-        if (saveCityIcon) saveCityIcon.textContent = "⭐";
-        if (saveCityText) saveCityText.textContent = "Save City";
-    }
-}
-
-/* ================= 9. 15-MINUTE AUTO-REFRESH ================= */
-function startAutoRefreshTimer() {
-    if (autoRefreshTimer) clearInterval(autoRefreshTimer);
-    autoRefreshSeconds = 900;
-
-    function updateTimerUI() {
-        const mins = Math.floor(autoRefreshSeconds / 60);
-        const secs = autoRefreshSeconds % 60;
-        const formatted = `${mins}:${secs < 10 ? "0" : ""}${secs}`;
-
-        if (refreshTimerText) {
-            refreshTimerText.textContent = `Refreshing in ${formatted}`;
-        }
-
-        if (autoRefreshSeconds <= 0) {
-            autoRefreshSeconds = 900;
-            if (currentLat && currentLon) {
-                loadWeatherCoordinates(currentLat, currentLon, currentCityLabel, true);
-            }
-        } else {
-            autoRefreshSeconds--;
-        }
-    }
-
-    updateTimerUI();
-    autoRefreshTimer = setInterval(updateTimerUI, 1000);
-}
-
-/* ================= 10. CARD TILT PHYSICS ================= */
-function init3DTiltPhysics() {
-    const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-    if (isTouch) return;
-
-    function bindTilt() {
-        const cards = document.querySelectorAll(".card-tilt");
-        cards.forEach((card) => {
-            if (card.dataset.tiltBound) return;
-            card.dataset.tiltBound = "true";
-
-            const glare = card.querySelector(".card-glare");
-            const maxTilt = 7;
-
-            card.addEventListener("mousemove", (e) => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-
-                const rotateX = ((y - rect.height / 2) / (rect.height / 2)) * -maxTilt;
-                const rotateY = ((x - rect.width / 2) / (rect.width / 2)) * maxTilt;
-
-                card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translate3d(0, -2px, 0)`;
-
-                if (glare) {
-                    glare.style.opacity = "1";
-                    glare.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255, 255, 255, 0.25) 0%, transparent 60%)`;
-                }
-            });
-
-            card.addEventListener("mouseleave", () => {
-                card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) translate3d(0, 0, 0)`;
-                if (glare) glare.style.opacity = "0";
-            });
-        });
-    }
-
-    bindTilt();
-    window.bindTilt = bindTilt;
-}
-
-/* ================= 11. SAFE THREE.JS BACKGROUND ================= */
+/* ================= 10. DYNAMIC THREE.JS 3D PARTICLES ================= */
 function initSafeThreeJS() {
     try {
         const canvas = document.getElementById("threeCanvas");
@@ -741,34 +1062,44 @@ function initSafeThreeJS() {
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 
-        const particleCount = 80;
+        const particleCount = 75;
         const geometry = new THREE.BufferGeometry();
         const positions = new Float32Array(particleCount * 3);
         const colors = new Float32Array(particleCount * 3);
 
+        const isDark = document.body.classList.contains("dark");
+
         for (let i = 0; i < particleCount * 3; i += 3) {
-            positions[i] = (Math.random() - 0.5) * 60;
-            positions[i + 1] = (Math.random() - 0.5) * 60;
+            positions[i] = (Math.random() - 0.5) * 55;
+            positions[i + 1] = (Math.random() - 0.5) * 55;
             positions[i + 2] = (Math.random() - 0.5) * 30;
 
-            colors[i] = 0.2 + Math.random() * 0.3;
-            colors[i + 1] = 0.6 + Math.random() * 0.4;
-            colors[i + 2] = 1.0;
+            if (isDark) {
+                // Night stars: cyan, purple, white
+                colors[i] = 0.2 + Math.random() * 0.4;
+                colors[i + 1] = 0.7 + Math.random() * 0.3;
+                colors[i + 2] = 1.0;
+            } else {
+                // Day sunlight motes: golden amber, warm azure
+                colors[i] = 0.95;
+                colors[i + 1] = 0.75 + Math.random() * 0.2;
+                colors[i + 2] = 0.3 + Math.random() * 0.3;
+            }
         }
 
         geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
         geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
-        const material = new THREE.PointsMaterial({
-            size: 0.8,
+        threeMaterial = new THREE.PointsMaterial({
+            size: 0.9,
             vertexColors: true,
             transparent: true,
-            opacity: 0.5,
+            opacity: isDark ? 0.65 : 0.45,
             blending: THREE.AdditiveBlending
         });
 
-        const particles = new THREE.Points(geometry, material);
-        scene.add(particles);
+        threeParticles = new THREE.Points(geometry, threeMaterial);
+        scene.add(threeParticles);
 
         window.addEventListener("resize", () => {
             camera.aspect = window.innerWidth / window.innerHeight;
@@ -778,17 +1109,50 @@ function initSafeThreeJS() {
 
         function animate() {
             requestAnimationFrame(animate);
-            if (particles) particles.rotation.y += 0.0004;
+            if (threeParticles) {
+                threeParticles.rotation.y += 0.0004;
+                threeParticles.rotation.x += 0.0002;
+            }
             renderer.render(scene, camera);
         }
 
         animate();
     } catch (err) {
-        console.warn("Optional WebGL Three.js fallback active:", err);
+        console.warn("WebGL Three.js background skipped:", err);
     }
 }
 
-/* ================= 12. WEATHER DATA FETCHING ================= */
+function updateThreeJSParticleColors() {
+    if (!threeParticles || !threeMaterial) return;
+    const isDark = document.body.classList.contains("dark");
+    const colors = threeParticles.geometry.attributes.color.array;
+    const count = colors.length / 3;
+
+    for (let i = 0; i < count * 3; i += 3) {
+        if (isDark) {
+            colors[i] = 0.2 + Math.random() * 0.4;
+            colors[i + 1] = 0.7 + Math.random() * 0.3;
+            colors[i + 2] = 1.0;
+        } else {
+            colors[i] = 0.95;
+            colors[i + 1] = 0.75 + Math.random() * 0.2;
+            colors[i + 2] = 0.3 + Math.random() * 0.3;
+        }
+    }
+
+    threeParticles.geometry.attributes.color.needsUpdate = true;
+    threeMaterial.opacity = isDark ? 0.65 : 0.45;
+}
+
+/* ================= 11. WEATHER DATA RETRIEVAL ================= */
+function searchCurrentInput() {
+    const input = document.getElementById("cityInput");
+    if (!input) return;
+    const city = input.value.trim();
+    if (city) fetchWeatherByCity(city);
+    else showError("Please enter a city name.");
+}
+
 async function fetchWeatherByCity(city) {
     showLoading(true, `Connecting to satellites for "${city}"...`);
     hideError();
@@ -881,7 +1245,19 @@ async function loadWeatherCoordinates(lat, lon, displayTitle, isBackground = fal
     }
 }
 
-/* ================= 13. RENDERING ================= */
+function forceRefreshWeather() {
+    const btn = document.getElementById("manualRefreshBtn");
+    const icon = btn ? btn.querySelector(".refresh-icon") : null;
+    if (icon) icon.style.transform = "rotate(360deg)";
+    setTimeout(() => { if (icon) icon.style.transform = "none"; }, 600);
+
+    if (currentLat && currentLon) {
+        loadWeatherCoordinates(currentLat, currentLon, currentCityLabel, true);
+        autoRefreshSeconds = 900;
+    }
+}
+
+/* ================= 12. WEATHER RENDERING ================= */
 function renderAllWeather(title, data) {
     if (!data || !data.current) return;
 
@@ -889,6 +1265,13 @@ function renderAllWeather(title, data) {
     const daily = data.daily || {};
     const hourly = data.hourly || {};
     const condition = getWeatherInfo(current.weather_code, current.is_day);
+
+    const cityNameEl = document.getElementById("cityName");
+    const timezoneTextEl = document.getElementById("timezoneText");
+    const weatherIconEl = document.getElementById("weatherIcon");
+    const conditionEl = document.getElementById("condition");
+    const tempUnitEl = document.getElementById("tempUnit");
+    const tempHighLowEl = document.getElementById("tempHighLow");
 
     if (cityNameEl) cityNameEl.textContent = title;
     if (timezoneTextEl) timezoneTextEl.textContent = `Timezone: ${currentTimezone.replace(/_/g, " ")}`;
@@ -917,11 +1300,10 @@ function renderAllWeather(title, data) {
 
     updateSaveButtonState();
     updateOpenDetailsLink();
-
-    if (window.bindTilt) window.bindTilt();
 }
 
 function animateTemperature(targetVal) {
+    const temperatureEl = document.getElementById("temperature");
     if (!temperatureEl) return;
     if (isNaN(targetVal)) {
         temperatureEl.textContent = targetVal;
@@ -929,7 +1311,7 @@ function animateTemperature(targetVal) {
     }
 
     const startVal = currentDisplayedTemp;
-    const duration = 500;
+    const duration = 400;
     const startTime = performance.now();
 
     function update(now) {
@@ -961,39 +1343,75 @@ function getWeatherInfo(code, isDay = 1) {
         case 71: case 73: return { description: "Snowfall", icon: "❄️" };
         case 80: case 81: case 82: return { description: "Showers", icon: "🌦️" };
         case 95: case 96: case 99: return { description: "Thunderstorm", icon: "⛈️⚡" };
-        default: return { description: "Clear Sky", icon: "☀️" };
+        default: return { description: "Clear Sky", icon: day ? "☀️" : "🌙" };
     }
 }
 
+function startAutoRefreshTimer() {
+    if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+    autoRefreshSeconds = 900;
+
+    const refreshTimerText = document.getElementById("refreshTimerText");
+
+    function updateTimerUI() {
+        const mins = Math.floor(autoRefreshSeconds / 60);
+        const secs = autoRefreshSeconds % 60;
+        const formatted = `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+
+        if (refreshTimerText) {
+            refreshTimerText.textContent = `Refreshing in ${formatted}`;
+        }
+
+        if (autoRefreshSeconds <= 0) {
+            autoRefreshSeconds = 900;
+            if (currentLat && currentLon) {
+                loadWeatherCoordinates(currentLat, currentLon, currentCityLabel, true);
+            }
+        } else {
+            autoRefreshSeconds--;
+        }
+    }
+
+    updateTimerUI();
+    autoRefreshTimer = setInterval(updateTimerUI, 1000);
+}
+
 function showLoading(show, message = "Synchronizing telemetry...") {
+    const loadingBox = document.getElementById("loading");
+    const loadingMsg = document.getElementById("loadingMsg");
     if (!loadingBox) return;
     loadingBox.style.display = show ? "flex" : "none";
     if (loadingMsg) loadingMsg.textContent = message;
 }
 
 function showError(msg) {
+    const errorBox = document.getElementById("error");
     if (!errorBox) return;
     errorBox.textContent = `⚠️ ${msg}`;
     errorBox.style.display = "block";
 }
 
 function hideError() {
+    const errorBox = document.getElementById("error");
     if (!errorBox) return;
     errorBox.style.display = "none";
 }
 
-/* ================= 14. INITIALIZATION ================= */
+/* ================= 13. BOOTSTRAP INITIALIZATION ================= */
 function initApp() {
-    setupCoreListeners();
     initTheme();
+    const unitBtn = document.getElementById("unitBtn");
     if (unitBtn) unitBtn.innerHTML = `<span class="btn-text">°${currentUnit}</span>`;
+
+    updateAccountBtnUI();
+    initWelcomeExperience();
     startAutoRefreshTimer();
     renderSavedCities();
-    init3DTiltPhysics();
     initSafeThreeJS();
 
     const savedCity = safeStorage.getItem("weatherwise_last_city");
     if (savedCity) {
+        const cityInput = document.getElementById("cityInput");
         if (cityInput) cityInput.value = savedCity;
         fetchWeatherByCity(savedCity);
     } else {

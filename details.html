@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <meta name="description" content="WeatherWise 3D - Comprehensive Hour-by-Hour Weather Details for Today and Tomorrow.">
     <meta name="theme-color" content="#0f172a">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌦️</text></svg>">
@@ -11,15 +11,14 @@
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,700&display=swap" rel="stylesheet">
 
-    <title>WeatherWise | Detailed Hourly Forecast</title>
+    <title>WeatherWise 3D | Detailed Hourly Telemetry</title>
 
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Specific enhancements for Detailed View */
         .details-page-app {
-            max-width: 1200px;
+            max-width: 1180px;
             margin: 0 auto;
             padding: 24px 20px 60px;
         }
@@ -28,7 +27,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 26px;
             flex-wrap: wrap;
             gap: 14px;
         }
@@ -38,26 +37,29 @@
             align-items: center;
             gap: 8px;
             background: var(--card-glass);
-            border: 1px solid var(--card-border);
+            border: 1.5px solid var(--card-border);
             color: var(--primary);
             padding: 10px 20px;
-            border-radius: 14px;
+            border-radius: 16px;
             font-size: 14px;
-            font-weight: 700;
+            font-weight: 800;
             text-decoration: none;
             box-shadow: var(--shadow-main);
             transition: all 0.2s ease;
         }
 
         .back-btn:hover {
-            transform: translateX(-3px);
+            transform: translateX(-4px);
             border-color: var(--primary);
+            box-shadow: 0 6px 18px var(--primary-glow);
         }
 
         .details-hero {
             background: var(--card-glass);
             border: 1.5px solid var(--card-border);
-            border-radius: 28px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 30px;
             padding: 30px;
             margin-bottom: 30px;
             box-shadow: var(--shadow-main);
@@ -77,8 +79,8 @@
             gap: 8px;
             background: var(--card-inner);
             padding: 6px;
-            border-radius: 16px;
-            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            border: 1.5px solid var(--card-border);
             margin-bottom: 24px;
         }
 
@@ -105,7 +107,6 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 16px;
-            margin-bottom: 30px;
         }
 
         .summary-card {
@@ -117,7 +118,7 @@
         }
 
         .summary-card p {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
@@ -125,7 +126,7 @@
         }
 
         .summary-card strong {
-            font-size: 20px;
+            font-size: 19px;
             font-weight: 800;
             color: var(--text-heading);
         }
@@ -135,16 +136,17 @@
             overflow-x: auto;
             background: var(--card-glass);
             border: 1.5px solid var(--card-border);
-            border-radius: 24px;
+            border-radius: 26px;
             box-shadow: var(--shadow-main);
-            padding: 10px;
+            padding: 12px;
+            -webkit-overflow-scrolling: touch;
         }
 
         .hourly-table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            min-width: 780px;
+            min-width: 760px;
         }
 
         .hourly-table th {
@@ -189,6 +191,14 @@
             .day-summary-cards {
                 grid-template-columns: repeat(2, 1fr);
             }
+
+            .details-hero {
+                padding: 20px;
+            }
+
+            .details-page-app {
+                padding: 16px 14px 40px;
+            }
         }
     </style>
 </head>
@@ -204,10 +214,10 @@
             </a>
 
             <div class="header-actions">
-                <button id="unitBtn" class="action-btn-3d unit-btn" title="Toggle °C / °F">
+                <button id="unitBtn" class="action-btn-3d unit-btn" onclick="toggleUnit()" title="Toggle °C / °F">
                     <span class="btn-text">°C</span>
                 </button>
-                <button id="themeBtn" class="action-btn-3d theme-btn" title="Toggle Dark/Light Mode">
+                <button id="themeBtn" class="action-btn-3d theme-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
                     <span class="btn-icon">🌙</span>
                 </button>
             </div>
@@ -218,9 +228,9 @@
             <div class="details-hero-top">
                 <div>
                     <span class="live-status-pill">
-                        <span class="live-ping"></span> HIGH-RESOLUTION TELEMETRY
+                        <span class="live-ping"></span> 24-HOUR CONTINUOUS TELEMETRY
                     </span>
-                    <h1 id="detailsCityName">Loading City Details...</h1>
+                    <h1 id="detailsCityName" class="city-heading-3d">Loading City Details...</h1>
                     <p id="detailsTimezone" class="timezone-tag">Timezone: Europe/London</p>
                 </div>
 
@@ -235,10 +245,10 @@
 
             <!-- TAB SWITCHER: TODAY vs TOMORROW -->
             <div class="details-day-tabs">
-                <button id="tabToday" class="details-tab-btn active">
+                <button id="tabToday" class="details-tab-btn active" onclick="switchDay('today')">
                     Today's 24-Hour Breakdown
                 </button>
-                <button id="tabTomorrow" class="details-tab-btn">
+                <button id="tabTomorrow" class="details-tab-btn" onclick="switchDay('tomorrow')">
                     Tomorrow's Complete Outlook
                 </button>
             </div>
@@ -264,15 +274,11 @@
             </div>
         </header>
 
-
         <!-- STATUS / LOADING -->
-        <div id="error" class="error-box-3d" style="display: none;"></div>
-
         <div id="loading" class="loading-box-3d" style="display: none;">
             <div class="spinner-3d"></div>
             <p>Loading complete atmospheric hourly telemetry...</p>
         </div>
-
 
         <!-- DETAILED HOURLY DATA TABLE -->
         <section class="table-wrap">
@@ -305,14 +311,24 @@
     </div>
 
     <script>
+        /* ================= SAFE STORAGE HELPER ================= */
+        const safeStorage = {
+            getItem(key) {
+                try { return window.localStorage ? window.localStorage.getItem(key) : null; } catch (e) { return null; }
+            },
+            setItem(key, value) {
+                try { if (window.localStorage) window.localStorage.setItem(key, value); } catch (e) {}
+            }
+        };
+
         /* ================= DETAILS PAGE SCRIPT ================= */
         const urlParams = new URLSearchParams(window.location.search);
         let cityName = urlParams.get("city") || "London, United Kingdom";
         let lat = parseFloat(urlParams.get("lat")) || 51.5085;
         let lon = parseFloat(urlParams.get("lon")) || -0.1257;
-        let unit = urlParams.get("unit") || localStorage.getItem("weatherwise_unit") || "C";
+        let unit = urlParams.get("unit") || safeStorage.getItem("weatherwise_unit") || "C";
+        let activeTab = urlParams.get("day") === "tomorrow" ? "tomorrow" : "today";
         let fullData = null;
-        let activeTab = "today";
         let clockTimer = null;
 
         const detailsCityName = document.getElementById("detailsCityName");
@@ -324,6 +340,7 @@
         const detailsHourlyBody = document.getElementById("detailsHourlyBody");
         const unitBtn = document.getElementById("unitBtn");
         const themeBtn = document.getElementById("themeBtn");
+        const loadingBox = document.getElementById("loading");
 
         const sumTempRange = document.getElementById("sumTempRange");
         const sumPrecip = document.getElementById("sumPrecip");
@@ -332,49 +349,49 @@
 
         // Theme init
         function initTheme() {
-            const saved = localStorage.getItem("weatherwise_theme");
+            const saved = safeStorage.getItem("weatherwise_theme");
             if (saved === "dark") {
                 document.body.classList.add("dark");
                 if (themeBtn) themeBtn.querySelector(".btn-icon").textContent = "☀️";
             }
         }
 
-        themeBtn.addEventListener("click", () => {
+        function toggleTheme() {
             document.body.classList.toggle("dark");
             const isDark = document.body.classList.contains("dark");
-            themeBtn.querySelector(".btn-icon").textContent = isDark ? "☀️" : "🌙";
-            localStorage.setItem("weatherwise_theme", isDark ? "dark" : "light");
-        });
+            if (themeBtn) themeBtn.querySelector(".btn-icon").textContent = isDark ? "☀️" : "🌙";
+            safeStorage.setItem("weatherwise_theme", isDark ? "dark" : "light");
+        }
 
-        unitBtn.addEventListener("click", () => {
+        function toggleUnit() {
             unit = unit === "C" ? "F" : "C";
-            localStorage.setItem("weatherwise_unit", unit);
-            unitBtn.querySelector(".btn-text").textContent = `°${unit}`;
+            safeStorage.setItem("weatherwise_unit", unit);
+            if (unitBtn) unitBtn.querySelector(".btn-text").textContent = `°${unit}`;
             if (fullData) renderDetailsView();
-        });
+        }
 
-        tabToday.addEventListener("click", () => {
-            activeTab = "today";
-            tabToday.classList.add("active");
-            tabTomorrow.classList.remove("active");
-            renderDetailsView();
-        });
-
-        tabTomorrow.addEventListener("click", () => {
-            activeTab = "tomorrow";
-            tabTomorrow.classList.add("active");
-            tabToday.classList.remove("active");
-            renderDetailsView();
-        });
+        function switchDay(day) {
+            activeTab = day;
+            if (day === "today") {
+                if (tabToday) tabToday.classList.add("active");
+                if (tabTomorrow) tabTomorrow.classList.remove("active");
+            } else {
+                if (tabTomorrow) tabTomorrow.classList.add("active");
+                if (tabToday) tabToday.classList.remove("active");
+            }
+            if (fullData) renderDetailsView();
+        }
 
         function formatTemp(c) {
-            if (c === undefined || c === null) return "--";
-            return unit === "F" ? Math.round((c * 9) / 5 + 32) : Math.round(c);
+            if (c === undefined || c === null || isNaN(c)) return "--";
+            const num = Number(c);
+            return unit === "F" ? Math.round((num * 9) / 5 + 32) : Math.round(num);
         }
 
         function formatWind(kmh) {
-            if (kmh === undefined || kmh === null) return "--";
-            return unit === "F" ? `${Math.round(kmh * 0.621371)} mph` : `${Math.round(kmh)} km/h`;
+            if (kmh === undefined || kmh === null || isNaN(kmh)) return "--";
+            const num = Number(kmh);
+            return unit === "F" ? `${Math.round(num * 0.621371)} mph` : `${Math.round(num)} km/h`;
         }
 
         function getWeatherInfo(code) {
@@ -413,9 +430,17 @@
         }
 
         async function loadData() {
-            detailsCityName.textContent = cityName;
-            unitBtn.querySelector(".btn-text").textContent = `°${unit}`;
+            if (detailsCityName) detailsCityName.textContent = cityName;
+            if (unitBtn) unitBtn.querySelector(".btn-text").textContent = `°${unit}`;
             initTheme();
+
+            // Set initial active tab state based on URL
+            if (activeTab === "tomorrow") {
+                if (tabTomorrow) tabTomorrow.classList.add("active");
+                if (tabToday) tabToday.classList.remove("active");
+            }
+
+            if (loadingBox) loadingBox.style.display = "flex";
 
             try {
                 const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure&hourly=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,precipitation_probability,surface_pressure&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,uv_index_max,precipitation_probability_max&timezone=auto`;
@@ -423,12 +448,14 @@
                 const data = await res.json();
                 fullData = data;
 
-                detailsTimezone.textContent = `Timezone: ${data.timezone.replace(/_/g, " ")}`;
+                if (detailsTimezone) detailsTimezone.textContent = `Timezone: ${data.timezone.replace(/_/g, " ")}`;
                 startClock(data.timezone);
                 renderDetailsView();
+                if (loadingBox) loadingBox.style.display = "none";
             } catch (err) {
                 console.error(err);
-                alert("Failed to load detailed forecast.");
+                if (loadingBox) loadingBox.style.display = "none";
+                alert("Failed to load detailed forecast. Please return to dashboard.");
             }
         }
 
@@ -439,20 +466,20 @@
             const dayIdx = (activeTab === "today") ? 0 : 1;
 
             // Summary Cards
-            const maxT = formatTemp(daily.temperature_2m_max[dayIdx]);
-            const minT = formatTemp(daily.temperature_2m_min[dayIdx]);
-            sumTempRange.textContent = `H: ${maxT}°${unit} • L: ${minT}°${unit}`;
-            sumPrecip.textContent = `${daily.precipitation_probability_max[dayIdx] || 0}%`;
-            sumUV.textContent = daily.uv_index_max[dayIdx] || "--";
+            const maxT = formatTemp(daily.temperature_2m_max?.[dayIdx]);
+            const minT = formatTemp(daily.temperature_2m_min?.[dayIdx]);
+            if (sumTempRange) sumTempRange.textContent = `H: ${maxT}°${unit} • L: ${minT}°${unit}`;
+            if (sumPrecip) sumPrecip.textContent = `${daily.precipitation_probability_max?.[dayIdx] || 0}%`;
+            if (sumUV) sumUV.textContent = daily.uv_index_max?.[dayIdx] || "--";
 
-            const sr = daily.sunrise[dayIdx]?.split("T")[1] || "--:--";
-            const ss = daily.sunset[dayIdx]?.split("T")[1] || "--:--";
-            sumSun.textContent = `↑${sr}  ↓${ss}`;
+            const sr = daily.sunrise?.[dayIdx]?.split("T")[1] || "--:--";
+            const ss = daily.sunset?.[dayIdx]?.split("T")[1] || "--:--";
+            if (sumSun) sumSun.textContent = `↑${sr}  ↓${ss}`;
 
             // Hourly rows (24 hours for chosen day)
             const startHour = dayIdx * 24;
             const endHour = startHour + 24;
-            detailsHourlyBody.innerHTML = "";
+            if (detailsHourlyBody) detailsHourlyBody.innerHTML = "";
 
             for (let i = startHour; i < Math.min(endHour, hourly.time.length); i++) {
                 const iso = hourly.time[i];
@@ -482,7 +509,7 @@
                     <td>${press} hPa</td>
                     <td>${hum}%</td>
                 `;
-                detailsHourlyBody.appendChild(tr);
+                if (detailsHourlyBody) detailsHourlyBody.appendChild(tr);
             }
         }
 
