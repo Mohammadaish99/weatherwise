@@ -20,102 +20,226 @@ const safeStorage = {
 let currentUnit = safeStorage.getItem("weatherwise_unit") || "C";
 let lastWeatherData = null;
 let currentCityLabel = "London, United Kingdom";
+let currentLat = 51.5085;
+let currentLon = -0.1257;
+let currentTimezone = "Europe/London";
 let currentDisplayedTemp = 18;
-let currentWeatherCode = 0;
-let isDaytime = 1;
+let autoRefreshTimer = null;
+let autoRefreshSeconds = 900; // 15 minutes (900 seconds)
+let clockInterval = null;
 
 /* ================= DOM ELEMENTS ================= */
 const cityInput = document.getElementById("cityInput");
 const searchBtn = document.getElementById("searchBtn");
 const locationBtn = document.getElementById("locationBtn");
+const saveCityBtn = document.getElementById("saveCityBtn");
+const saveCityIcon = document.getElementById("saveCityIcon");
+const saveCityText = document.getElementById("saveCityText");
+const manualRefreshBtn = document.getElementById("manualRefreshBtn");
+const refreshTimerText = document.getElementById("refreshTimerText");
 const quickCityBtns = document.querySelectorAll(".city-pill-3d");
 const unitBtn = document.getElementById("unitBtn");
 const themeBtn = document.getElementById("themeBtn");
 
+const localTimeDisplay = document.getElementById("localTimeDisplay");
+const localDateDisplay = document.getElementById("localDateDisplay");
+
 const errorBox = document.getElementById("error");
 const loadingBox = document.getElementById("loading");
+const loadingMsg = document.getElementById("loadingMsg");
 const weatherCard = document.getElementById("weatherCard");
 
 const cityNameEl = document.getElementById("cityName");
-const dateEl = document.getElementById("date");
+const timezoneTextEl = document.getElementById("timezoneText");
 const weatherIconEl = document.getElementById("weatherIcon");
 const temperatureEl = document.getElementById("temperature");
 const tempUnitEl = document.getElementById("tempUnit");
 const tempHighLowEl = document.getElementById("tempHighLow");
 const conditionEl = document.getElementById("condition");
 
-const feelsLikeEl = document.getElementById("feelsLike");
-const humidityEl = document.getElementById("humidity");
-const windEl = document.getElementById("wind");
-const uvIndexEl = document.getElementById("uvIndex");
-const rainChanceEl = document.getElementById("rainChance");
-const sunScheduleEl = document.getElementById("sunSchedule");
-const pressureEl = document.getElementById("pressure");
-const timezoneEl = document.getElementById("timezone");
+// 3D Celestial Tracker Elements
+const celestialModeIcon = document.getElementById("celestialModeIcon");
+const celestialModeName = document.getElementById("celestialModeName");
+const celestialRemainingText = document.getElementById("celestialRemainingText");
+const celestialOrbiter = document.getElementById("celestialOrbiter");
+const celestialBody = document.getElementById("celestialBody");
+const celestialEmoji = document.getElementById("celestialEmoji");
+const sunriseTimeEl = document.getElementById("sunriseTime");
+const sunsetTimeEl = document.getElementById("sunsetTime");
+const solarProgressBadge = document.getElementById("solarProgressBadge");
 
-const forecastContainer = document.getElementById("forecastContainer");
+// Real-Time Monitoring Dashboard Elements
+const compassNeedle = document.getElementById("compassNeedle");
+const windBearingText = document.getElementById("windBearingText");
+const windSpeedVal = document.getElementById("windSpeedVal");
+const windGustsVal = document.getElementById("windGustsVal");
 
-/* ================= EVENT LISTENERS ================= */
-if (searchBtn) {
-    searchBtn.addEventListener("click", () => {
-        const city = cityInput.value.trim();
-        if (city) {
-            fetchWeatherByCity(city);
-        } else {
-            showError("Please enter a city name to search.");
-        }
+const pressureNumber = document.getElementById("pressureNumber");
+const pressureTrendPill = document.getElementById("pressureTrendPill");
+const trendIcon = document.getElementById("trendIcon");
+const trendText = document.getElementById("trendText");
+const pressureFillBar = document.getElementById("pressureFillBar");
+const pressureMsl = document.getElementById("pressureMsl");
+const elevationText = document.getElementById("elevationText");
+
+const humidityVal = document.getElementById("humidityVal");
+const uvVal = document.getElementById("uvVal");
+const precipVal = document.getElementById("precipVal");
+const feelsLikeVal = document.getElementById("feelsLikeVal");
+
+const hourlyContainer = document.getElementById("hourlyContainer");
+
+// Saved Cities
+const savedCitiesSection = document.getElementById("savedCitiesSection");
+const savedCitiesContainer = document.getElementById("savedCitiesContainer");
+const savedCountBadge = document.getElementById("savedCountBadge");
+
+/* ================= 1. TRUE 3D WEBGL ENGINE (THREE.JS) ================= */
+let threeScene, threeCamera, threeRenderer, particlesMesh, floatingOrbs = [];
+
+function initThreeJSWorld() {
+    const canvas = document.getElementById("threeCanvas");
+    if (!canvas || typeof THREE === "undefined") return;
+
+    threeScene = new THREE.Scene();
+    threeCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    threeCamera.position.z = 30;
+
+    threeRenderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    threeRenderer.setSize(window.innerWidth, window.innerHeight);
+    threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    // Ambient 3D Particle Cloud
+    const particleCount = 200;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+
+    for (let i = 0; i < particleCount * 3; i += 3) {
+        positions[i] = (Math.random() - 0.5) * 80;
+        positions[i + 1] = (Math.random() - 0.5) * 80;
+        positions[i + 2] = (Math.random() - 0.5) * 60;
+
+        colors[i] = 0.2 + Math.random() * 0.4;
+        colors[i + 1] = 0.6 + Math.random() * 0.4;
+        colors[i + 2] = 1.0;
+    }
+
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+
+    const material = new THREE.PointsMaterial({
+        size: 0.8,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.7,
+        blending: THREE.AdditiveBlending
     });
-}
 
-if (cityInput) {
-    cityInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-            const city = cityInput.value.trim();
-            if (city) {
-                fetchWeatherByCity(city);
-            } else {
-                showError("Please enter a city name to search.");
-            }
-        }
-    });
-}
+    particlesMesh = new THREE.Points(geometry, material);
+    threeScene.add(particlesMesh);
 
-if (locationBtn) {
-    locationBtn.addEventListener("click", fetchWeatherByLocation);
-}
+    // Floating 3D Glowing Atmospheric Orbs
+    const orbGeom = new THREE.SphereGeometry(2.5, 32, 32);
+    const orbColors = [0x38bdf8, 0x818cf8, 0xf59e0b];
 
-if (quickCityBtns) {
-    quickCityBtns.forEach((btn) => {
-        btn.addEventListener("click", () => {
-            const city = btn.getAttribute("data-city");
-            if (cityInput) cityInput.value = city;
-            fetchWeatherByCity(city);
+    for (let i = 0; i < 3; i++) {
+        const orbMat = new THREE.MeshBasicMaterial({
+            color: orbColors[i],
+            transparent: true,
+            opacity: 0.25,
+            wireframe: true
         });
+        const orb = new THREE.Mesh(orbGeom, orbMat);
+        orb.position.set((i - 1) * 22, (Math.random() - 0.5) * 20, -10 + i * 5);
+        threeScene.add(orb);
+        floatingOrbs.push(orb);
+    }
+
+    // Mouse Movement Parallax
+    let mouseX = 0, mouseY = 0;
+    window.addEventListener("mousemove", (e) => {
+        mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+        mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
     });
+
+    // Window Resize
+    window.addEventListener("resize", () => {
+        threeCamera.aspect = window.innerWidth / window.innerHeight;
+        threeCamera.updateProjectionMatrix();
+        threeRenderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // 3D Animation Loop
+    function animateThree() {
+        requestAnimationFrame(animateThree);
+
+        // Rotation & drift
+        if (particlesMesh) {
+            particlesMesh.rotation.y += 0.0008;
+            particlesMesh.rotation.x += 0.0004;
+        }
+
+        floatingOrbs.forEach((orb, idx) => {
+            orb.rotation.x += 0.004 * (idx + 1);
+            orb.rotation.y += 0.003 * (idx + 1);
+            orb.position.y += Math.sin(Date.now() * 0.001 + idx) * 0.02;
+        });
+
+        // Smooth camera drift responding to mouse and scroll
+        const scrollY = window.scrollY || window.pageYOffset;
+        const targetCamZ = 30 + (scrollY * 0.015);
+        const targetCamY = -(scrollY * 0.02) - (mouseY * 2);
+        const targetCamX = mouseX * 3;
+
+        threeCamera.position.x += (targetCamX - threeCamera.position.x) * 0.05;
+        threeCamera.position.y += (targetCamY - threeCamera.position.y) * 0.05;
+        threeCamera.position.z += (targetCamZ - threeCamera.position.z) * 0.05;
+
+        threeRenderer.render(threeScene, threeCamera);
+    }
+
+    animateThree();
 }
 
-if (unitBtn) {
-    unitBtn.addEventListener("click", toggleUnit);
+/* ================= 2. 3D SCROLL EFFECTS ENGINE ================= */
+function init3DScrollPhysics() {
+    const scrollItems = document.querySelectorAll(".scroll-3d-item");
+
+    function onScroll() {
+        const viewportHeight = window.innerHeight;
+
+        scrollItems.forEach((item) => {
+            const rect = item.getBoundingClientRect();
+            const centerOffset = rect.top + rect.height / 2 - viewportHeight / 2;
+            const scrollFraction = centerOffset / (viewportHeight / 2);
+
+            // Subtle 3D tilt & depth based on position relative to center of screen
+            const rotateX = Math.max(-6, Math.min(6, scrollFraction * 4));
+            const translateZ = Math.max(-20, Math.min(10, (1 - Math.abs(scrollFraction)) * 10));
+
+            item.style.transform = `perspective(1200px) rotateX(${rotateX.toFixed(2)}deg) translateZ(${translateZ.toFixed(1)}px)`;
+        });
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
 }
 
-if (themeBtn) {
-    themeBtn.addEventListener("click", toggleTheme);
-}
-
-/* ================= 3D TILT PHYSICS ENGINE ================= */
-function init3DTilt() {
+/* ================= 3. 3D CARD TILT & GLARE ================= */
+function init3DTiltPhysics() {
     const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-    if (isTouch) return; // Disable hover tilt on mobile touch devices
+    if (isTouch) return;
 
-    function applyTiltToCards() {
+    function bindTilt() {
         const cards = document.querySelectorAll(".card-tilt");
 
         cards.forEach((card) => {
-            if (card.dataset.tiltActive) return;
-            card.dataset.tiltActive = "true";
+            if (card.dataset.tiltBound) return;
+            card.dataset.tiltBound = "true";
 
             const glare = card.querySelector(".card-glare");
-            const maxTilt = card.classList.contains("weather-card-3d") ? 10 : 14;
+            const maxTilt = card.classList.contains("weather-card-3d") ? 8 : 12;
 
             card.addEventListener("mousemove", (e) => {
                 const rect = card.getBoundingClientRect();
@@ -132,7 +256,7 @@ function init3DTilt() {
 
                 if (glare) {
                     glare.style.opacity = "1";
-                    glare.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255, 255, 255, 0.35) 0%, transparent 65%)`;
+                    glare.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255, 255, 255, 0.32) 0%, transparent 65%)`;
                 }
             });
 
@@ -143,148 +267,417 @@ function init3DTilt() {
         });
     }
 
-    applyTiltToCards();
-    window.applyTiltToCards = applyTiltToCards;
+    bindTilt();
+    window.bindTilt = bindTilt;
 }
 
-/* ================= 3D AMBIENT ATMOSPHERIC CANVAS ================= */
-function initAtmosphericCanvas() {
-    const canvas = document.getElementById("weatherCanvas");
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+/* ================= 4. LOCATION-ACCURATE LIVE CLOCK ================= */
+function startLocationClock(timezone) {
+    if (clockInterval) clearInterval(clockInterval);
 
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
+    function tick() {
+        try {
+            const now = new Date();
 
-    window.addEventListener("resize", () => {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
+            const timeFormat = new Intl.DateTimeFormat("en-US", {
+                timeZone: timezone,
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true
+            });
+
+            const dateFormat = new Intl.DateTimeFormat("en-US", {
+                timeZone: timezone,
+                weekday: "short",
+                month: "short",
+                day: "numeric"
+            });
+
+            if (localTimeDisplay) localTimeDisplay.textContent = timeFormat.format(now);
+            if (localDateDisplay) localDateDisplay.textContent = `${dateFormat.format(now)} • ${timezone.replace(/_/g, " ")}`;
+        } catch (e) {
+            console.warn("Timezone clock fallback:", e);
+            const now = new Date();
+            if (localTimeDisplay) localTimeDisplay.textContent = now.toLocaleTimeString();
+        }
+    }
+
+    tick();
+    clockInterval = setInterval(tick, 1000);
+}
+
+/* ================= 5. 3D SUN & MOON CELESTIAL ORBIT TRACKER ================= */
+function updateCelestialTrajectory(daily, timezone) {
+    if (!daily || !daily.sunrise || !daily.sunset) return;
+
+    try {
+        const now = new Date();
+        const sunriseStr = daily.sunrise[0];
+        const sunsetStr = daily.sunset[0];
+
+        // Format sunrise & sunset labels
+        const srParts = sunriseStr.split("T")[1];
+        const ssParts = sunsetStr.split("T")[1];
+
+        if (sunriseTimeEl) sunriseTimeEl.textContent = srParts || "--:--";
+        if (sunsetTimeEl) sunsetTimeEl.textContent = ssParts || "--:--";
+
+        // Current minutes into day for timezone
+        const timeParts = new Intl.DateTimeFormat("en-US", {
+            timeZone: timezone,
+            hour: "numeric",
+            minute: "numeric",
+            hour12: false
+        }).format(now).split(":");
+
+        const curMins = parseInt(timeParts[0], 10) * 60 + parseInt(timeParts[1], 10);
+
+        const [srH, srM] = srParts.split(":").map(Number);
+        const [ssH, ssM] = ssParts.split(":").map(Number);
+
+        const sunriseMins = srH * 60 + srM;
+        const sunsetMins = ssH * 60 + ssM;
+
+        let isDay = curMins >= sunriseMins && curMins <= sunsetMins;
+        let progress = 0;
+
+        if (isDay) {
+            // DAY SUN TRAJECTORY
+            progress = (curMins - sunriseMins) / (sunsetMins - sunriseMins);
+            progress = Math.max(0, Math.min(1, progress));
+
+            if (celestialModeIcon) celestialModeIcon.textContent = "☀️";
+            if (celestialModeName) celestialModeName.textContent = "Day Sun Path";
+            if (celestialEmoji) celestialEmoji.textContent = "☀️";
+
+            if (celestialBody) {
+                celestialBody.className = "celestial-body sun-body";
+            }
+
+            const remMins = sunsetMins - curMins;
+            const remH = Math.floor(remMins / 60);
+            const remM = remMins % 60;
+            if (celestialRemainingText) {
+                celestialRemainingText.textContent = `${remH}h ${remM}m daylight remaining`;
+            }
+            if (solarProgressBadge) {
+                solarProgressBadge.textContent = `${Math.round(progress * 100)}% Sun Orbit`;
+            }
+        } else {
+            // NIGHT MOON TRAJECTORY
+            const nightTotal = (1440 - sunsetMins) + sunriseMins;
+            const nightElapsed = curMins > sunsetMins ? (curMins - sunsetMins) : ((1440 - sunsetMins) + curMins);
+            progress = nightElapsed / nightTotal;
+            progress = Math.max(0, Math.min(1, progress));
+
+            if (celestialModeIcon) celestialModeIcon.textContent = "🌙";
+            if (celestialModeName) celestialModeName.textContent = "Nocturnal Lunar Path";
+            if (celestialEmoji) celestialEmoji.textContent = "🌙";
+
+            if (celestialBody) {
+                celestialBody.className = "celestial-body moon-body";
+            }
+
+            const untilSunMins = (nightTotal - nightElapsed);
+            const uH = Math.floor(untilSunMins / 60);
+            const uM = untilSunMins % 60;
+            if (celestialRemainingText) {
+                celestialRemainingText.textContent = `${uH}h ${uM}m until sunrise`;
+            }
+            if (solarProgressBadge) {
+                solarProgressBadge.textContent = `${Math.round(progress * 100)}% Moon Orbit`;
+            }
+        }
+
+        // Compute 3D parabolic arc position
+        // X goes from 6% to 94%
+        const leftPercent = 6 + progress * 88;
+        // Y follows parabolic curve: highest at progress = 0.5 (top: 15px), lowest at 0 & 1 (top: 110px)
+        const topPx = 110 - 4 * (110 - 15) * progress * (1 - progress);
+
+        if (celestialOrbiter) {
+            celestialOrbiter.style.left = `${leftPercent.toFixed(1)}%`;
+            celestialOrbiter.style.top = `${topPx.toFixed(1)}px`;
+        }
+    } catch (err) {
+        console.warn("Celestial calculation error:", err);
+    }
+}
+
+/* ================= 6. REAL-TIME MONITORING DASHBOARD ================= */
+function updateMonitoringDashboard(data) {
+    if (!data || !data.current) return;
+    const cur = data.current;
+
+    // 1. 3D Wind Vector Compass
+    const bearing = cur.wind_direction_10m ?? 0;
+    if (compassNeedle) {
+        compassNeedle.style.transform = `rotate(${bearing}deg)`;
+    }
+
+    const cardinalDirection = getCompassCardinal(bearing);
+    if (windBearingText) windBearingText.textContent = `${bearing}° ${cardinalDirection}`;
+    if (windSpeedVal) windSpeedVal.textContent = formatWind(cur.wind_speed_10m);
+    if (windGustsVal) windGustsVal.textContent = formatWind(cur.wind_gusts_10m || (cur.wind_speed_10m * 1.3));
+
+    // 2. Barometric Pressure Gauge
+    const pressure = cur.surface_pressure ?? 1013;
+    if (pressureNumber) pressureNumber.textContent = Math.round(pressure);
+
+    // Calculate gauge fill bar (970 to 1040 range)
+    const pMin = 970, pMax = 1040;
+    const pPercent = Math.max(0, Math.min(100, ((pressure - pMin) / (pMax - pMin)) * 100));
+    if (pressureFillBar) pressureFillBar.style.width = `${pPercent}%`;
+
+    // Pressure Trend analysis
+    if (pressureTrendPill && trendIcon && trendText) {
+        if (pressure > 1020) {
+            pressureTrendPill.className = "trend-pill trend-rising";
+            trendIcon.textContent = "↗️";
+            trendText.textContent = "High Barometer (Fair)";
+        } else if (pressure < 1005) {
+            pressureTrendPill.className = "trend-pill trend-falling";
+            trendIcon.textContent = "↘️";
+            trendText.textContent = "Low Barometer (Rain/Wind)";
+        } else {
+            pressureTrendPill.className = "trend-pill trend-steady";
+            trendIcon.textContent = "➡️";
+            trendText.textContent = "Steady Normal Barometer";
+        }
+    }
+
+    if (pressureMsl) pressureMsl.textContent = `${Math.round(pressure + 2)} hPa`;
+    if (elevationText) elevationText.textContent = `${data.elevation ? Math.round(data.elevation) + "m Elev." : "Sea-Level ATM"}`;
+
+    // 3. Atmospheric Stack
+    if (humidityVal) humidityVal.textContent = `${cur.relative_humidity_2m ?? "--"}%`;
+
+    const uv = data.daily?.uv_index_max?.[0] ?? "--";
+    if (uvVal) uvVal.textContent = uv !== "--" ? `${uv} (${getUVDescription(uv)})` : "--";
+
+    const rainProb = data.daily?.precipitation_probability_max?.[0] ?? (cur.precipitation ? 100 : 0);
+    if (precipVal) precipVal.textContent = `${rainProb}%`;
+
+    if (feelsLikeVal) feelsLikeVal.textContent = `${formatTemp(cur.apparent_temperature)}°${currentUnit}`;
+}
+
+function getCompassCardinal(deg) {
+    const directions = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+    const idx = Math.round((deg % 360) / 22.5) % 16;
+    return directions[idx];
+}
+
+/* ================= 7. 24-HOUR REAL-TIME HOURLY STREAM ================= */
+function renderHourlyStream(hourly, timezone) {
+    if (!hourlyContainer || !hourly || !hourly.time) return;
+    hourlyContainer.innerHTML = "";
+
+    const now = new Date();
+    // Get current hour in destination timezone
+    let targetHour = now.getHours();
+    try {
+        const hourStr = new Intl.DateTimeFormat("en-US", {
+            timeZone: timezone,
+            hour: "numeric",
+            hour12: false
+        }).format(now);
+        targetHour = parseInt(hourStr, 10);
+    } catch (e) {}
+
+    // Find starting index matching today's current hour
+    let startIdx = 0;
+    const totalHours = hourly.time.length;
+
+    for (let i = 0; i < Math.min(48, totalHours); i++) {
+        const timePart = hourly.time[i].split("T")[1];
+        if (timePart) {
+            const h = parseInt(timePart.split(":")[0], 10);
+            if (h === targetHour) {
+                startIdx = i;
+                break;
+            }
+        }
+    }
+
+    // Render 24 consecutive hours
+    const endIdx = Math.min(startIdx + 24, totalHours);
+
+    for (let i = startIdx; i < endIdx; i++) {
+        const isCurrent = (i === startIdx);
+        const isoTime = hourly.time[i];
+        const hourNumber = parseInt(isoTime.split("T")[1].split(":")[0], 10);
+
+        const timeLabel = isCurrent
+            ? "Now"
+            : `${hourNumber % 12 || 12} ${hourNumber >= 12 ? "PM" : "AM"}`;
+
+        const code = hourly.weather_code ? hourly.weather_code[i] : 0;
+        const info = getWeatherInfo(code, (hourNumber >= 6 && hourNumber < 19) ? 1 : 0);
+        const temp = hourly.temperature_2m ? formatTemp(hourly.temperature_2m[i]) : "--";
+        const wind = hourly.wind_speed_10m ? formatWind(hourly.wind_speed_10m[i]) : "";
+        const rain = hourly.precipitation_probability ? (hourly.precipitation_probability[i] || 0) : 0;
+
+        const card = document.createElement("div");
+        card.className = `hourly-card-3d ${isCurrent ? "current-hour" : ""}`;
+        card.innerHTML = `
+            <div class="hour-time">${timeLabel}</div>
+            <div class="hour-icon">${info.icon}</div>
+            <div class="hour-temp">${temp}°</div>
+            ${rain > 0 ? `<div class="hour-rain">💧 ${rain}%</div>` : ""}
+            <div class="hour-wind">${wind}</div>
+        `;
+
+        hourlyContainer.appendChild(card);
+    }
+}
+
+/* ================= 8. 15-MINUTE AUTO-REFRESH MONITOR ================= */
+function startAutoRefreshTimer() {
+    if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+    autoRefreshSeconds = 900; // 15 mins
+
+    function updateTimerUI() {
+        const mins = Math.floor(autoRefreshSeconds / 60);
+        const secs = autoRefreshSeconds % 60;
+        const formatted = `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+
+        if (refreshTimerText) {
+            refreshTimerText.textContent = `Next update in ${formatted}`;
+        }
+
+        if (autoRefreshSeconds <= 0) {
+            // Auto refresh triggered!
+            autoRefreshSeconds = 900;
+            if (currentLat && currentLon) {
+                loadWeatherCoordinates(currentLat, currentLon, currentCityLabel, true);
+            }
+        } else {
+            autoRefreshSeconds--;
+        }
+    }
+
+    updateTimerUI();
+    autoRefreshTimer = setInterval(updateTimerUI, 1000);
+}
+
+if (manualRefreshBtn) {
+    manualRefreshBtn.addEventListener("click", () => {
+        const icon = manualRefreshBtn.querySelector(".refresh-icon");
+        if (icon) icon.style.transform = "rotate(360deg)";
+        setTimeout(() => { if (icon) icon.style.transform = "none"; }, 600);
+
+        if (currentLat && currentLon) {
+            loadWeatherCoordinates(currentLat, currentLon, currentCityLabel, true);
+            autoRefreshSeconds = 900;
+        }
     });
-
-    const particles = [];
-    const particleCount = 45;
-
-    class Particle {
-        constructor() {
-            this.reset();
-        }
-
-        reset() {
-            this.x = Math.random() * width;
-            this.y = Math.random() * height;
-            this.size = Math.random() * 2.5 + 1;
-            this.speedX = (Math.random() - 0.5) * 0.6;
-            this.speedY = Math.random() * 0.8 + 0.3;
-            this.opacity = Math.random() * 0.5 + 0.2;
-            this.pulseSpeed = Math.random() * 0.02 + 0.01;
-            this.angle = Math.random() * Math.PI * 2;
-        }
-
-        update(weatherType, isDark) {
-            this.angle += this.pulseSpeed;
-
-            if (weatherType === "rain") {
-                this.speedY = Math.random() * 4 + 5;
-                this.speedX = -1;
-                this.size = Math.random() * 1.5 + 1;
-            } else if (weatherType === "snow") {
-                this.speedY = Math.random() * 1.5 + 0.8;
-                this.speedX = Math.sin(this.angle) * 1.2;
-                this.size = Math.random() * 3 + 1.5;
-            } else {
-                // Clear / default floating dust motes
-                this.speedY = Math.cos(this.angle) * 0.5 - 0.2;
-                this.speedX = Math.sin(this.angle) * 0.5;
-            }
-
-            this.x += this.speedX;
-            this.y += this.speedY;
-
-            if (this.x < 0) this.x = width;
-            if (this.x > width) this.x = 0;
-            if (this.y < 0) this.y = height;
-            if (this.y > height) this.y = 0;
-        }
-
-        draw(weatherType, isDark) {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-
-            let color = "255, 255, 255";
-            if (weatherType === "rain") {
-                color = isDark ? "56, 189, 248" : "37, 99, 235";
-            } else if (weatherType === "clear" && !isDark) {
-                color = "251, 191, 36";
-            } else if (isDark) {
-                color = "224, 242, 254";
-            }
-
-            const currentAlpha = Math.abs(Math.sin(this.angle)) * this.opacity;
-            ctx.fillStyle = `rgba(${color}, ${currentAlpha.toFixed(3)})`;
-            ctx.shadowBlur = weatherType === "clear" ? 10 : 5;
-            ctx.shadowColor = `rgba(${color}, 0.5)`;
-            ctx.fill();
-        }
-    }
-
-    for (let i = 0; i < particleCount; i++) {
-        particles.push(new Particle());
-    }
-
-    function animate() {
-        ctx.clearRect(0, 0, width, height);
-
-        let weatherType = "clear";
-        if (currentWeatherCode >= 51 && currentWeatherCode <= 67) weatherType = "rain";
-        else if (currentWeatherCode >= 80 && currentWeatherCode <= 82) weatherType = "rain";
-        else if (currentWeatherCode >= 71 && currentWeatherCode <= 77) weatherType = "snow";
-        else if (currentWeatherCode >= 95) weatherType = "rain";
-
-        const isDark = document.body.classList.contains("dark");
-
-        for (let i = 0; i < particles.length; i++) {
-            particles[i].update(weatherType, isDark);
-            particles[i].draw(weatherType, isDark);
-        }
-
-        requestAnimationFrame(animate);
-    }
-
-    animate();
 }
 
-/* ================= ANIMATED TEMPERATURE COUNTER ================= */
-function animateTemperature(targetVal) {
-    if (!temperatureEl) return;
-    if (isNaN(targetVal)) {
-        temperatureEl.textContent = targetVal;
+/* ================= 9. SAVED CITIES ("ADD CITY") MANAGER ================= */
+function getSavedCities() {
+    const data = safeStorage.getItem("weatherwise_saved_cities");
+    if (!data) return [];
+    try {
+        return JSON.parse(data);
+    } catch (e) {
+        return [];
+    }
+}
+
+function saveCityToStorage(cityObj) {
+    const list = getSavedCities();
+    // Prevent duplicate
+    const exists = list.some(c => c.name.toLowerCase() === cityObj.name.toLowerCase());
+    if (!exists) {
+        list.push(cityObj);
+        safeStorage.setItem("weatherwise_saved_cities", JSON.stringify(list));
+    }
+    renderSavedCities();
+    updateSaveButtonState();
+}
+
+function removeCityFromStorage(cityName) {
+    let list = getSavedCities();
+    list = list.filter(c => c.name.toLowerCase() !== cityName.toLowerCase());
+    safeStorage.setItem("weatherwise_saved_cities", JSON.stringify(list));
+    renderSavedCities();
+    updateSaveButtonState();
+}
+
+function renderSavedCities() {
+    if (!savedCitiesContainer || !savedCitiesSection) return;
+    const list = getSavedCities();
+
+    if (list.length === 0) {
+        savedCitiesSection.style.display = "none";
         return;
     }
 
-    const startVal = currentDisplayedTemp;
-    const duration = 650;
-    const startTime = performance.now();
+    savedCitiesSection.style.display = "block";
+    if (savedCountBadge) savedCountBadge.textContent = `${list.length} saved`;
+    savedCitiesContainer.innerHTML = "";
 
-    function update(now) {
-        const elapsed = now - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        // Ease out expo
-        const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-        const current = Math.round(startVal + (targetVal - startVal) * ease);
+    list.forEach((item) => {
+        const card = document.createElement("div");
+        card.className = "saved-city-card";
+        card.innerHTML = `
+            <div class="saved-city-info">
+                <span class="saved-city-name">${item.name}</span>
+                <span class="saved-city-temp">${item.temp ? item.temp + "°" : "Click to view"}</span>
+            </div>
+            <button class="saved-delete-btn" title="Remove city">✕</button>
+        `;
 
-        temperatureEl.textContent = current;
+        card.addEventListener("click", (e) => {
+            if (e.target.classList.contains("saved-delete-btn")) {
+                e.stopPropagation();
+                removeCityFromStorage(item.name);
+            } else {
+                fetchWeatherByCity(item.name);
+            }
+        });
 
-        if (progress < 1) {
-            requestAnimationFrame(update);
-        } else {
-            currentDisplayedTemp = targetVal;
-        }
-    }
-
-    requestAnimationFrame(update);
+        savedCitiesContainer.appendChild(card);
+    });
 }
 
-/* ================= WEATHER DATA FETCHING ================= */
+function updateSaveButtonState() {
+    if (!saveCityBtn) return;
+    const list = getSavedCities();
+    const isSaved = list.some(c => c.name.toLowerCase() === currentCityLabel.toLowerCase() || c.name.toLowerCase() === currentCityLabel.split(",")[0].toLowerCase());
+
+    if (isSaved) {
+        saveCityBtn.classList.add("saved");
+        if (saveCityIcon) saveCityIcon.textContent = "★";
+        if (saveCityText) saveCityText.textContent = "Saved";
+    } else {
+        saveCityBtn.classList.remove("saved");
+        if (saveCityIcon) saveCityIcon.textContent = "⭐";
+        if (saveCityText) saveCityText.textContent = "Save City";
+    }
+}
+
+if (saveCityBtn) {
+    saveCityBtn.addEventListener("click", () => {
+        const list = getSavedCities();
+        const baseName = currentCityLabel.split(",")[0].trim();
+        const isSaved = list.some(c => c.name.toLowerCase() === baseName.toLowerCase());
+
+        if (isSaved) {
+            removeCityFromStorage(baseName);
+        } else {
+            saveCityToStorage({
+                name: baseName,
+                lat: currentLat,
+                lon: currentLon,
+                temp: temperatureEl ? temperatureEl.textContent : ""
+            });
+        }
+    });
+}
+
+/* ================= 10. WEATHER DATA FETCHING ================= */
 
 // Search by City Name
 async function fetchWeatherByCity(city) {
@@ -304,11 +697,14 @@ async function fetchWeatherByCity(city) {
         }
 
         const loc = geoData.results[0];
+        currentLat = loc.latitude;
+        currentLon = loc.longitude;
         const label = `${loc.name}${loc.admin1 ? ", " + loc.admin1 : ""}, ${loc.country || ""}`;
         currentCityLabel = label;
 
-        await loadWeatherCoordinates(loc.latitude, loc.longitude, label);
+        await loadWeatherCoordinates(currentLat, currentLon, label);
         safeStorage.setItem("weatherwise_last_city", city);
+        updateSaveButtonState();
     } catch (err) {
         console.error("Geocoding fetch error:", err);
         showError("Unable to reach atmospheric services. Please check connection.");
@@ -328,12 +724,13 @@ function fetchWeatherByLocation() {
 
     navigator.geolocation.getCurrentPosition(
         async (position) => {
-            const { latitude, longitude } = position.coords;
+            currentLat = position.coords.latitude;
+            currentLon = position.coords.longitude;
 
             let label = "Your Current Location";
             try {
                 const revRes = await fetch(
-                    `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+                    `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${currentLat}&longitude=${currentLon}&localityLanguage=en`
                 );
                 if (revRes.ok) {
                     const revData = await revRes.json();
@@ -347,13 +744,14 @@ function fetchWeatherByLocation() {
             }
 
             currentCityLabel = label;
-            await loadWeatherCoordinates(latitude, longitude, label);
+            await loadWeatherCoordinates(currentLat, currentLon, label);
+            updateSaveButtonState();
         },
         (err) => {
             console.warn("Geolocation error:", err);
             let msg = "Could not retrieve GPS location.";
             if (err.code === 1) {
-                msg = "Location permission denied. Please search your city manually in the box above.";
+                msg = "Location permission denied. Please search your city manually.";
             } else if (err.code === 2) {
                 msg = "Location unavailable. Please search manually.";
             } else if (err.code === 3) {
@@ -367,156 +765,104 @@ function fetchWeatherByLocation() {
 }
 
 // Load Weather Details from Open-Meteo
-async function loadWeatherCoordinates(latitude, longitude, displayTitle) {
+async function loadWeatherCoordinates(latitude, longitude, displayTitle, isBackground = false) {
+    if (!isBackground) {
+        showLoading(true, "Synchronizing atmospheric telemetry...");
+    }
+
     try {
-        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,surface_pressure&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&timezone=auto`;
+        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,surface_pressure&hourly=temperature_2m,weather_code,wind_speed_10m,wind_direction_10m,precipitation_probability&daily=sunrise,sunset,uv_index_max&timezone=auto`;
 
         const res = await fetch(weatherUrl);
         if (!res.ok) throw new Error("Weather API returned non-200");
         const data = await res.json();
 
         lastWeatherData = data;
+        currentTimezone = data.timezone || "auto";
+
         renderAllWeather(displayTitle, data);
         showLoading(false);
     } catch (err) {
         console.error("Forecast fetch error:", err);
-        showError("Failed to retrieve live weather data. Please try again.");
+        showError("Failed to retrieve live atmospheric telemetry. Please try again.");
         showLoading(false);
     }
 }
 
-/* ================= RENDERING ================= */
+/* ================= 11. RENDERING ================= */
 
 function renderAllWeather(title, data) {
     if (!data || !data.current) return;
 
     const current = data.current;
     const daily = data.daily || {};
-    currentWeatherCode = current.weather_code ?? 0;
-    isDaytime = current.is_day ?? 1;
+    const hourly = data.hourly || {};
+    const condition = getWeatherInfo(current.weather_code, current.is_day);
 
-    const condition = getWeatherInfo(currentWeatherCode, isDaytime);
-
-    // City & Date
+    // City & Timezone
     if (cityNameEl) cityNameEl.textContent = title;
-    if (dateEl) {
-        const now = new Date();
-        const dateOptions = { weekday: "long", month: "short", day: "numeric" };
-        dateEl.textContent = `${now.toLocaleDateString("en-US", dateOptions)} • Live`;
-    }
+    if (timezoneTextEl) timezoneTextEl.textContent = `Timezone: ${currentTimezone.replace(/_/g, " ")}`;
+
+    // Start Location Clock Ticking
+    startLocationClock(currentTimezone);
 
     // Weather Icon & Condition
     if (weatherIconEl) weatherIconEl.textContent = condition.icon;
     if (conditionEl) conditionEl.textContent = condition.description;
 
-    // Animated Temperature & High / Low
+    // Animated Temperature
     const targetTemp = formatTemp(current.temperature_2m);
     animateTemperature(targetTemp);
 
     if (tempUnitEl) tempUnitEl.textContent = `°${currentUnit}`;
-
-    if (tempHighLowEl && daily.temperature_2m_max && daily.temperature_2m_min) {
-        const todayMax = formatTemp(daily.temperature_2m_max[0]);
-        const todayMin = formatTemp(daily.temperature_2m_min[0]);
-        tempHighLowEl.textContent = `H: ${todayMax}°${currentUnit} • L: ${todayMin}°${currentUnit}`;
+    if (tempHighLowEl) {
+        tempHighLowEl.textContent = `Feels like ${formatTemp(current.apparent_temperature)}°${currentUnit}`;
     }
 
-    // Metrics
-    if (feelsLikeEl) feelsLikeEl.textContent = `${formatTemp(current.apparent_temperature)}°${currentUnit}`;
-    if (humidityEl) humidityEl.textContent = `${current.relative_humidity_2m ?? "--"}%`;
-    if (windEl) windEl.textContent = formatWind(current.wind_speed_10m);
+    // Update 3D Sun & Moon Celestial Arc Trajectory
+    updateCelestialTrajectory(daily, currentTimezone);
 
-    // UV Index
-    if (uvIndexEl) {
-        const uv = (daily.uv_index_max && daily.uv_index_max[0] !== undefined) ? daily.uv_index_max[0] : "--";
-        uvIndexEl.textContent = uv !== "--" ? `${uv} (${getUVDescription(uv)})` : "--";
-    }
+    // Update Real-Time Monitoring Dashboard
+    updateMonitoringDashboard(data);
 
-    // Precipitation Probability
-    if (rainChanceEl) {
-        const rainProb = (daily.precipitation_probability_max && daily.precipitation_probability_max[0] !== undefined)
-            ? daily.precipitation_probability_max[0]
-            : (current.precipitation ?? 0);
-        rainChanceEl.textContent = `${rainProb}% chance`;
-    }
+    // Render 24-Hour Hourly Timeline
+    renderHourlyStream(hourly, currentTimezone);
 
-    // Sunrise & Sunset
-    if (sunScheduleEl) {
-        if (daily.sunrise && daily.sunset && daily.sunrise[0] && daily.sunset[0]) {
-            const sr = daily.sunrise[0].includes("T") ? daily.sunrise[0].split("T")[1] : daily.sunrise[0];
-            const ss = daily.sunset[0].includes("T") ? daily.sunset[0].split("T")[1] : daily.sunset[0];
-            sunScheduleEl.textContent = `↑${sr}  ↓${ss}`;
-        } else {
-            sunScheduleEl.textContent = "N/A";
-        }
-    }
+    // Update Save button state
+    updateSaveButtonState();
 
-    // Pressure & Timezone
-    if (pressureEl) pressureEl.textContent = current.surface_pressure ? `${Math.round(current.surface_pressure)} hPa` : "1013 hPa";
-    if (timezoneEl) timezoneEl.textContent = data.timezone ? data.timezone.replace(/_/g, " ") : "Auto";
-
-    // 7-Day Forecast Cards
-    if (daily.time) {
-        renderForecast(daily);
-    }
-
-    // Re-apply 3D tilt bindings to dynamically generated elements
-    if (window.applyTiltToCards) {
-        window.applyTiltToCards();
-    }
+    // Re-bind 3D tilt
+    if (window.bindTilt) window.bindTilt();
 }
 
-function renderForecast(daily) {
-    if (!forecastContainer || !daily || !daily.time) return;
-    forecastContainer.innerHTML = "";
-
-    const daysCount = Math.min(daily.time.length, 7);
-
-    for (let i = 0; i < daysCount; i++) {
-        const dateStr = daily.time[i];
-        let dayName = "Day";
-        let formattedDate = dateStr;
-
-        try {
-            const parts = dateStr.split("-");
-            if (parts.length === 3) {
-                const dateObj = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-                dayName = i === 0 ? "Today" : dateObj.toLocaleDateString("en-US", { weekday: "short" });
-                formattedDate = dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-            }
-        } catch (e) {
-            dayName = i === 0 ? "Today" : `Day ${i + 1}`;
-        }
-
-        const isToday = i === 0;
-        const code = daily.weather_code ? daily.weather_code[i] : 0;
-        const info = getWeatherInfo(code, 1);
-        const maxTemp = daily.temperature_2m_max ? formatTemp(daily.temperature_2m_max[i]) : "--";
-        const minTemp = daily.temperature_2m_min ? formatTemp(daily.temperature_2m_min[i]) : "--";
-        const rainChance = (daily.precipitation_probability_max && daily.precipitation_probability_max[i] !== undefined)
-            ? daily.precipitation_probability_max[i]
-            : 0;
-
-        const card = document.createElement("div");
-        card.className = `forecast-card-3d ${isToday ? "today" : ""} card-tilt`;
-        card.setAttribute("data-tilt", "");
-        card.innerHTML = `
-            <div class="card-glare"></div>
-            <div class="forecast-day-header">
-                <p class="day-name">${dayName}</p>
-                <p class="day-date">${formattedDate}</p>
-            </div>
-            <div class="forecast-icon-3d">${info.icon}</div>
-            <div class="forecast-temps">
-                <span class="temp-max">${maxTemp}°</span>
-                <span class="temp-min">${minTemp}°</span>
-            </div>
-            <div class="forecast-condition">${info.description}</div>
-            ${rainChance > 0 ? `<div class="rain-chance-badge">💧 ${rainChance}%</div>` : ""}
-        `;
-
-        forecastContainer.appendChild(card);
+/* ================= ANIMATED TEMPERATURE COUNTER ================= */
+function animateTemperature(targetVal) {
+    if (!temperatureEl) return;
+    if (isNaN(targetVal)) {
+        temperatureEl.textContent = targetVal;
+        return;
     }
+
+    const startVal = currentDisplayedTemp;
+    const duration = 650;
+    const startTime = performance.now();
+
+    function update(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+        const current = Math.round(startVal + (targetVal - startVal) * ease);
+
+        temperatureEl.textContent = current;
+
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        } else {
+            currentDisplayedTemp = targetVal;
+        }
+    }
+
+    requestAnimationFrame(update);
 }
 
 /* ================= UNIT TOGGLING ================= */
@@ -556,7 +902,7 @@ function getUVDescription(uv) {
     const num = Number(uv);
     if (isNaN(num)) return "N/A";
     if (num <= 2) return "Low";
-    if (num <= 5) return "Mod";
+    if (num <= 5) return "Moderate";
     if (num <= 7) return "High";
     if (num <= 10) return "Very High";
     return "Extreme";
@@ -590,28 +936,28 @@ function getWeatherInfo(code, isDay = 1) {
         case 63:
             return { description: "Rain Showers", icon: "🌧️" };
         case 65:
-            return { description: "Heavy Rainfall", icon: "🌧️" };
+            return { description: "Heavy Rain", icon: "🌧️" };
         case 66:
         case 67:
             return { description: "Freezing Rain", icon: "🌨️" };
         case 71:
         case 73:
-            return { description: "Light Snow", icon: "❄️" };
+            return { description: "Snowfall", icon: "❄️" };
         case 75:
         case 77:
-            return { description: "Blizzard Snow", icon: "❄️" };
+            return { description: "Heavy Snow", icon: "❄️" };
         case 80:
         case 81:
         case 82:
-            return { description: "Torrential Showers", icon: "🌦️" };
+            return { description: "Rain Showers", icon: "🌦️" };
         case 85:
         case 86:
-            return { description: "Snow Squalls", icon: "🌨️" };
+            return { description: "Snow Showers", icon: "🌨️" };
         case 95:
             return { description: "Thunderstorm", icon: "⛈️" };
         case 96:
         case 99:
-            return { description: "Severe Lightning Storm", icon: "⛈️⚡" };
+            return { description: "Severe Lightning", icon: "⛈️⚡" };
         default:
             return { description: "Clear Sky", icon: "☀️" };
     }
@@ -647,12 +993,11 @@ function toggleTheme() {
 
 /* ================= UI HELPERS ================= */
 
-function showLoading(show, message = "Fetching atmospheric data...") {
+function showLoading(show, message = "Synchronizing atmospheric telemetry...") {
     if (!loadingBox) return;
     if (show) {
         loadingBox.style.display = "flex";
-        const p = loadingBox.querySelector("p");
-        if (p) p.textContent = message;
+        if (loadingMsg) loadingMsg.textContent = message;
         if (weatherCard) weatherCard.style.opacity = "0.65";
     } else {
         loadingBox.style.display = "none";
@@ -676,12 +1021,47 @@ function hideError() {
 
 function initApp() {
     initTheme();
-    init3DTilt();
-    initAtmosphericCanvas();
+    initThreeJSWorld();
+    init3DTiltPhysics();
+    init3DScrollPhysics();
+    startAutoRefreshTimer();
+    renderSavedCities();
 
     if (unitBtn) {
         const textSpan = unitBtn.querySelector(".btn-text") || unitBtn;
         textSpan.textContent = `°${currentUnit}`;
+    }
+
+    if (searchBtn) {
+        searchBtn.addEventListener("click", () => {
+            const city = cityInput.value.trim();
+            if (city) fetchWeatherByCity(city);
+            else showError("Please enter a city name to search.");
+        });
+    }
+
+    if (cityInput) {
+        cityInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                const city = cityInput.value.trim();
+                if (city) fetchWeatherByCity(city);
+                else showError("Please enter a city name to search.");
+            }
+        });
+    }
+
+    if (locationBtn) locationBtn.addEventListener("click", fetchWeatherByLocation);
+    if (unitBtn) unitBtn.addEventListener("click", toggleUnit);
+    if (themeBtn) themeBtn.addEventListener("click", toggleTheme);
+
+    if (quickCityBtns) {
+        quickCityBtns.forEach((btn) => {
+            btn.addEventListener("click", () => {
+                const city = btn.getAttribute("data-city");
+                if (cityInput) cityInput.value = city;
+                fetchWeatherByCity(city);
+            });
+        });
     }
 
     const savedCity = safeStorage.getItem("weatherwise_last_city");

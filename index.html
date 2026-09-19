@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="WeatherWise - 3D Real-Time Weather Forecast, UV index, rain probability, and 7-day outlook.">
-    <meta name="theme-color" content="#2563eb">
+    <meta name="description" content="WeatherWise 3D - Fully 3D Real-Time Atmospheric Weather Monitoring, Celestial Sun & Moon Tracker, and Live Location Clock.">
+    <meta name="theme-color" content="#0f172a">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌦️</text></svg>">
 
@@ -14,28 +14,35 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <title>WeatherWise | 3D Real-Time Weather Experience</title>
+    <!-- Three.js for true 3D WebGL rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <title>WeatherWise 3D | Real-Time Atmospheric Monitoring</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <!-- 3D ATMOSPHERIC AMBIENT CANVAS & MESH ORBS -->
-    <canvas id="weatherCanvas"></canvas>
-    <div class="mesh-background">
-        <div class="mesh-orb orb-1"></div>
-        <div class="mesh-orb orb-2"></div>
-        <div class="mesh-orb orb-3"></div>
-    </div>
+    <!-- 3D WEBGL FULL CANVAS -->
+    <canvas id="threeCanvas"></canvas>
 
     <div class="app">
 
         <!-- HEADER -->
-        <header class="header">
+        <header class="header scroll-3d-item">
             <div class="logo">
                 <span class="logo-icon-3d">🌦️</span>
-                <span class="logo-text">Weather<span class="gradient-text">Wise</span></span>
+                <span class="logo-text">Weather<span class="gradient-text">Wise 3D</span></span>
+            </div>
+
+            <!-- LOCATION LIVE CLOCK -->
+            <div class="location-clock-card" id="locationClockCard" title="Current Local Time at Location">
+                <span class="clock-icon">🕒</span>
+                <div class="clock-details">
+                    <span id="localTimeDisplay" class="clock-time">--:--:--</span>
+                    <span id="localDateDisplay" class="clock-date">Live Local Time</span>
+                </div>
             </div>
 
             <div class="header-actions">
@@ -53,26 +60,34 @@
         <!-- MAIN -->
         <main>
 
-            <!-- HERO -->
-            <section class="hero">
-                <div class="hero-badge">
-                    <span class="pulse-dot"></span> Real-Time Live Weather System
+            <!-- HERO & MONITORING BADGE -->
+            <section class="hero scroll-3d-item">
+                <div class="monitor-live-bar">
+                    <div class="monitor-pulse">
+                        <span class="pulse-dot"></span>
+                        <span class="monitor-label">REAL-TIME MONITORING:</span>
+                        <span id="refreshTimerText" class="timer-countdown">Next update in 15:00</span>
+                    </div>
+                    <button id="manualRefreshBtn" class="manual-refresh-btn" title="Force Refresh Live Data">
+                        <span class="refresh-icon">🔄</span> Refresh Now
+                    </button>
                 </div>
-                <h1>Weather at your <span class="gradient-text">fingertips</span></h1>
+
+                <h1>Atmosphere in <span class="gradient-text">Complete 3D</span></h1>
                 <p>
-                    Experience real-time atmospheric conditions, accurate 7-day outlooks, and dynamic weather analytics in interactive 3D.
+                    Live barometric pressure tracking, wind direction compass, and astronomical Sun & Moon trajectory.
                 </p>
             </section>
 
 
-            <!-- SEARCH SECTION -->
-            <section class="search-section">
+            <!-- SEARCH & ADD CITY SECTION -->
+            <section class="search-section scroll-3d-item">
                 <div class="search-box-3d" id="searchBox3D">
                     <span class="search-icon">🔍</span>
                     <input
                         type="text"
                         id="cityInput"
-                        placeholder="Search any city (e.g., Tokyo, London, New York)..."
+                        placeholder="Search any city worldwide (e.g., Tokyo, London, New York)..."
                         autocomplete="off"
                     >
                     <button id="searchBtn" class="search-btn-3d">
@@ -80,13 +95,16 @@
                     </button>
                 </div>
 
-                <div class="search-controls">
-                    <button id="locationBtn" class="location-btn-3d">
-                        <span class="loc-icon">📍</span> Use My Current Location
+                <div class="search-actions-row">
+                    <button id="locationBtn" class="control-btn-3d">
+                        <span>📍</span> My Current Location
+                    </button>
+                    <button id="saveCityBtn" class="control-btn-3d save-btn" title="Save this city to favorites">
+                        <span id="saveCityIcon">⭐</span> <span id="saveCityText">Save City</span>
                     </button>
                 </div>
 
-                <!-- QUICK CITY PILLS -->
+                <!-- QUICK POPULAR PILLS -->
                 <div class="quick-cities">
                     <span class="quick-label">Trending:</span>
                     <button class="city-pill-3d" data-city="New York">New York</button>
@@ -94,7 +112,19 @@
                     <button class="city-pill-3d" data-city="Tokyo">Tokyo</button>
                     <button class="city-pill-3d" data-city="Paris">Paris</button>
                     <button class="city-pill-3d" data-city="Dubai">Dubai</button>
-                    <button class="city-pill-3d" data-city="Mumbai">Mumbai</button>
+                    <button class="city-pill-3d" data-city="Lucknow">Lucknow</button>
+                </div>
+            </section>
+
+
+            <!-- SAVED CITIES DRAWER -->
+            <section id="savedCitiesSection" class="saved-cities-section scroll-3d-item">
+                <div class="section-header-compact">
+                    <h3>⭐ My Saved Cities</h3>
+                    <span id="savedCountBadge" class="count-badge">0 saved</span>
+                </div>
+                <div id="savedCitiesContainer" class="saved-cities-grid">
+                    <!-- Populated dynamically via JavaScript -->
                 </div>
             </section>
 
@@ -104,22 +134,21 @@
 
             <div id="loading" class="loading-box-3d" style="display: none;">
                 <div class="spinner-3d"></div>
-                <p>Connecting to atmospheric satellites...</p>
+                <p id="loadingMsg">Synchronizing with live atmospheric satellites...</p>
             </div>
 
 
-            <!-- CURRENT WEATHER 3D CARD -->
-            <section id="weatherCard" class="weather-card-3d card-tilt" data-tilt>
-                <!-- Interactive Glare Overlay -->
+            <!-- MAIN WEATHER 3D CARD -->
+            <section id="weatherCard" class="weather-card-3d card-tilt scroll-3d-item" data-tilt>
                 <div class="card-glare"></div>
 
                 <div class="weather-top">
                     <div class="location-meta">
-                        <div class="status-indicator">
-                            <span class="live-dot"></span> LIVE FORECAST
+                        <div class="live-status-pill">
+                            <span class="live-ping"></span> LIVE CONDITIONS
                         </div>
                         <h2 id="cityName">London, United Kingdom</h2>
-                        <p id="date">Saturday, Sep 19 • Live</p>
+                        <p id="timezoneText" class="timezone-tag">Timezone: Europe/London</p>
                     </div>
 
                     <div class="weather-icon-wrapper-3d">
@@ -134,7 +163,7 @@
                         <span id="tempUnit" class="degree-3d">°C</span>
                     </div>
                     <div class="high-low-badge-3d">
-                        <span id="tempHighLow">H: 21°C • L: 12°C</span>
+                        <span id="tempHighLow">Feels like 18°C</span>
                     </div>
                 </div>
 
@@ -142,180 +171,220 @@
                     <p id="condition" class="condition-text">Partly Cloudy</p>
                 </div>
 
-                <!-- 3D DETAILS GRID -->
-                <div class="weather-details-grid">
 
-                    <div class="detail-card-3d card-tilt" data-tilt>
-                        <div class="detail-icon-circle icon-temp">🌡️</div>
-                        <div class="detail-content">
-                            <p>Feels Like</p>
-                            <strong id="feelsLike">18°C</strong>
-                        </div>
+                <!-- ================= 3D SUN & MOON CELESTIAL ARC TRACKER ================= -->
+                <div class="celestial-tracker-3d" id="celestialTracker">
+                    <div class="celestial-header">
+                        <span class="celestial-title">
+                            <span id="celestialModeIcon">☀️</span> 3D Celestial Trajectory (<span id="celestialModeName">Day Sun Path</span>)
+                        </span>
+                        <span id="celestialRemainingText" class="celestial-remaining">Calculating trajectory...</span>
                     </div>
 
-                    <div class="detail-card-3d card-tilt" data-tilt>
-                        <div class="detail-icon-circle icon-water">💧</div>
-                        <div class="detail-content">
-                            <p>Humidity</p>
-                            <strong id="humidity">68%</strong>
+                    <!-- Visual 3D Orbit Arc -->
+                    <div class="orbit-stage">
+                        <svg class="orbit-svg" viewBox="0 0 500 160" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="arcGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.4" />
+                                    <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.9" />
+                                    <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.4" />
+                                </linearGradient>
+                                <linearGradient id="orbitFillGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="rgba(56, 189, 248, 0.15)" />
+                                    <stop offset="100%" stop-color="rgba(56, 189, 248, 0.0)" />
+                                </linearGradient>
+                            </defs>
+                            <!-- Background filled arc -->
+                            <path d="M 30 140 Q 250 15 470 140 Z" fill="url(#orbitFillGradient)" />
+                            <!-- Orbit curve -->
+                            <path id="orbitCurve" d="M 30 140 Q 250 15 470 140" fill="none" stroke="url(#arcGradient)" stroke-width="4" stroke-dasharray="8,6" />
+                        </svg>
+
+                        <!-- 3D Sun / Moon Orbiter Body -->
+                        <div id="celestialOrbiter" class="celestial-orbiter" style="left: 50%; top: 30px;">
+                            <div id="celestialBody" class="celestial-body sun-body">
+                                <span id="celestialEmoji">☀️</span>
+                            </div>
+                            <div class="orbiter-glow"></div>
+                        </div>
+
+                        <!-- Ground Horizon Line -->
+                        <div class="orbit-horizon">
+                            <div class="horizon-point start-point">
+                                <span class="point-icon">🌅</span>
+                                <span class="point-label">Sunrise</span>
+                                <strong id="sunriseTime">06:00</strong>
+                            </div>
+
+                            <div class="horizon-point mid-point">
+                                <span class="point-badge" id="solarProgressBadge">50% Orbit</span>
+                            </div>
+
+                            <div class="horizon-point end-point">
+                                <span class="point-icon">🌇</span>
+                                <span class="point-label">Sunset</span>
+                                <strong id="sunsetTime">18:00</strong>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="detail-card-3d card-tilt" data-tilt>
-                        <div class="detail-icon-circle icon-wind">💨</div>
-                        <div class="detail-content">
-                            <p>Wind Speed</p>
-                            <strong id="wind">14 km/h</strong>
-                        </div>
-                    </div>
-
-                    <div class="detail-card-3d card-tilt" data-tilt>
-                        <div class="detail-icon-circle icon-sun">☀️</div>
-                        <div class="detail-content">
-                            <p>UV Index</p>
-                            <strong id="uvIndex">3 (Mod)</strong>
-                        </div>
-                    </div>
-
-                    <div class="detail-card-3d card-tilt" data-tilt>
-                        <div class="detail-icon-circle icon-rain">🌧️</div>
-                        <div class="detail-content">
-                            <p>Precipitation</p>
-                            <strong id="rainChance">10% chance</strong>
-                        </div>
-                    </div>
-
-                    <div class="detail-card-3d card-tilt" data-tilt>
-                        <div class="detail-icon-circle icon-sun-cycle">🌅</div>
-                        <div class="detail-content">
-                            <p>Sunrise & Sunset</p>
-                            <strong id="sunSchedule">↑06:45  ↓19:10</strong>
-                        </div>
-                    </div>
-
-                    <div class="detail-card-3d card-tilt" data-tilt>
-                        <div class="detail-icon-circle icon-gauge">🧭</div>
-                        <div class="detail-content">
-                            <p>Air Pressure</p>
-                            <strong id="pressure">1014 hPa</strong>
-                        </div>
-                    </div>
-
-                    <div class="detail-card-3d card-tilt" data-tilt>
-                        <div class="detail-icon-circle icon-globe">🌐</div>
-                        <div class="detail-content">
-                            <p>Timezone</p>
-                            <strong id="timezone">Europe/London</strong>
-                        </div>
-                    </div>
-
                 </div>
 
             </section>
 
 
-            <!-- 7-DAY FORECAST SECTION -->
-            <section class="forecast-section">
+            <!-- ================= REAL-TIME ATMOSPHERIC MONITORING DASHBOARD ================= -->
+            <section class="monitoring-section scroll-3d-item">
                 <div class="section-title">
-                    <h2>7-Day Atmospheric Outlook</h2>
-                    <span class="forecast-badge-3d">
-                        <span class="sparkle">✨</span> Hyperlocal Live Models
+                    <h2>⚡ Real-Time Atmospheric Monitoring</h2>
+                    <span class="refresh-badge-3d">
+                        <span class="live-dot"></span> Live Gauge Network
                     </span>
                 </div>
 
-                <div id="forecastContainer" class="forecast-container-3d">
-                    <div class="forecast-card-3d today card-tilt" data-tilt>
-                        <div class="forecast-day-header">
-                            <p class="day-name">Today</p>
-                            <p class="day-date">Live</p>
+                <div class="monitoring-grid">
+
+                    <!-- 3D WIND COMPASS CARD -->
+                    <div class="monitoring-card-3d card-tilt" data-tilt>
+                        <div class="card-glare"></div>
+                        <div class="monitor-card-header">
+                            <span class="monitor-icon">🧭</span>
+                            <h4>3D Wind Vector Compass</h4>
                         </div>
-                        <div class="forecast-icon-3d">⛅</div>
-                        <div class="forecast-temps">
-                            <span class="temp-max">21°</span>
-                            <span class="temp-min">12°</span>
+
+                        <div class="compass-stage">
+                            <div class="compass-rose">
+                                <span class="cardinal cardinal-n">N</span>
+                                <span class="cardinal cardinal-e">E</span>
+                                <span class="cardinal cardinal-s">S</span>
+                                <span class="cardinal cardinal-w">W</span>
+                                <div class="compass-dial-ring"></div>
+                                <!-- 3D ROTATING NEEDLE -->
+                                <div id="compassNeedle" class="compass-needle" style="transform: rotate(0deg);">
+                                    <div class="needle-north"></div>
+                                    <div class="needle-center-pin"></div>
+                                    <div class="needle-south"></div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="forecast-condition">Partly Cloudy</div>
+
+                        <div class="compass-readout">
+                            <div class="compass-val">
+                                <span class="readout-label">Bearing</span>
+                                <strong id="windBearingText">0° North</strong>
+                            </div>
+                            <div class="compass-val">
+                                <span class="readout-label">Wind Speed</span>
+                                <strong id="windSpeedVal">-- km/h</strong>
+                            </div>
+                            <div class="compass-val">
+                                <span class="readout-label">Wind Gusts</span>
+                                <strong id="windGustsVal">-- km/h</strong>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="forecast-card-3d card-tilt" data-tilt>
-                        <div class="forecast-day-header">
-                            <p class="day-name">Sun</p>
-                            <p class="day-date">Day 2</p>
+
+                    <!-- BAROMETRIC PRESSURE MONITOR -->
+                    <div class="monitoring-card-3d card-tilt" data-tilt>
+                        <div class="card-glare"></div>
+                        <div class="monitor-card-header">
+                            <span class="monitor-icon">📊</span>
+                            <h4>Barometric Pressure Gauge</h4>
                         </div>
-                        <div class="forecast-icon-3d">🌤️</div>
-                        <div class="forecast-temps">
-                            <span class="temp-max">22°</span>
-                            <span class="temp-min">13°</span>
+
+                        <div class="pressure-gauge-stage">
+                            <div class="gauge-dial">
+                                <div class="pressure-number-box">
+                                    <span id="pressureNumber" class="big-pressure">1014</span>
+                                    <span class="pressure-unit">hPa</span>
+                                </div>
+                                <div id="pressureTrendPill" class="trend-pill trend-steady">
+                                    <span id="trendIcon">➡️</span> <span id="trendText">Steady Barometer</span>
+                                </div>
+                            </div>
+
+                            <div class="pressure-scale-bar">
+                                <div class="scale-labels">
+                                    <span>Low (970)</span>
+                                    <span>Normal (1013)</span>
+                                    <span>High (1040)</span>
+                                </div>
+                                <div class="scale-track">
+                                    <div id="pressureFillBar" class="scale-fill" style="width: 50%;"></div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="forecast-condition">Mainly Clear</div>
+
+                        <div class="gauge-footer-stats">
+                            <div class="gauge-stat">
+                                <p>Sea-Level MSL</p>
+                                <strong id="pressureMsl">1014 hPa</strong>
+                            </div>
+                            <div class="gauge-stat">
+                                <p>Elevation Context</p>
+                                <strong id="elevationText">Standard ATM</strong>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="forecast-card-3d card-tilt" data-tilt>
-                        <div class="forecast-day-header">
-                            <p class="day-name">Mon</p>
-                            <p class="day-date">Day 3</p>
+
+                    <!-- AIR QUALITY & ATMOSPHERIC METRICS -->
+                    <div class="monitoring-card-3d card-tilt" data-tilt>
+                        <div class="card-glare"></div>
+                        <div class="monitor-card-header">
+                            <span class="monitor-icon">💧</span>
+                            <h4>Atmospheric Moisture & UV</h4>
                         </div>
-                        <div class="forecast-icon-3d">🌧️</div>
-                        <div class="forecast-temps">
-                            <span class="temp-max">18°</span>
-                            <span class="temp-min">11°</span>
+
+                        <div class="metrics-stack">
+                            <div class="metric-row">
+                                <div class="metric-left">
+                                    <span class="m-icon">💧</span>
+                                    <span>Relative Humidity</span>
+                                </div>
+                                <strong id="humidityVal">68%</strong>
+                            </div>
+
+                            <div class="metric-row">
+                                <div class="metric-left">
+                                    <span class="m-icon">☀️</span>
+                                    <span>UV Radiation Index</span>
+                                </div>
+                                <strong id="uvVal">3 (Moderate)</strong>
+                            </div>
+
+                            <div class="metric-row">
+                                <div class="metric-left">
+                                    <span class="m-icon">🌧️</span>
+                                    <span>Precipitation Probability</span>
+                                </div>
+                                <strong id="precipVal">10%</strong>
+                            </div>
+
+                            <div class="metric-row">
+                                <div class="metric-left">
+                                    <span class="m-icon">🌡️</span>
+                                    <span>Apparent (Feels Like)</span>
+                                </div>
+                                <strong id="feelsLikeVal">18°C</strong>
+                            </div>
                         </div>
-                        <div class="forecast-condition">Rain Showers</div>
-                        <div class="rain-chance-badge">💧 65%</div>
                     </div>
 
-                    <div class="forecast-card-3d card-tilt" data-tilt>
-                        <div class="forecast-day-header">
-                            <p class="day-name">Tue</p>
-                            <p class="day-date">Day 4</p>
-                        </div>
-                        <div class="forecast-icon-3d">☀️</div>
-                        <div class="forecast-temps">
-                            <span class="temp-max">23°</span>
-                            <span class="temp-min">14°</span>
-                        </div>
-                        <div class="forecast-condition">Clear Sky</div>
-                    </div>
+                </div>
+            </section>
 
-                    <div class="forecast-card-3d card-tilt" data-tilt>
-                        <div class="forecast-day-header">
-                            <p class="day-name">Wed</p>
-                            <p class="day-date">Day 5</p>
-                        </div>
-                        <div class="forecast-icon-3d">⛅</div>
-                        <div class="forecast-temps">
-                            <span class="temp-max">20°</span>
-                            <span class="temp-min">13°</span>
-                        </div>
-                        <div class="forecast-condition">Partly Cloudy</div>
-                    </div>
 
-                    <div class="forecast-card-3d card-tilt" data-tilt>
-                        <div class="forecast-day-header">
-                            <p class="day-name">Thu</p>
-                            <p class="day-date">Day 6</p>
-                        </div>
-                        <div class="forecast-icon-3d">🌦️</div>
-                        <div class="forecast-temps">
-                            <span class="temp-max">19°</span>
-                            <span class="temp-min">12°</span>
-                        </div>
-                        <div class="forecast-condition">Drizzle</div>
-                        <div class="rain-chance-badge">💧 35%</div>
-                    </div>
+            <!-- ================= 24-HOUR REAL-TIME HOURLY STREAM ================= -->
+            <section class="hourly-section scroll-3d-item">
+                <div class="section-title">
+                    <h2>⏳ 24-Hour Real-Time Atmospheric Timeline</h2>
+                    <span class="forecast-badge-3d">Continuous Hourly Updates</span>
+                </div>
 
-                    <div class="forecast-card-3d card-tilt" data-tilt>
-                        <div class="forecast-day-header">
-                            <p class="day-name">Fri</p>
-                            <p class="day-date">Day 7</p>
-                        </div>
-                        <div class="forecast-icon-3d">☀️</div>
-                        <div class="forecast-temps">
-                            <span class="temp-max">24°</span>
-                            <span class="temp-min">15°</span>
-                        </div>
-                        <div class="forecast-condition">Sunny</div>
-                    </div>
+                <div id="hourlyContainer" class="hourly-container-3d">
+                    <!-- Populated dynamically via JavaScript with 24 real-time hourly cards -->
                 </div>
             </section>
 
@@ -323,12 +392,12 @@
 
 
         <!-- FOOTER -->
-        <footer class="footer-3d">
+        <footer class="footer-3d scroll-3d-item">
             <p>
-                <strong>WeatherWise 3D</strong> • High-Accuracy Atmospheric Forecasts for Everyone
+                <strong>WeatherWise 3D</strong> • High-Accuracy 3D Real-Time Atmospheric Station
             </p>
             <p class="sub-footer">
-                Powered by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> • Free & Open-Source Worldwide
+                Live Data powered by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo API</a> • High-Resolution Forecast Models
             </p>
         </footer>
 
