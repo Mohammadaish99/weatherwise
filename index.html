@@ -4,34 +4,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="WeatherWise - Free real-time weather forecasts, UV index, rain probability, and 7-day outlook for any city worldwide.">
-    <meta name="theme-color" content="#3182ce">
+    <meta name="description" content="WeatherWise - 3D Real-Time Weather Forecast, UV index, rain probability, and 7-day outlook.">
+    <meta name="theme-color" content="#2563eb">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌦️</text></svg>">
 
-    <title>WeatherWise | Real-Time Weather Forecast</title>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <title>WeatherWise | 3D Real-Time Weather Experience</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
+    <!-- 3D ATMOSPHERIC AMBIENT CANVAS & MESH ORBS -->
+    <canvas id="weatherCanvas"></canvas>
+    <div class="mesh-background">
+        <div class="mesh-orb orb-1"></div>
+        <div class="mesh-orb orb-2"></div>
+        <div class="mesh-orb orb-3"></div>
+    </div>
+
     <div class="app">
 
         <!-- HEADER -->
         <header class="header">
             <div class="logo">
-                <span class="logo-icon">🌦️</span>
-                <span class="logo-text">WeatherWise</span>
+                <span class="logo-icon-3d">🌦️</span>
+                <span class="logo-text">Weather<span class="gradient-text">Wise</span></span>
             </div>
 
             <div class="header-actions">
-                <button id="unitBtn" class="action-btn unit-btn" title="Toggle °C / °F">
-                    °C
+                <button id="unitBtn" class="action-btn-3d unit-btn" title="Toggle °C / °F">
+                    <span class="btn-text">°C</span>
                 </button>
 
-                <button id="themeBtn" class="action-btn theme-btn" title="Toggle Dark/Light Mode">
-                    🌙
+                <button id="themeBtn" class="action-btn-3d theme-btn" title="Toggle Dark/Light Mode">
+                    <span class="btn-icon">🌙</span>
                 </button>
             </div>
         </header>
@@ -42,146 +55,155 @@
 
             <!-- HERO -->
             <section class="hero">
-                <h1>Weather at your fingertips</h1>
+                <div class="hero-badge">
+                    <span class="pulse-dot"></span> Real-Time Live Weather System
+                </div>
+                <h1>Weather at your <span class="gradient-text">fingertips</span></h1>
                 <p>
-                    Instant, real-time weather forecasts and 7-day outlook for every city on Earth.
+                    Experience real-time atmospheric conditions, accurate 7-day outlooks, and dynamic weather analytics in interactive 3D.
                 </p>
             </section>
 
 
             <!-- SEARCH SECTION -->
             <section class="search-section">
-                <div class="search-box">
+                <div class="search-box-3d" id="searchBox3D">
                     <span class="search-icon">🔍</span>
                     <input
                         type="text"
                         id="cityInput"
-                        placeholder="Search city (e.g., Tokyo, London, New York)..."
+                        placeholder="Search any city (e.g., Tokyo, London, New York)..."
                         autocomplete="off"
                     >
-                    <button id="searchBtn">
-                        Search
+                    <button id="searchBtn" class="search-btn-3d">
+                        <span>Search</span>
                     </button>
                 </div>
 
                 <div class="search-controls">
-                    <button id="locationBtn" class="location-btn">
-                        <span>📍</span> Use My Current Location
+                    <button id="locationBtn" class="location-btn-3d">
+                        <span class="loc-icon">📍</span> Use My Current Location
                     </button>
                 </div>
 
                 <!-- QUICK CITY PILLS -->
                 <div class="quick-cities">
-                    <span class="quick-label">Popular:</span>
-                    <button class="city-pill" data-city="New York">New York</button>
-                    <button class="city-pill" data-city="London">London</button>
-                    <button class="city-pill" data-city="Tokyo">Tokyo</button>
-                    <button class="city-pill" data-city="Paris">Paris</button>
-                    <button class="city-pill" data-city="Dubai">Dubai</button>
-                    <button class="city-pill" data-city="Mumbai">Mumbai</button>
+                    <span class="quick-label">Trending:</span>
+                    <button class="city-pill-3d" data-city="New York">New York</button>
+                    <button class="city-pill-3d" data-city="London">London</button>
+                    <button class="city-pill-3d" data-city="Tokyo">Tokyo</button>
+                    <button class="city-pill-3d" data-city="Paris">Paris</button>
+                    <button class="city-pill-3d" data-city="Dubai">Dubai</button>
+                    <button class="city-pill-3d" data-city="Mumbai">Mumbai</button>
                 </div>
             </section>
 
 
-            <!-- ERROR & STATUS MESSAGE -->
-            <div id="error" class="error-box" style="display: none;"></div>
+            <!-- STATUS & LOADING -->
+            <div id="error" class="error-box-3d" style="display: none;"></div>
 
-            <!-- LOADING SPINNER -->
-            <div id="loading" class="loading-box" style="display: none;">
-                <div class="spinner"></div>
-                <p>Fetching real-time weather data...</p>
+            <div id="loading" class="loading-box-3d" style="display: none;">
+                <div class="spinner-3d"></div>
+                <p>Connecting to atmospheric satellites...</p>
             </div>
 
 
-            <!-- CURRENT WEATHER CARD -->
-            <section id="weatherCard" class="weather-card">
+            <!-- CURRENT WEATHER 3D CARD -->
+            <section id="weatherCard" class="weather-card-3d card-tilt" data-tilt>
+                <!-- Interactive Glare Overlay -->
+                <div class="card-glare"></div>
 
                 <div class="weather-top">
                     <div class="location-meta">
-                        <p class="small-title">CURRENT WEATHER</p>
+                        <div class="status-indicator">
+                            <span class="live-dot"></span> LIVE FORECAST
+                        </div>
                         <h2 id="cityName">London, United Kingdom</h2>
-                        <p id="date">Live Weather</p>
+                        <p id="date">Saturday, Sep 19 • Live</p>
                     </div>
 
-                    <div id="weatherIcon" class="weather-icon">
-                        ⛅
+                    <div class="weather-icon-wrapper-3d">
+                        <div id="weatherIcon" class="weather-icon-3d">⛅</div>
+                        <div class="icon-glow-ring"></div>
                     </div>
                 </div>
 
                 <div class="temperature-section">
                     <div class="temp-wrapper">
-                        <span id="temperature">18</span>
-                        <span id="tempUnit" class="degree">°C</span>
+                        <span id="temperature" class="temp-digits">18</span>
+                        <span id="tempUnit" class="degree-3d">°C</span>
                     </div>
-                    <div class="high-low-box">
+                    <div class="high-low-badge-3d">
                         <span id="tempHighLow">H: 21°C • L: 12°C</span>
                     </div>
                 </div>
 
-                <p id="condition" class="condition">Partly Cloudy</p>
+                <div class="condition-badge-wrap">
+                    <p id="condition" class="condition-text">Partly Cloudy</p>
+                </div>
 
-                <!-- DETAILED WEATHER METRICS -->
-                <div class="weather-details">
+                <!-- 3D DETAILS GRID -->
+                <div class="weather-details-grid">
 
-                    <div class="detail-card">
-                        <span class="detail-icon">🌡️</span>
-                        <div>
+                    <div class="detail-card-3d card-tilt" data-tilt>
+                        <div class="detail-icon-circle icon-temp">🌡️</div>
+                        <div class="detail-content">
                             <p>Feels Like</p>
                             <strong id="feelsLike">18°C</strong>
                         </div>
                     </div>
 
-                    <div class="detail-card">
-                        <span class="detail-icon">💧</span>
-                        <div>
+                    <div class="detail-card-3d card-tilt" data-tilt>
+                        <div class="detail-icon-circle icon-water">💧</div>
+                        <div class="detail-content">
                             <p>Humidity</p>
                             <strong id="humidity">68%</strong>
                         </div>
                     </div>
 
-                    <div class="detail-card">
-                        <span class="detail-icon">💨</span>
-                        <div>
+                    <div class="detail-card-3d card-tilt" data-tilt>
+                        <div class="detail-icon-circle icon-wind">💨</div>
+                        <div class="detail-content">
                             <p>Wind Speed</p>
                             <strong id="wind">14 km/h</strong>
                         </div>
                     </div>
 
-                    <div class="detail-card">
-                        <span class="detail-icon">☀️</span>
-                        <div>
+                    <div class="detail-card-3d card-tilt" data-tilt>
+                        <div class="detail-icon-circle icon-sun">☀️</div>
+                        <div class="detail-content">
                             <p>UV Index</p>
                             <strong id="uvIndex">3 (Mod)</strong>
                         </div>
                     </div>
 
-                    <div class="detail-card">
-                        <span class="detail-icon">🌧️</span>
-                        <div>
+                    <div class="detail-card-3d card-tilt" data-tilt>
+                        <div class="detail-icon-circle icon-rain">🌧️</div>
+                        <div class="detail-content">
                             <p>Precipitation</p>
                             <strong id="rainChance">10% chance</strong>
                         </div>
                     </div>
 
-                    <div class="detail-card">
-                        <span class="detail-icon">🌅</span>
-                        <div>
-                            <p>Sun Schedule</p>
+                    <div class="detail-card-3d card-tilt" data-tilt>
+                        <div class="detail-icon-circle icon-sun-cycle">🌅</div>
+                        <div class="detail-content">
+                            <p>Sunrise & Sunset</p>
                             <strong id="sunSchedule">↑06:45  ↓19:10</strong>
                         </div>
                     </div>
 
-                    <div class="detail-card">
-                        <span class="detail-icon">🧭</span>
-                        <div>
+                    <div class="detail-card-3d card-tilt" data-tilt>
+                        <div class="detail-icon-circle icon-gauge">🧭</div>
+                        <div class="detail-content">
                             <p>Air Pressure</p>
                             <strong id="pressure">1014 hPa</strong>
                         </div>
                     </div>
 
-                    <div class="detail-card">
-                        <span class="detail-icon">🌐</span>
-                        <div>
+                    <div class="detail-card-3d card-tilt" data-tilt>
+                        <div class="detail-icon-circle icon-globe">🌐</div>
+                        <div class="detail-content">
                             <p>Timezone</p>
                             <strong id="timezone">Europe/London</strong>
                         </div>
@@ -195,53 +217,103 @@
             <!-- 7-DAY FORECAST SECTION -->
             <section class="forecast-section">
                 <div class="section-title">
-                    <h2>7-Day Outlook</h2>
-                    <span class="forecast-badge">📅 Accurate Live Forecast</span>
+                    <h2>7-Day Atmospheric Outlook</h2>
+                    <span class="forecast-badge-3d">
+                        <span class="sparkle">✨</span> Hyperlocal Live Models
+                    </span>
                 </div>
 
-                <div id="forecastContainer" class="forecast-container">
-                    <div class="forecast-card today">
-                        <div><p class="day-name">Today</p><p class="day-date">Live</p></div>
-                        <div class="forecast-icon">⛅</div>
-                        <div class="forecast-temps"><span class="temp-max">21°</span><span class="temp-min">12°</span></div>
+                <div id="forecastContainer" class="forecast-container-3d">
+                    <div class="forecast-card-3d today card-tilt" data-tilt>
+                        <div class="forecast-day-header">
+                            <p class="day-name">Today</p>
+                            <p class="day-date">Live</p>
+                        </div>
+                        <div class="forecast-icon-3d">⛅</div>
+                        <div class="forecast-temps">
+                            <span class="temp-max">21°</span>
+                            <span class="temp-min">12°</span>
+                        </div>
                         <div class="forecast-condition">Partly Cloudy</div>
                     </div>
-                    <div class="forecast-card">
-                        <div><p class="day-name">Sun</p><p class="day-date">Day 2</p></div>
-                        <div class="forecast-icon">🌤️</div>
-                        <div class="forecast-temps"><span class="temp-max">22°</span><span class="temp-min">13°</span></div>
+
+                    <div class="forecast-card-3d card-tilt" data-tilt>
+                        <div class="forecast-day-header">
+                            <p class="day-name">Sun</p>
+                            <p class="day-date">Day 2</p>
+                        </div>
+                        <div class="forecast-icon-3d">🌤️</div>
+                        <div class="forecast-temps">
+                            <span class="temp-max">22°</span>
+                            <span class="temp-min">13°</span>
+                        </div>
                         <div class="forecast-condition">Mainly Clear</div>
                     </div>
-                    <div class="forecast-card">
-                        <div><p class="day-name">Mon</p><p class="day-date">Day 3</p></div>
-                        <div class="forecast-icon">🌧️</div>
-                        <div class="forecast-temps"><span class="temp-max">18°</span><span class="temp-min">11°</span></div>
+
+                    <div class="forecast-card-3d card-tilt" data-tilt>
+                        <div class="forecast-day-header">
+                            <p class="day-name">Mon</p>
+                            <p class="day-date">Day 3</p>
+                        </div>
+                        <div class="forecast-icon-3d">🌧️</div>
+                        <div class="forecast-temps">
+                            <span class="temp-max">18°</span>
+                            <span class="temp-min">11°</span>
+                        </div>
                         <div class="forecast-condition">Rain Showers</div>
-                        <div class="rain-chance">💧 65%</div>
+                        <div class="rain-chance-badge">💧 65%</div>
                     </div>
-                    <div class="forecast-card">
-                        <div><p class="day-name">Tue</p><p class="day-date">Day 4</p></div>
-                        <div class="forecast-icon">☀️</div>
-                        <div class="forecast-temps"><span class="temp-max">23°</span><span class="temp-min">14°</span></div>
+
+                    <div class="forecast-card-3d card-tilt" data-tilt>
+                        <div class="forecast-day-header">
+                            <p class="day-name">Tue</p>
+                            <p class="day-date">Day 4</p>
+                        </div>
+                        <div class="forecast-icon-3d">☀️</div>
+                        <div class="forecast-temps">
+                            <span class="temp-max">23°</span>
+                            <span class="temp-min">14°</span>
+                        </div>
                         <div class="forecast-condition">Clear Sky</div>
                     </div>
-                    <div class="forecast-card">
-                        <div><p class="day-name">Wed</p><p class="day-date">Day 5</p></div>
-                        <div class="forecast-icon">⛅</div>
-                        <div class="forecast-temps"><span class="temp-max">20°</span><span class="temp-min">13°</span></div>
+
+                    <div class="forecast-card-3d card-tilt" data-tilt>
+                        <div class="forecast-day-header">
+                            <p class="day-name">Wed</p>
+                            <p class="day-date">Day 5</p>
+                        </div>
+                        <div class="forecast-icon-3d">⛅</div>
+                        <div class="forecast-temps">
+                            <span class="temp-max">20°</span>
+                            <span class="temp-min">13°</span>
+                        </div>
                         <div class="forecast-condition">Partly Cloudy</div>
                     </div>
-                    <div class="forecast-card">
-                        <div><p class="day-name">Thu</p><p class="day-date">Day 6</p></div>
-                        <div class="forecast-icon">🌦️</div>
-                        <div class="forecast-temps"><span class="temp-max">19°</span><span class="temp-min">12°</span></div>
+
+                    <div class="forecast-card-3d card-tilt" data-tilt>
+                        <div class="forecast-day-header">
+                            <p class="day-name">Thu</p>
+                            <p class="day-date">Day 6</p>
+                        </div>
+                        <div class="forecast-icon-3d">🌦️</div>
+                        <div class="forecast-temps">
+                            <span class="temp-max">19°</span>
+                            <span class="temp-min">12°</span>
+                        </div>
                         <div class="forecast-condition">Drizzle</div>
-                        <div class="rain-chance">💧 35%</div>
+                        <div class="rain-chance-badge">💧 35%</div>
                     </div>
-                    <div class="forecast-card">
-                        <div><p class="day-name">Fri</p><p class="day-date">Day 7</p></div>
-                        <div class="forecast-icon">☀️</div>
-                        <div class="forecast-temps"><span class="temp-max">24°</span><span class="temp-min">15°</span></div>
+
+                    <div class="forecast-card-3d card-tilt" data-tilt>
+                        <div class="forecast-day-header">
+                            <p class="day-name">Fri</p>
+                            <p class="day-date">Day 7</p>
+                        </div>
+                        <div class="forecast-icon-3d">☀️</div>
+                        <div class="forecast-temps">
+                            <span class="temp-max">24°</span>
+                            <span class="temp-min">15°</span>
+                        </div>
                         <div class="forecast-condition">Sunny</div>
                     </div>
                 </div>
@@ -251,12 +323,12 @@
 
 
         <!-- FOOTER -->
-        <footer>
+        <footer class="footer-3d">
             <p>
-                <strong>WeatherWise</strong> • Real-time weather for everyone
+                <strong>WeatherWise 3D</strong> • High-Accuracy Atmospheric Forecasts for Everyone
             </p>
             <p class="sub-footer">
-                Data provided by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> • Free & Open-Source
+                Powered by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> • Free & Open-Source Worldwide
             </p>
         </footer>
 

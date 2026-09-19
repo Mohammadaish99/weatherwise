@@ -20,12 +20,15 @@ const safeStorage = {
 let currentUnit = safeStorage.getItem("weatherwise_unit") || "C";
 let lastWeatherData = null;
 let currentCityLabel = "London, United Kingdom";
+let currentDisplayedTemp = 18;
+let currentWeatherCode = 0;
+let isDaytime = 1;
 
 /* ================= DOM ELEMENTS ================= */
 const cityInput = document.getElementById("cityInput");
 const searchBtn = document.getElementById("searchBtn");
 const locationBtn = document.getElementById("locationBtn");
-const quickCityBtns = document.querySelectorAll(".city-pill");
+const quickCityBtns = document.querySelectorAll(".city-pill-3d");
 const unitBtn = document.getElementById("unitBtn");
 const themeBtn = document.getElementById("themeBtn");
 
@@ -99,11 +102,193 @@ if (themeBtn) {
     themeBtn.addEventListener("click", toggleTheme);
 }
 
+/* ================= 3D TILT PHYSICS ENGINE ================= */
+function init3DTilt() {
+    const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    if (isTouch) return; // Disable hover tilt on mobile touch devices
+
+    function applyTiltToCards() {
+        const cards = document.querySelectorAll(".card-tilt");
+
+        cards.forEach((card) => {
+            if (card.dataset.tiltActive) return;
+            card.dataset.tiltActive = "true";
+
+            const glare = card.querySelector(".card-glare");
+            const maxTilt = card.classList.contains("weather-card-3d") ? 10 : 14;
+
+            card.addEventListener("mousemove", (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+
+                const rotateX = ((y - centerY) / centerY) * -maxTilt;
+                const rotateY = ((x - centerX) / centerX) * maxTilt;
+
+                card.style.transform = `perspective(1200px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.02, 1.02, 1.02)`;
+
+                if (glare) {
+                    glare.style.opacity = "1";
+                    glare.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(255, 255, 255, 0.35) 0%, transparent 65%)`;
+                }
+            });
+
+            card.addEventListener("mouseleave", () => {
+                card.style.transform = `perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+                if (glare) glare.style.opacity = "0";
+            });
+        });
+    }
+
+    applyTiltToCards();
+    window.applyTiltToCards = applyTiltToCards;
+}
+
+/* ================= 3D AMBIENT ATMOSPHERIC CANVAS ================= */
+function initAtmosphericCanvas() {
+    const canvas = document.getElementById("weatherCanvas");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    window.addEventListener("resize", () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    });
+
+    const particles = [];
+    const particleCount = 45;
+
+    class Particle {
+        constructor() {
+            this.reset();
+        }
+
+        reset() {
+            this.x = Math.random() * width;
+            this.y = Math.random() * height;
+            this.size = Math.random() * 2.5 + 1;
+            this.speedX = (Math.random() - 0.5) * 0.6;
+            this.speedY = Math.random() * 0.8 + 0.3;
+            this.opacity = Math.random() * 0.5 + 0.2;
+            this.pulseSpeed = Math.random() * 0.02 + 0.01;
+            this.angle = Math.random() * Math.PI * 2;
+        }
+
+        update(weatherType, isDark) {
+            this.angle += this.pulseSpeed;
+
+            if (weatherType === "rain") {
+                this.speedY = Math.random() * 4 + 5;
+                this.speedX = -1;
+                this.size = Math.random() * 1.5 + 1;
+            } else if (weatherType === "snow") {
+                this.speedY = Math.random() * 1.5 + 0.8;
+                this.speedX = Math.sin(this.angle) * 1.2;
+                this.size = Math.random() * 3 + 1.5;
+            } else {
+                // Clear / default floating dust motes
+                this.speedY = Math.cos(this.angle) * 0.5 - 0.2;
+                this.speedX = Math.sin(this.angle) * 0.5;
+            }
+
+            this.x += this.speedX;
+            this.y += this.speedY;
+
+            if (this.x < 0) this.x = width;
+            if (this.x > width) this.x = 0;
+            if (this.y < 0) this.y = height;
+            if (this.y > height) this.y = 0;
+        }
+
+        draw(weatherType, isDark) {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+
+            let color = "255, 255, 255";
+            if (weatherType === "rain") {
+                color = isDark ? "56, 189, 248" : "37, 99, 235";
+            } else if (weatherType === "clear" && !isDark) {
+                color = "251, 191, 36";
+            } else if (isDark) {
+                color = "224, 242, 254";
+            }
+
+            const currentAlpha = Math.abs(Math.sin(this.angle)) * this.opacity;
+            ctx.fillStyle = `rgba(${color}, ${currentAlpha.toFixed(3)})`;
+            ctx.shadowBlur = weatherType === "clear" ? 10 : 5;
+            ctx.shadowColor = `rgba(${color}, 0.5)`;
+            ctx.fill();
+        }
+    }
+
+    for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, width, height);
+
+        let weatherType = "clear";
+        if (currentWeatherCode >= 51 && currentWeatherCode <= 67) weatherType = "rain";
+        else if (currentWeatherCode >= 80 && currentWeatherCode <= 82) weatherType = "rain";
+        else if (currentWeatherCode >= 71 && currentWeatherCode <= 77) weatherType = "snow";
+        else if (currentWeatherCode >= 95) weatherType = "rain";
+
+        const isDark = document.body.classList.contains("dark");
+
+        for (let i = 0; i < particles.length; i++) {
+            particles[i].update(weatherType, isDark);
+            particles[i].draw(weatherType, isDark);
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+}
+
+/* ================= ANIMATED TEMPERATURE COUNTER ================= */
+function animateTemperature(targetVal) {
+    if (!temperatureEl) return;
+    if (isNaN(targetVal)) {
+        temperatureEl.textContent = targetVal;
+        return;
+    }
+
+    const startVal = currentDisplayedTemp;
+    const duration = 650;
+    const startTime = performance.now();
+
+    function update(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // Ease out expo
+        const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+        const current = Math.round(startVal + (targetVal - startVal) * ease);
+
+        temperatureEl.textContent = current;
+
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        } else {
+            currentDisplayedTemp = targetVal;
+        }
+    }
+
+    requestAnimationFrame(update);
+}
+
 /* ================= WEATHER DATA FETCHING ================= */
 
 // Search by City Name
 async function fetchWeatherByCity(city) {
-    showLoading(true, `Searching weather for "${city}"...`);
+    showLoading(true, `Connecting to satellites for "${city}"...`);
     hideError();
 
     try {
@@ -113,7 +298,7 @@ async function fetchWeatherByCity(city) {
         const geoData = await geoRes.json();
 
         if (!geoData || !geoData.results || geoData.results.length === 0) {
-            showError(`City "${city}" not found. Please check spelling.`);
+            showError(`City "${city}" not found. Please verify spelling.`);
             showLoading(false);
             return;
         }
@@ -126,7 +311,7 @@ async function fetchWeatherByCity(city) {
         safeStorage.setItem("weatherwise_last_city", city);
     } catch (err) {
         console.error("Geocoding fetch error:", err);
-        showError("Unable to reach weather services. Please check your internet connection.");
+        showError("Unable to reach atmospheric services. Please check connection.");
         showLoading(false);
     }
 }
@@ -138,7 +323,7 @@ function fetchWeatherByLocation() {
         return;
     }
 
-    showLoading(true, "Detecting your current GPS location...");
+    showLoading(true, "Triangulating GPS coordinates...");
     hideError();
 
     navigator.geolocation.getCurrentPosition(
@@ -166,13 +351,13 @@ function fetchWeatherByLocation() {
         },
         (err) => {
             console.warn("Geolocation error:", err);
-            let msg = "Could not retrieve your GPS location.";
+            let msg = "Could not retrieve GPS location.";
             if (err.code === 1) {
-                msg = "Location permission denied. You can search your city manually in the box above.";
+                msg = "Location permission denied. Please search your city manually in the box above.";
             } else if (err.code === 2) {
                 msg = "Location unavailable. Please search manually.";
             } else if (err.code === 3) {
-                msg = "Location request timed out. Please try again or search manually.";
+                msg = "Location request timed out. Please search manually.";
             }
             showError(msg);
             showLoading(false);
@@ -195,7 +380,7 @@ async function loadWeatherCoordinates(latitude, longitude, displayTitle) {
         showLoading(false);
     } catch (err) {
         console.error("Forecast fetch error:", err);
-        showError("Failed to retrieve live weather data. Please try again in a moment.");
+        showError("Failed to retrieve live weather data. Please try again.");
         showLoading(false);
     }
 }
@@ -207,7 +392,10 @@ function renderAllWeather(title, data) {
 
     const current = data.current;
     const daily = data.daily || {};
-    const condition = getWeatherInfo(current.weather_code, current.is_day);
+    currentWeatherCode = current.weather_code ?? 0;
+    isDaytime = current.is_day ?? 1;
+
+    const condition = getWeatherInfo(currentWeatherCode, isDaytime);
 
     // City & Date
     if (cityNameEl) cityNameEl.textContent = title;
@@ -221,8 +409,10 @@ function renderAllWeather(title, data) {
     if (weatherIconEl) weatherIconEl.textContent = condition.icon;
     if (conditionEl) conditionEl.textContent = condition.description;
 
-    // Temperature & High / Low
-    if (temperatureEl) temperatureEl.textContent = formatTemp(current.temperature_2m);
+    // Animated Temperature & High / Low
+    const targetTemp = formatTemp(current.temperature_2m);
+    animateTemperature(targetTemp);
+
     if (tempUnitEl) tempUnitEl.textContent = `°${currentUnit}`;
 
     if (tempHighLowEl && daily.temperature_2m_max && daily.temperature_2m_min) {
@@ -269,6 +459,11 @@ function renderAllWeather(title, data) {
     if (daily.time) {
         renderForecast(daily);
     }
+
+    // Re-apply 3D tilt bindings to dynamically generated elements
+    if (window.applyTiltToCards) {
+        window.applyTiltToCards();
+    }
 }
 
 function renderForecast(daily) {
@@ -303,19 +498,21 @@ function renderForecast(daily) {
             : 0;
 
         const card = document.createElement("div");
-        card.className = `forecast-card ${isToday ? "today" : ""}`;
+        card.className = `forecast-card-3d ${isToday ? "today" : ""} card-tilt`;
+        card.setAttribute("data-tilt", "");
         card.innerHTML = `
-            <div>
+            <div class="card-glare"></div>
+            <div class="forecast-day-header">
                 <p class="day-name">${dayName}</p>
                 <p class="day-date">${formattedDate}</p>
             </div>
-            <div class="forecast-icon">${info.icon}</div>
+            <div class="forecast-icon-3d">${info.icon}</div>
             <div class="forecast-temps">
                 <span class="temp-max">${maxTemp}°</span>
                 <span class="temp-min">${minTemp}°</span>
             </div>
             <div class="forecast-condition">${info.description}</div>
-            ${rainChance > 0 ? `<div class="rain-chance">💧 ${rainChance}%</div>` : ""}
+            ${rainChance > 0 ? `<div class="rain-chance-badge">💧 ${rainChance}%</div>` : ""}
         `;
 
         forecastContainer.appendChild(card);
@@ -327,7 +524,10 @@ function renderForecast(daily) {
 function toggleUnit() {
     currentUnit = currentUnit === "C" ? "F" : "C";
     safeStorage.setItem("weatherwise_unit", currentUnit);
-    if (unitBtn) unitBtn.textContent = `°${currentUnit}`;
+    if (unitBtn) {
+        const textSpan = unitBtn.querySelector(".btn-text") || unitBtn;
+        textSpan.textContent = `°${currentUnit}`;
+    }
 
     if (lastWeatherData) {
         renderAllWeather(currentCityLabel, lastWeatherData);
@@ -378,7 +578,7 @@ function getWeatherInfo(code, isDay = 1) {
             return { description: "Overcast", icon: "☁️" };
         case 45:
         case 48:
-            return { description: "Foggy", icon: "🌫️" };
+            return { description: "Foggy Mist", icon: "🌫️" };
         case 51:
         case 53:
         case 55:
@@ -388,32 +588,32 @@ function getWeatherInfo(code, isDay = 1) {
             return { description: "Freezing Drizzle", icon: "🌨️" };
         case 61:
         case 63:
-            return { description: "Rain", icon: "🌧️" };
+            return { description: "Rain Showers", icon: "🌧️" };
         case 65:
-            return { description: "Heavy Rain", icon: "🌧️" };
+            return { description: "Heavy Rainfall", icon: "🌧️" };
         case 66:
         case 67:
             return { description: "Freezing Rain", icon: "🌨️" };
         case 71:
         case 73:
-            return { description: "Snowfall", icon: "❄️" };
+            return { description: "Light Snow", icon: "❄️" };
         case 75:
         case 77:
-            return { description: "Heavy Snow", icon: "❄️" };
+            return { description: "Blizzard Snow", icon: "❄️" };
         case 80:
         case 81:
         case 82:
-            return { description: "Rain Showers", icon: "🌦️" };
+            return { description: "Torrential Showers", icon: "🌦️" };
         case 85:
         case 86:
-            return { description: "Snow Showers", icon: "🌨️" };
+            return { description: "Snow Squalls", icon: "🌨️" };
         case 95:
             return { description: "Thunderstorm", icon: "⛈️" };
         case 96:
         case 99:
-            return { description: "Severe Storm", icon: "⛈️⚡" };
+            return { description: "Severe Lightning Storm", icon: "⛈️⚡" };
         default:
-            return { description: "Clear", icon: "☀️" };
+            return { description: "Clear Sky", icon: "☀️" };
     }
 }
 
@@ -426,31 +626,34 @@ function initTheme() {
         prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
     } catch (e) {}
 
+    const iconSpan = themeBtn ? (themeBtn.querySelector(".btn-icon") || themeBtn) : null;
+
     if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
         document.body.classList.add("dark");
-        if (themeBtn) themeBtn.textContent = "☀️";
+        if (iconSpan) iconSpan.textContent = "☀️";
     } else {
         document.body.classList.remove("dark");
-        if (themeBtn) themeBtn.textContent = "🌙";
+        if (iconSpan) iconSpan.textContent = "🌙";
     }
 }
 
 function toggleTheme() {
     document.body.classList.toggle("dark");
     const isDark = document.body.classList.contains("dark");
-    if (themeBtn) themeBtn.textContent = isDark ? "☀️" : "🌙";
+    const iconSpan = themeBtn ? (themeBtn.querySelector(".btn-icon") || themeBtn) : null;
+    if (iconSpan) iconSpan.textContent = isDark ? "☀️" : "🌙";
     safeStorage.setItem("weatherwise_theme", isDark ? "dark" : "light");
 }
 
 /* ================= UI HELPERS ================= */
 
-function showLoading(show, message = "Fetching real-time weather...") {
+function showLoading(show, message = "Fetching atmospheric data...") {
     if (!loadingBox) return;
     if (show) {
         loadingBox.style.display = "flex";
         const p = loadingBox.querySelector("p");
         if (p) p.textContent = message;
-        if (weatherCard) weatherCard.style.opacity = "0.6";
+        if (weatherCard) weatherCard.style.opacity = "0.65";
     } else {
         loadingBox.style.display = "none";
         if (weatherCard) weatherCard.style.opacity = "1";
@@ -473,7 +676,13 @@ function hideError() {
 
 function initApp() {
     initTheme();
-    if (unitBtn) unitBtn.textContent = `°${currentUnit}`;
+    init3DTilt();
+    initAtmosphericCanvas();
+
+    if (unitBtn) {
+        const textSpan = unitBtn.querySelector(".btn-text") || unitBtn;
+        textSpan.textContent = `°${currentUnit}`;
+    }
 
     const savedCity = safeStorage.getItem("weatherwise_last_city");
     if (savedCity) {
