@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <meta name="description" content="WeatherWise 3D - Comprehensive Hour-by-Hour Weather Details for Today and Tomorrow.">
+    <meta name="description" content="WeatherWise 3D - Comprehensive Hour-by-Hour Weather Details for Today and Tomorrow with 3D Telemetry.">
     <meta name="theme-color" content="#0f172a">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌦️</text></svg>">
 
@@ -13,16 +13,25 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,700&display=swap" rel="stylesheet">
 
+    <!-- Three.js CDN for High-Impact WebGL 3D Planetarium Background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
     <title>WeatherWise 3D | Detailed Hourly Telemetry</title>
 
-    <link rel="stylesheet" href="style.css?v=5.0">
+    <link rel="stylesheet" href="style.css?v=5.1">
     <style>
+        /* ================= 3D CONTAINER & PERSPECTIVE ================= */
         .details-page-app {
-            max-width: 1180px;
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 24px 20px 60px;
+            perspective: 1400px;
+            transform-style: preserve-3d;
         }
 
+        /* ================= NAVIGATION BAR ================= */
         .back-nav-bar {
             display: flex;
             justify-content: space-between;
@@ -32,6 +41,13 @@
             gap: 14px;
         }
 
+        .back-nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
         .back-btn {
             display: inline-flex;
             align-items: center;
@@ -39,30 +55,54 @@
             background: var(--card-glass);
             border: 1.5px solid var(--card-border);
             color: var(--primary);
-            padding: 10px 20px;
-            border-radius: 16px;
+            padding: 10px 22px;
+            border-radius: 18px;
             font-size: 14px;
             font-weight: 800;
             text-decoration: none;
-            box-shadow: var(--shadow-main);
-            transition: all 0.2s ease;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transform-style: preserve-3d;
         }
 
         .back-btn:hover {
-            transform: translateX(-4px);
+            transform: translateY(-3px) translateZ(12px) scale(1.02);
             border-color: var(--primary);
-            box-shadow: 0 6px 18px var(--primary-glow);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16), 0 0 16px var(--primary-glow);
         }
 
+        .ppt-nav-btn {
+            border-color: rgba(255, 215, 0, 0.5) !important;
+            color: #ffd700 !important;
+            background: rgba(255, 215, 0, 0.08) !important;
+        }
+
+        .ppt-nav-btn:hover {
+            border-color: #ffd700 !important;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16), 0 0 18px rgba(255, 215, 0, 0.4) !important;
+        }
+
+        /* ================= 3D HERO CONTAINER ================= */
         .details-hero {
+            position: relative;
             background: var(--card-glass);
-            border: 1.5px solid var(--card-border);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 30px;
-            padding: 30px;
-            margin-bottom: 30px;
+            border: 1.5px solid var(--card-border-glow);
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            border-radius: 32px;
+            padding: 32px;
+            margin-bottom: 28px;
             box-shadow: var(--shadow-main);
+            transform-style: preserve-3d;
+            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+            overflow: hidden;
+        }
+
+        .details-hero:hover {
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary-glow);
         }
 
         .details-hero-top {
@@ -72,49 +112,137 @@
             flex-wrap: wrap;
             gap: 16px;
             margin-bottom: 24px;
+            transform: translateZ(16px);
         }
 
+        /* 3D Extruded City Title */
+        .city-heading-3d {
+            font-size: 38px;
+            font-weight: 800;
+            color: var(--text-heading);
+            margin-bottom: 6px;
+            letter-spacing: -0.8px;
+            text-shadow: 0 1px 0 #ffffff, 0 2px 0 #cbd5e1, 0 3px 0 #94a3b8, 0 4px 0 #64748b, 0 6px 14px rgba(0, 0, 0, 0.18);
+            transition: all 0.3s ease;
+        }
+
+        body.dark .city-heading-3d {
+            color: #ffffff;
+            text-shadow: 0 1px 0 #38bdf8, 0 2px 0 #0284c7, 0 3px 0 #0369a1, 0 4px 0 #075985, 0 8px 24px rgba(56, 189, 248, 0.4);
+        }
+
+        .location-clock-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--card-inner);
+            border: 1.5px solid var(--card-border);
+            padding: 12px 20px;
+            border-radius: 20px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.04);
+            transform: translateZ(18px);
+        }
+
+        .clock-icon {
+            font-size: 26px;
+            animation: pulseSlow 3s infinite ease-in-out;
+        }
+
+        @keyframes pulseSlow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .clock-time {
+            display: block;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-heading);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .clock-date {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* 3D Day Tabs Switcher */
         .details-day-tabs {
             display: inline-flex;
             gap: 8px;
             background: var(--card-inner);
             padding: 6px;
-            border-radius: 18px;
+            border-radius: 20px;
             border: 1.5px solid var(--card-border);
             margin-bottom: 24px;
+            transform: translateZ(12px);
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1);
         }
 
         .details-tab-btn {
             border: none;
             background: transparent;
             color: var(--text-muted);
-            padding: 10px 22px;
-            border-radius: 12px;
+            padding: 10px 24px;
+            border-radius: 14px;
             font-size: 14px;
             font-weight: 800;
             font-family: inherit;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .details-tab-btn:hover {
+            color: var(--text-heading);
+            transform: translateY(-1px);
         }
 
         .details-tab-btn.active {
             background: var(--primary);
             color: #ffffff;
-            box-shadow: 0 4px 14px var(--primary-glow);
+            box-shadow: 0 4px 16px var(--primary-glow);
+            transform: translateY(-2px);
         }
 
+        /* ================= 3D SUMMARY METRICS GRID ================= */
         .day-summary-cards {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 16px;
+            transform: translateZ(14px);
         }
 
         .summary-card {
+            position: relative;
             background: var(--card-inner);
-            border: 1px solid var(--card-border);
-            border-radius: 18px;
-            padding: 18px;
+            border: 1.5px solid var(--card-border);
+            border-radius: 22px;
+            padding: 20px 16px;
             text-align: center;
+            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+            transform-style: preserve-3d;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .summary-card:hover {
+            transform: perspective(1000px) translateY(-8px) translateZ(18px) scale(1.03);
+            border-color: var(--card-border-glow);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.18), 0 0 20px var(--primary-glow);
+        }
+
+        .summary-icon {
+            font-size: 26px;
+            margin-bottom: 6px;
+            transform: translateZ(16px);
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        .summary-card:hover .summary-icon {
+            transform: translateZ(24px) scale(1.2) rotate(8deg);
         }
 
         .summary-card p {
@@ -122,31 +250,224 @@
             font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
-            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            transform: translateZ(10px);
         }
 
         .summary-card strong {
+            display: block;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-heading);
+            transform: translateZ(14px);
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        body.dark .summary-card strong {
+            color: #ffffff;
+            text-shadow: 0 1px 0 #38bdf8, 0 0 12px rgba(56, 189, 248, 0.35);
+        }
+
+        /* ================= 3D HOURLY VISUAL STREAM (CAROUSEL) ================= */
+        .details-hourly-strip-wrap {
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 2;
+            transform-style: preserve-3d;
+        }
+
+        .details-strip-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .details-strip-title h3 {
             font-size: 19px;
             font-weight: 800;
             color: var(--text-heading);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        /* Detailed Hourly Table */
-        .table-wrap {
+        .strip-hint {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            background: var(--card-inner);
+            border: 1px solid var(--card-border);
+            padding: 4px 12px;
+            border-radius: 12px;
+        }
+
+        .details-hourly-strip {
+            display: flex;
+            gap: 14px;
             overflow-x: auto;
+            padding: 12px 6px 20px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            perspective: 1200px;
+        }
+
+        .details-hourly-strip::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .details-hourly-strip::-webkit-scrollbar-track {
+            background: var(--card-inner);
+            border-radius: 10px;
+        }
+
+        .details-hourly-strip::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        .details-hourly-card-3d {
+            position: relative;
+            flex: 0 0 114px;
             background: var(--card-glass);
             border: 1.5px solid var(--card-border);
-            border-radius: 26px;
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-radius: 22px;
+            padding: 16px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.22s ease, border-color 0.22s ease;
+            transform-style: preserve-3d;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+            user-select: none;
+            overflow: hidden;
+        }
+
+        .details-hourly-card-3d:hover,
+        .details-hourly-card-3d.active {
+            transform: perspective(1000px) translateY(-10px) translateZ(20px) scale(1.05);
+            border-color: var(--primary);
+            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.2), 0 0 20px var(--primary-glow);
+        }
+
+        .details-hourly-card-3d.active {
+            background: var(--card-inner);
+            border-width: 2px;
+        }
+
+        .hourly-card-time {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text-heading);
+            margin-bottom: 8px;
+            transform: translateZ(10px);
+        }
+
+        .hourly-card-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+            display: inline-block;
+            transition: transform 0.3s ease;
+            transform: translateZ(16px);
+        }
+
+        .details-hourly-card-3d:hover .hourly-card-icon {
+            transform: translateZ(26px) scale(1.18) rotate(8deg);
+        }
+
+        .hourly-card-temp {
+            font-size: 21px;
+            font-weight: 800;
+            color: var(--text-heading);
+            margin-bottom: 6px;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+            transform: translateZ(12px);
+        }
+
+        body.dark .hourly-card-temp {
+            color: #ffffff;
+            text-shadow: 0 1px 0 #38bdf8, 0 0 10px rgba(56, 189, 248, 0.35);
+        }
+
+        .hourly-card-rain {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+            transform: translateZ(8px);
+        }
+
+        .hourly-card-rain.placeholder {
+            opacity: 0.35;
+            color: var(--text-muted);
+        }
+
+        .hourly-card-wind {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            transform: translateZ(6px);
+        }
+
+        /* ================= 3D TELEMETRY TABLE CONSOLE ================= */
+        .table-wrap {
+            position: relative;
+            overflow-x: auto;
+            background: var(--card-glass);
+            border: 1.5px solid var(--card-border-glow);
+            border-radius: 28px;
             box-shadow: var(--shadow-main);
-            padding: 12px;
+            padding: 20px;
             -webkit-overflow-scrolling: touch;
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            transform-style: preserve-3d;
+            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+
+        .table-wrap:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        .table-header-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+            transform: translateZ(12px);
+        }
+
+        .table-header-title h3 {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-heading);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .table-badge {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: var(--primary);
+            background: var(--card-inner);
+            border: 1px solid var(--card-border);
+            padding: 4px 12px;
+            border-radius: 12px;
         }
 
         .hourly-table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            min-width: 760px;
+            min-width: 780px;
         }
 
         .hourly-table th {
@@ -155,7 +476,7 @@
             font-weight: 800;
             color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.6px;
             border-bottom: 1.5px solid var(--card-border);
         }
 
@@ -166,10 +487,24 @@
             color: var(--text);
             border-bottom: 1px solid var(--card-border);
             vertical-align: middle;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .hourly-table tr {
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
         .hourly-table tr:hover td {
             background: var(--card-inner);
+            color: var(--text-heading);
+        }
+
+        .row-highlight-3d td {
+            background: rgba(56, 189, 248, 0.16) !important;
+            color: var(--text-heading) !important;
+            font-weight: 700 !important;
+            border-color: var(--primary) !important;
         }
 
         .table-time {
@@ -185,19 +520,41 @@
 
         .table-cond-icon {
             font-size: 24px;
+            display: inline-block;
+            transition: transform 0.2s ease;
         }
 
-        @media (max-width: 768px) {
+        .hourly-table tr:hover .table-cond-icon {
+            transform: scale(1.2) rotate(6deg);
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 900px) {
             .day-summary-cards {
                 grid-template-columns: repeat(2, 1fr);
             }
+        }
 
-            .details-hero {
-                padding: 20px;
+        @media (max-width: 600px) {
+            .details-page-app {
+                padding: 16px 12px 40px;
             }
 
-            .details-page-app {
-                padding: 16px 14px 40px;
+            .details-hero {
+                padding: 20px 16px;
+            }
+
+            .city-heading-3d {
+                font-size: 28px;
+            }
+
+            .day-summary-cards {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .table-wrap {
+                padding: 14px 10px;
             }
         }
     </style>
@@ -205,13 +562,21 @@
 
 <body>
 
+    <!-- HIGH-IMPACT 3D WEBGL PLANETARIUM CANVAS -->
+    <canvas id="threeCanvas"></canvas>
+
     <div class="details-page-app">
 
         <!-- NAVIGATION -->
         <nav class="back-nav-bar">
-            <a href="index.html" class="back-btn">
-                <span>⬅️</span> Back to 3D Dashboard
-            </a>
+            <div class="back-nav-left">
+                <a href="index.html" class="back-btn" title="Return to interactive 3D station dashboard">
+                    <span>⬅️</span> Back to 3D Dashboard
+                </a>
+                <a href="presentation.html" target="_blank" class="back-btn ppt-nav-btn" title="View 14-Slide College & Office Presentation Deck">
+                    <span>📊</span> Presentation Deck (14 Slides) ↗
+                </a>
+            </div>
 
             <div class="header-actions">
                 <button id="unitBtn" class="action-btn-3d unit-btn" onclick="toggleUnit()" title="Toggle °C / °F">
@@ -223,8 +588,10 @@
             </div>
         </nav>
 
-        <!-- DETAILS HERO -->
+        <!-- DETAILS 3D HERO -->
         <header class="details-hero">
+            <div class="card-glare"></div>
+
             <div class="details-hero-top">
                 <div>
                     <span class="live-status-pill">
@@ -253,21 +620,29 @@
                 </button>
             </div>
 
-            <!-- DAY SUMMARY METRICS -->
+            <!-- DAY SUMMARY METRICS (4 3D METRIC CARDS) -->
             <div class="day-summary-cards">
                 <div class="summary-card">
+                    <div class="card-glare"></div>
+                    <div class="summary-icon">🌡️</div>
                     <p>Temperature Range</p>
                     <strong id="sumTempRange">-- / --</strong>
                 </div>
                 <div class="summary-card">
+                    <div class="card-glare"></div>
+                    <div class="summary-icon">🌧️</div>
                     <p>Precipitation Max</p>
                     <strong id="sumPrecip">--%</strong>
                 </div>
                 <div class="summary-card">
+                    <div class="card-glare"></div>
+                    <div class="summary-icon">☀️</div>
                     <p>UV Index Peak</p>
                     <strong id="sumUV">--</strong>
                 </div>
                 <div class="summary-card">
+                    <div class="card-glare"></div>
+                    <div class="summary-icon">🌅</div>
                     <p>Sun Schedule</p>
                     <strong id="sumSun">↑--:-- ↓--:--</strong>
                 </div>
@@ -280,8 +655,31 @@
             <p>Loading complete atmospheric hourly telemetry...</p>
         </div>
 
-        <!-- DETAILED HOURLY DATA TABLE -->
+        <!-- 3D HOURLY VISUAL STREAM (HORIZONTAL CAROUSEL) -->
+        <section class="details-hourly-strip-wrap">
+            <div class="details-strip-title">
+                <h3>
+                    <span>✨</span>
+                    <span>3D Hourly Visual Stream</span>
+                </h3>
+                <span class="strip-hint">Scroll horizontally • Click card to highlight table row</span>
+            </div>
+            <div id="detailsHourlyStrip" class="details-hourly-strip">
+                <!-- Populated dynamically with 3D hourly cards -->
+            </div>
+        </section>
+
+        <!-- DETAILED HOURLY DATA TABLE CONSOLE -->
         <section class="table-wrap">
+            <div class="card-glare"></div>
+            <div class="table-header-title">
+                <h3>
+                    <span>📊</span>
+                    <span>Complete Atmospheric Telemetry Data Sheet</span>
+                </h3>
+                <span class="table-badge">60 FPS Precision</span>
+            </div>
+
             <table class="hourly-table">
                 <thead>
                     <tr>
@@ -290,7 +688,7 @@
                         <th>Temp</th>
                         <th>Feels Like</th>
                         <th>Rain %</th>
-                        <th>Wind</th>
+                        <th>Wind Speed</th>
                         <th>Pressure</th>
                         <th>Humidity</th>
                     </tr>
@@ -304,7 +702,15 @@
         <!-- FOOTER -->
         <footer class="footer-3d" style="margin-top: 40px;">
             <p>
-                <strong>WeatherWise Detailed Telemetry</strong> • Data via Open-Meteo High-Resolution Models
+                <strong>WeatherWise 3D Station</strong> • Real-Time Global Atmospheric Telemetry
+            </p>
+            <p style="margin: 8px 0;">
+                <a href="presentation.html" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: rgba(255, 215, 0, 0.12); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 20px; color: #ffd700; text-decoration: none; font-size: 0.85rem; font-weight: 700;">
+                    📊 View College & Office Presentation Deck (14 Slides) ↗
+                </a>
+            </p>
+            <p class="sub-footer">
+                Live Data powered by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo API</a> • 100% Free & Open-Source Domain
             </p>
         </footer>
 
@@ -321,7 +727,7 @@
             }
         };
 
-        /* ================= DETAILS PAGE SCRIPT ================= */
+        /* ================= DETAILS PAGE STATE & DOM REFS ================= */
         const urlParams = new URLSearchParams(window.location.search);
         let cityName = urlParams.get("city") || "London, United Kingdom";
         let lat = parseFloat(urlParams.get("lat")) || 51.5085;
@@ -338,6 +744,7 @@
         const tabToday = document.getElementById("tabToday");
         const tabTomorrow = document.getElementById("tabTomorrow");
         const detailsHourlyBody = document.getElementById("detailsHourlyBody");
+        const detailsHourlyStrip = document.getElementById("detailsHourlyStrip");
         const unitBtn = document.getElementById("unitBtn");
         const themeBtn = document.getElementById("themeBtn");
         const loadingBox = document.getElementById("loading");
@@ -347,7 +754,7 @@
         const sumUV = document.getElementById("sumUV");
         const sumSun = document.getElementById("sumSun");
 
-        // Theme init
+        /* ================= THEME & UNIT HANDLERS ================= */
         function initTheme() {
             const saved = safeStorage.getItem("weatherwise_theme");
             if (saved === "dark") {
@@ -361,6 +768,7 @@
             const isDark = document.body.classList.contains("dark");
             if (themeBtn) themeBtn.querySelector(".btn-icon").textContent = isDark ? "☀️" : "🌙";
             safeStorage.setItem("weatherwise_theme", isDark ? "dark" : "light");
+            updateThreeJSPalette();
         }
 
         function toggleUnit() {
@@ -394,11 +802,11 @@
             return unit === "F" ? `${Math.round(num * 0.621371)} mph` : `${Math.round(num)} km/h`;
         }
 
-        function getWeatherInfo(code) {
+        function getWeatherInfo(code, isDay = 1) {
             switch (code) {
-                case 0: return { desc: "Clear Sky", icon: "☀️" };
-                case 1: return { desc: "Mainly Clear", icon: "🌤️" };
-                case 2: return { desc: "Partly Cloudy", icon: "⛅" };
+                case 0: return { desc: "Clear Sky", icon: isDay ? "☀️" : "🌙" };
+                case 1: return { desc: "Mainly Clear", icon: isDay ? "🌤️" : "🌤️" };
+                case 2: return { desc: "Partly Cloudy", icon: isDay ? "⛅" : "☁️🌙" };
                 case 3: return { desc: "Overcast", icon: "☁️" };
                 case 45: case 48: return { desc: "Foggy Mist", icon: "🌫️" };
                 case 51: case 53: case 55: return { desc: "Drizzle", icon: "🌦️" };
@@ -406,7 +814,7 @@
                 case 71: case 73: case 75: return { desc: "Snowfall", icon: "❄️" };
                 case 80: case 81: case 82: return { desc: "Showers", icon: "🌦️" };
                 case 95: case 96: case 99: return { desc: "Thunderstorm", icon: "⛈️⚡" };
-                default: return { desc: "Clear", icon: "☀️" };
+                default: return { desc: "Clear", icon: isDay ? "☀️" : "🌙" };
             }
         }
 
@@ -429,12 +837,12 @@
             clockTimer = setInterval(tick, 1000);
         }
 
+        /* ================= LOAD FORECAST TELEMETRY ================= */
         async function loadData() {
             if (detailsCityName) detailsCityName.textContent = cityName;
             if (unitBtn) unitBtn.querySelector(".btn-text").textContent = `°${unit}`;
             initTheme();
 
-            // Set initial active tab state based on URL
             if (activeTab === "tomorrow") {
                 if (tabTomorrow) tabTomorrow.classList.add("active");
                 if (tabToday) tabToday.classList.remove("active");
@@ -459,13 +867,14 @@
             }
         }
 
+        /* ================= RENDER DETAILS 3D VIEW & TABLE ================= */
         function renderDetailsView() {
             if (!fullData || !fullData.hourly) return;
             const daily = fullData.daily;
             const hourly = fullData.hourly;
             const dayIdx = (activeTab === "today") ? 0 : 1;
 
-            // Summary Cards
+            // Summary Metrics
             const maxT = formatTemp(daily.temperature_2m_max?.[dayIdx]);
             const minT = formatTemp(daily.temperature_2m_min?.[dayIdx]);
             if (sumTempRange) sumTempRange.textContent = `H: ${maxT}°${unit} • L: ${minT}°${unit}`;
@@ -476,16 +885,19 @@
             const ss = daily.sunset?.[dayIdx]?.split("T")[1] || "--:--";
             if (sumSun) sumSun.textContent = `↑${sr}  ↓${ss}`;
 
-            // Hourly rows (24 hours for chosen day)
+            // Hourly Range
             const startHour = dayIdx * 24;
             const endHour = startHour + 24;
+
             if (detailsHourlyBody) detailsHourlyBody.innerHTML = "";
+            if (detailsHourlyStrip) detailsHourlyStrip.innerHTML = "";
 
             for (let i = startHour; i < Math.min(endHour, hourly.time.length); i++) {
                 const iso = hourly.time[i];
                 const hNum = parseInt(iso.split("T")[1].split(":")[0], 10);
                 const timeStr = `${hNum % 12 || 12}:00 ${hNum >= 12 ? "PM" : "AM"}`;
-                const info = getWeatherInfo(hourly.weather_code[i]);
+                const isDay = (hNum >= 6 && hNum < 19) ? 1 : 0;
+                const info = getWeatherInfo(hourly.weather_code[i], isDay);
                 const t = formatTemp(hourly.temperature_2m[i]);
                 const appT = formatTemp(hourly.apparent_temperature[i]);
                 const rain = hourly.precipitation_probability ? (hourly.precipitation_probability[i] || 0) : 0;
@@ -493,7 +905,31 @@
                 const press = Math.round(hourly.surface_pressure[i] || 1013);
                 const hum = hourly.relative_humidity_2m[i] || "--";
 
+                // 1. Render 3D Hourly Strip Card
+                const stripCard = document.createElement("div");
+                stripCard.className = "details-hourly-card-3d";
+                stripCard.dataset.rowIndex = i;
+                stripCard.innerHTML = `
+                    <div class="card-glare"></div>
+                    <div class="hourly-card-time">${timeStr}</div>
+                    <div class="hourly-card-icon">${info.icon}</div>
+                    <div class="hourly-card-temp">${t}°</div>
+                    <div class="hourly-card-rain ${rain > 0 ? "" : "placeholder"}">💧 ${rain}%</div>
+                    <div class="hourly-card-wind">${wind}</div>
+                `;
+
+                stripCard.addEventListener("click", () => {
+                    document.querySelectorAll(".details-hourly-card-3d").forEach(c => c.classList.remove("active"));
+                    stripCard.classList.add("active");
+                    highlightTableRow(i);
+                });
+
+                if (detailsHourlyStrip) detailsHourlyStrip.appendChild(stripCard);
+
+                // 2. Render Full Data Table Row
                 const tr = document.createElement("tr");
+                tr.id = `row-hour-${i}`;
+                tr.dataset.cardIndex = i;
                 tr.innerHTML = `
                     <td class="table-time">${timeStr}</td>
                     <td>
@@ -509,11 +945,298 @@
                     <td>${press} hPa</td>
                     <td>${hum}%</td>
                 `;
+
+                tr.addEventListener("click", () => {
+                    highlightTableRow(i);
+                    highlightStripCard(i);
+                });
+
                 if (detailsHourlyBody) detailsHourlyBody.appendChild(tr);
+            }
+
+            // Initialize dynamic 3D tilt engine on all cards
+            initDetailsCard3DTilt();
+        }
+
+        function highlightTableRow(index) {
+            document.querySelectorAll("#detailsHourlyBody tr").forEach(r => r.classList.remove("row-highlight-3d"));
+            const targetRow = document.getElementById(`row-hour-${index}`);
+            if (targetRow) {
+                targetRow.classList.add("row-highlight-3d");
+                targetRow.scrollIntoView({ behavior: "smooth", block: "center" });
             }
         }
 
-        loadData();
+        function highlightStripCard(index) {
+            document.querySelectorAll(".details-hourly-card-3d").forEach(c => {
+                if (parseInt(c.dataset.rowIndex, 10) === index) {
+                    c.classList.add("active");
+                    c.scrollIntoView({ behavior: "smooth", inline: "center" });
+                } else {
+                    c.classList.remove("active");
+                }
+            });
+        }
+
+        /* ================= DYNAMIC 3D CARD TILT ENGINE ================= */
+        function initDetailsCard3DTilt() {
+            const cardSelectors = [
+                ".details-hero",
+                ".summary-card",
+                ".details-hourly-card-3d",
+                ".table-wrap"
+            ];
+
+            const cards = document.querySelectorAll(cardSelectors.join(","));
+            cards.forEach(card => {
+                if (card.dataset.tiltInitialized) return;
+                card.dataset.tiltInitialized = "true";
+
+                let rect = null;
+
+                card.addEventListener("mouseenter", () => {
+                    rect = card.getBoundingClientRect();
+                });
+
+                card.addEventListener("mousemove", (e) => {
+                    if (!rect) rect = card.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+                    const mouseY = e.clientY - rect.top;
+
+                    const xPct = (mouseX / rect.width - 0.5) * 2;
+                    const yPct = (mouseY / rect.height - 0.5) * 2;
+
+                    const isBig = card.classList.contains("details-hero") || card.classList.contains("table-wrap");
+                    const maxTilt = isBig ? 3.5 : 8;
+                    const tiltX = -yPct * maxTilt;
+                    const tiltY = xPct * maxTilt;
+
+                    card.style.transform = `perspective(1000px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) translateY(-6px) translateZ(16px)`;
+
+                    const glare = card.querySelector(".card-glare");
+                    if (glare) {
+                        glare.style.opacity = "0.8";
+                        glare.style.background = `radial-gradient(circle at ${(mouseX / rect.width * 100).toFixed(1)}% ${(mouseY / rect.height * 100).toFixed(1)}%, rgba(255, 255, 255, 0.4) 0%, transparent 65%)`;
+                    }
+                });
+
+                card.addEventListener("mouseleave", () => {
+                    card.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0) translateZ(0)";
+                    const glare = card.querySelector(".card-glare");
+                    if (glare) {
+                        glare.style.opacity = "0.4";
+                    }
+                    rect = null;
+                });
+
+                // Touch support for mobile devices
+                card.addEventListener("touchmove", (e) => {
+                    if (!e.touches || !e.touches[0]) return;
+                    if (!rect) rect = card.getBoundingClientRect();
+                    const touch = e.touches[0];
+                    const touchX = touch.clientX - rect.left;
+                    const touchY = touch.clientY - rect.top;
+                    if (touchX < 0 || touchX > rect.width || touchY < 0 || touchY > rect.height) return;
+
+                    const xPct = (touchX / rect.width - 0.5) * 2;
+                    const yPct = (touchY / rect.height - 0.5) * 2;
+                    const maxTilt = 4;
+                    card.style.transform = `perspective(1000px) rotateX(${(-yPct * maxTilt).toFixed(2)}deg) rotateY(${(xPct * maxTilt).toFixed(2)}deg) translateY(-4px)`;
+                }, { passive: true });
+
+                card.addEventListener("touchend", () => {
+                    card.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)";
+                    rect = null;
+                });
+            });
+        }
+
+        /* ================= HIGH-IMPACT 3D WEBGL ATMOSPHERIC PLANETARIUM ================= */
+        let threeScene, threeCamera, threeRenderer;
+        let threeCelestialGlobe, threeOrbitRing, threeOrbitRing2, threeStarParticles, threeStarMaterial;
+        let targetCameraX = 0, targetCameraY = 0;
+
+        function initThreePlanetarium() {
+            try {
+                const canvas = document.getElementById("threeCanvas");
+                if (!canvas || typeof THREE === "undefined") return;
+
+                threeScene = new THREE.Scene();
+                threeCamera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+                threeCamera.position.z = 32;
+
+                threeRenderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "high-performance" });
+                threeRenderer.setSize(window.innerWidth, window.innerHeight);
+                threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+
+                const isDark = document.body.classList.contains("dark");
+
+                // 1. Central 3D Celestial Wireframe Globe
+                const globeGeo = new THREE.SphereGeometry(14, 28, 28);
+                const globeMat = new THREE.MeshBasicMaterial({
+                    color: isDark ? 0x38bdf8 : 0x0284c7,
+                    wireframe: true,
+                    transparent: true,
+                    opacity: isDark ? 0.38 : 0.24
+                });
+                threeCelestialGlobe = new THREE.Mesh(globeGeo, globeMat);
+                threeCelestialGlobe.position.set(0, -2, -5);
+                threeScene.add(threeCelestialGlobe);
+
+                // 2. 3D Primary Planetary Orbit Ring
+                const ringGeo = new THREE.RingGeometry(18, 18.7, 64);
+                const ringMat = new THREE.MeshBasicMaterial({
+                    color: isDark ? 0xa855f7 : 0xf59e0b,
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: isDark ? 0.45 : 0.32
+                });
+                threeOrbitRing = new THREE.Mesh(ringGeo, ringMat);
+                threeOrbitRing.rotation.x = Math.PI / 2.6;
+                threeOrbitRing.rotation.y = Math.PI / 8;
+                threeOrbitRing.position.set(0, -2, -5);
+                threeScene.add(threeOrbitRing);
+
+                // 3. 3D Secondary Concentric Ring
+                const ring2Geo = new THREE.RingGeometry(22, 22.6, 64);
+                const ring2Mat = new THREE.MeshBasicMaterial({
+                    color: isDark ? 0x22d3ee : 0x06b6d4,
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: isDark ? 0.35 : 0.22
+                });
+                threeOrbitRing2 = new THREE.Mesh(ring2Geo, ring2Mat);
+                threeOrbitRing2.rotation.x = Math.PI / 3.4;
+                threeOrbitRing2.rotation.y = -Math.PI / 6;
+                threeOrbitRing2.position.set(0, -2, -5);
+                threeScene.add(threeOrbitRing2);
+
+                // 4. Floating 3D Celestial Particles (240 points)
+                const particleCount = 240;
+                const particleGeo = new THREE.BufferGeometry();
+                const posArray = new Float32Array(particleCount * 3);
+                const colorArray = new Float32Array(particleCount * 3);
+
+                for (let i = 0; i < particleCount * 3; i += 3) {
+                    posArray[i] = (Math.random() - 0.5) * 80;
+                    posArray[i + 1] = (Math.random() - 0.5) * 70;
+                    posArray[i + 2] = (Math.random() - 0.5) * 50;
+
+                    if (isDark) {
+                        colorArray[i] = 0.2 + Math.random() * 0.4;
+                        colorArray[i + 1] = 0.7 + Math.random() * 0.3;
+                        colorArray[i + 2] = 1.0;
+                    } else {
+                        colorArray[i] = 0.96;
+                        colorArray[i + 1] = 0.7 + Math.random() * 0.25;
+                        colorArray[i + 2] = 0.2 + Math.random() * 0.3;
+                    }
+                }
+
+                particleGeo.setAttribute("position", new THREE.BufferAttribute(posArray, 3));
+                particleGeo.setAttribute("color", new THREE.BufferAttribute(colorArray, 3));
+
+                threeStarMaterial = new THREE.PointsMaterial({
+                    size: 2.2,
+                    vertexColors: true,
+                    transparent: true,
+                    opacity: isDark ? 0.85 : 0.70,
+                    blending: THREE.AdditiveBlending
+                });
+
+                threeStarParticles = new THREE.Points(particleGeo, threeStarMaterial);
+                threeScene.add(threeStarParticles);
+
+                // Mouse Parallax
+                window.addEventListener("mousemove", (e) => {
+                    const normX = (e.clientX / window.innerWidth) * 2 - 1;
+                    const normY = -(e.clientY / window.innerHeight) * 2 + 1;
+                    targetCameraX = normX * 4;
+                    targetCameraY = normY * 3;
+                });
+
+                window.addEventListener("resize", () => {
+                    if (!threeCamera || !threeRenderer) return;
+                    threeCamera.aspect = window.innerWidth / window.innerHeight;
+                    threeCamera.updateProjectionMatrix();
+                    threeRenderer.setSize(window.innerWidth, window.innerHeight);
+                });
+
+                function animate() {
+                    requestAnimationFrame(animate);
+
+                    if (threeCelestialGlobe) {
+                        threeCelestialGlobe.rotation.y += 0.0014;
+                        threeCelestialGlobe.rotation.x += 0.0005;
+                    }
+                    if (threeOrbitRing) {
+                        threeOrbitRing.rotation.z += 0.0018;
+                    }
+                    if (threeOrbitRing2) {
+                        threeOrbitRing2.rotation.z -= 0.0015;
+                    }
+                    if (threeStarParticles) {
+                        threeStarParticles.rotation.y += 0.0008;
+                    }
+
+                    if (threeCamera) {
+                        threeCamera.position.x += (targetCameraX - threeCamera.position.x) * 0.05;
+                        threeCamera.position.y += (targetCameraY - threeCamera.position.y) * 0.05;
+                        threeCamera.lookAt(0, 0, 0);
+                    }
+
+                    threeRenderer.render(threeScene, threeCamera);
+                }
+
+                animate();
+            } catch (err) {
+                console.warn("Three.js WebGL background notice:", err);
+            }
+        }
+
+        function updateThreeJSPalette() {
+            if (!threeScene) return;
+            const isDark = document.body.classList.contains("dark");
+
+            if (threeCelestialGlobe && threeCelestialGlobe.material) {
+                threeCelestialGlobe.material.color.setHex(isDark ? 0x38bdf8 : 0x0284c7);
+                threeCelestialGlobe.material.opacity = isDark ? 0.38 : 0.24;
+            }
+            if (threeOrbitRing && threeOrbitRing.material) {
+                threeOrbitRing.material.color.setHex(isDark ? 0xa855f7 : 0xf59e0b);
+                threeOrbitRing.material.opacity = isDark ? 0.45 : 0.32;
+            }
+            if (threeOrbitRing2 && threeOrbitRing2.material) {
+                threeOrbitRing2.material.color.setHex(isDark ? 0x22d3ee : 0x06b6d4);
+                threeOrbitRing2.material.opacity = isDark ? 0.35 : 0.22;
+            }
+            if (threeStarParticles && threeStarParticles.geometry) {
+                const colors = threeStarParticles.geometry.attributes.color.array;
+                const count = colors.length / 3;
+
+                for (let i = 0; i < count * 3; i += 3) {
+                    if (isDark) {
+                        colors[i] = 0.2 + Math.random() * 0.4;
+                        colors[i + 1] = 0.7 + Math.random() * 0.3;
+                        colors[i + 2] = 1.0;
+                    } else {
+                        colors[i] = 0.96;
+                        colors[i + 1] = 0.7 + Math.random() * 0.25;
+                        colors[i + 2] = 0.2 + Math.random() * 0.3;
+                    }
+                }
+                threeStarParticles.geometry.attributes.color.needsUpdate = true;
+            }
+            if (threeStarMaterial) {
+                threeStarMaterial.opacity = isDark ? 0.85 : 0.70;
+            }
+        }
+
+        // Initialize WebGL planetarium and load data
+        window.addEventListener("DOMContentLoaded", () => {
+            initThreePlanetarium();
+            loadData();
+        });
     </script>
 </body>
 
