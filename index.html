@@ -19,7 +19,7 @@
 
     <title>WeatherWise 3D | Real-Time Atmospheric Station</title>
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=5.0">
 </head>
 
 <body>
@@ -48,6 +48,7 @@
                 </div>
             </div>
             <div class="welcome-actions">
+                <button type="button" class="welcome-auth-pill" onclick="window.openAuthModal && window.openAuthModal()">⭐ Sign In / Mohammad</button>
                 <button class="welcome-close-btn" onclick="window.dismissWelcomeBanner && window.dismissWelcomeBanner()" title="Close greeting" aria-label="Close greeting">✕</button>
             </div>
         </aside>
@@ -229,6 +230,7 @@
 
                     <!-- 3D ROTATING WIND VECTOR COMPASS -->
                     <div class="monitoring-card-3d card-3d-interactive">
+                        <div class="card-glare"></div>
                         <div class="monitor-card-header">
                             <span class="monitor-icon">🧭</span>
                             <h4>3D Rotating Wind Compass</h4>
@@ -272,6 +274,7 @@
 
                     <!-- BAROMETRIC PRESSURE MONITOR -->
                     <div class="monitoring-card-3d card-3d-interactive">
+                        <div class="card-glare"></div>
                         <div class="monitor-card-header">
                             <span class="monitor-icon">📊</span>
                             <h4>Barometric Pressure Gauge</h4>
@@ -280,8 +283,8 @@
                         <div class="pressure-gauge-stage">
                             <div class="gauge-dial">
                                 <div class="pressure-number-box">
-                                    <span id="pressureNumber" class="big-pressure">1014</span>
-                                    <span class="pressure-unit">hPa</span>
+                                     <span id="pressureNumber" class="big-pressure">1014</span>
+                                     <span class="pressure-unit">hPa</span>
                                 </div>
                                 <div id="pressureTrendPill" class="trend-pill trend-steady">
                                     <span id="trendIcon">➡️</span> <span id="trendText">Steady Barometer</span>
@@ -315,6 +318,7 @@
 
                     <!-- ATMOSPHERIC MOISTURE & UV METRICS -->
                     <div class="monitoring-card-3d card-3d-interactive">
+                        <div class="card-glare"></div>
                         <div class="monitor-card-header">
                             <span class="monitor-icon">💧</span>
                             <h4>Moisture, UV & Apparent</h4>
@@ -368,7 +372,8 @@
                     </span>
                 </div>
 
-                <div class="celestial-dome-card-3d card-3d-glow" id="celestialDomeCard">
+                <div class="celestial-dome-card-3d card-3d-glow card-3d-interactive" id="celestialDomeCard">
+                    <div class="card-glare"></div>
                     <div class="dome-meta-header">
                         <div class="dome-info">
                             <h3 id="celestialHeading">Sun Orbit Trajectory (Sunrise to Sunset)</h3>
@@ -487,127 +492,6 @@
 
         </main>
 
-
-        <!-- ================= USER ACCOUNT & SPECIAL CITIES MODAL (GENUINE & FRICTIONLESS) ================= -->
-        <div id="authModal" class="modal-overlay" style="display: none;" onclick="if(event.target === this) window.closeAuthModal && window.closeAuthModal()">
-            <div class="modal-card-3d">
-                <div class="modal-header">
-                    <div class="modal-title-wrap">
-                        <span class="modal-icon">✨</span>
-                        <h3 id="modalTitle">WeatherWise Account</h3>
-                    </div>
-                    <button class="modal-close-btn" onclick="window.closeAuthModal && window.closeAuthModal()" title="Close modal">✕</button>
-                </div>
-
-                <!-- 1-CLICK INSTANT DEMO LOGIN BUTTON -->
-                <div id="quickLoginBox" class="quick-login-box">
-                    <button type="button" class="quick-login-btn" onclick="window.quickDemoLogin && window.quickDemoLogin('Mohammad')">
-                        <span>🚀</span> Instant 1-Click Login (as Mohammad)
-                    </button>
-                    <div class="quick-login-divider"><span>or enter your name</span></div>
-                </div>
-
-                <!-- AUTH TABS -->
-                <div class="auth-tabs" id="authTabs">
-                    <button id="tabSignIn" class="auth-tab-btn active" onclick="window.switchAuthTab && window.switchAuthTab('signin')">Sign In</button>
-                    <button id="tabSignUp" class="auth-tab-btn" onclick="window.switchAuthTab && window.switchAuthTab('signup')">Create Account</button>
-                </div>
-
-                <div id="authAlert" class="auth-alert" style="display: none;"></div>
-
-                <!-- SMART SIGN IN FORM (AUTO-LOGS IN OR REGISTERS) -->
-                <form id="signInForm" class="auth-form" onsubmit="window.handleSignIn && window.handleSignIn(event)">
-                    <div class="form-group">
-                        <label for="signInEmail">Your Name or Username</label>
-                        <input type="text" id="signInEmail" placeholder="e.g., Mohammad" required autocomplete="username">
-                    </div>
-                    <div class="form-group">
-                        <label for="signInPassword">Password</label>
-                        <input type="password" id="signInPassword" placeholder="Enter any password" required autocomplete="current-password">
-                    </div>
-                    <button type="submit" class="auth-submit-btn">
-                        <span>Sign In & Sync Special Cities</span>
-                    </button>
-                </form>
-
-                <!-- SIGN UP FORM -->
-                <form id="signUpForm" class="auth-form" style="display: none;" onsubmit="window.handleSignUp && window.handleSignUp(event)">
-                    <div class="form-group">
-                        <label for="signUpName">Your Name</label>
-                        <input type="text" id="signUpName" placeholder="e.g., Mohammad" required autocomplete="name">
-                    </div>
-                    <div class="form-group">
-                        <label for="signUpEmail">Email / Username</label>
-                        <input type="text" id="signUpEmail" placeholder="Choose username or email" required autocomplete="username">
-                    </div>
-                    <div class="form-group">
-                        <label for="signUpPassword">Create Password</label>
-                        <input type="password" id="signUpPassword" placeholder="Create your password" required autocomplete="new-password">
-                    </div>
-                    <button type="submit" class="auth-submit-btn">
-                        <span>Create Account & Start Saving</span>
-                    </button>
-                </form>
-
-                <!-- LOGGED-IN PROFILE & SPECIAL CITIES VIEW -->
-                <div id="profileView" class="profile-view" style="display: none;">
-                    <div class="profile-user-badge">
-                        <div class="profile-avatar" id="profileAvatar">👤</div>
-                        <div class="profile-info">
-                            <h4 id="profileUserName">User Name</h4>
-                            <p id="profileUserEmail">user@example.com</p>
-                        </div>
-                    </div>
-
-                    <div class="special-cities-box">
-                        <div class="special-cities-header">
-                            <h4>⭐ My Special & Favorite Cities</h4>
-                            <span class="special-cities-count" id="specialCitiesCount">0 cities</span>
-                        </div>
-                        <p class="special-cities-tip">Click any city to view its live weather instantly:</p>
-                        <div id="specialCitiesList" class="special-cities-list">
-                            <!-- Populated dynamically -->
-                        </div>
-                    </div>
-
-                    <button class="auth-logout-btn" onclick="window.handleLogout && window.handleLogout()">
-                        <span>🚪</span> Sign Out
-                    </button>
-                </div>
-            </div>
-        </div>
-
-
-        <!-- ================= SAVE SPECIAL CITY DIALOG ================= -->
-        <div id="saveSpecialModal" class="modal-overlay" style="display: none;" onclick="if(event.target === this) window.closeSaveSpecialModal && window.closeSaveSpecialModal()">
-            <div class="modal-card-3d modal-card-sm">
-                <div class="modal-header">
-                    <div class="modal-title-wrap">
-                        <span class="modal-icon">⭐</span>
-                        <h3>Save Special City</h3>
-                    </div>
-                    <button class="modal-close-btn" onclick="window.closeSaveSpecialModal && window.closeSaveSpecialModal()">✕</button>
-                </div>
-
-                <div class="save-special-body">
-                    <p class="save-special-city-name" id="saveSpecialCityLabel">London, United Kingdom</p>
-                    
-                    <label class="save-special-label">Select Special Category:</label>
-                    <div class="tag-selector-grid">
-                        <button type="button" class="tag-pill active" data-tag="Home" onclick="window.selectSpecialTag && window.selectSpecialTag(this, 'Home')">🏠 Home</button>
-                        <button type="button" class="tag-pill" data-tag="Work" onclick="window.selectSpecialTag && window.selectSpecialTag(this, 'Work')">💼 Work</button>
-                        <button type="button" class="tag-pill" data-tag="Vacation" onclick="window.selectSpecialTag && window.selectSpecialTag(this, 'Vacation')">🏖️ Vacation</button>
-                        <button type="button" class="tag-pill" data-tag="Special" onclick="window.selectSpecialTag && window.selectSpecialTag(this, 'Special')">⭐ Special</button>
-                    </div>
-
-                    <button class="auth-submit-btn" style="margin-top: 20px;" onclick="window.confirmSaveSpecialCity && window.confirmSaveSpecialCity()">
-                        <span>Save to My Special Cities</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-
         <!-- ================= FOOTER ================= -->
         <footer class="footer-3d">
             <p>
@@ -618,10 +502,129 @@
             </p>
         </footer>
 
+    </div> <!-- END .app -->
+
+    <!-- ================= USER ACCOUNT & SPECIAL CITIES MODAL (OUTSIDE .app FOR TRUE FULL-SCREEN 3D POPUP) ================= -->
+    <div id="authModal" class="modal-overlay" style="display: none;" onclick="if(event.target === this) window.closeAuthModal && window.closeAuthModal()">
+        <div class="modal-card-3d">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <span class="modal-icon">✨</span>
+                    <h3 id="modalTitle">WeatherWise Account</h3>
+                </div>
+                <button class="modal-close-btn" onclick="window.closeAuthModal && window.closeAuthModal()" title="Close modal">✕</button>
+            </div>
+
+            <!-- 1-CLICK INSTANT DEMO LOGIN BUTTON -->
+            <div id="quickLoginBox" class="quick-login-box">
+                <button type="button" class="quick-login-btn" onclick="window.quickDemoLogin && window.quickDemoLogin('Mohammad')">
+                    <span>🚀</span> Instant 1-Click Login (as Mohammad)
+                </button>
+                <div class="quick-login-divider"><span>or enter your name</span></div>
+            </div>
+
+            <!-- AUTH TABS -->
+            <div class="auth-tabs" id="authTabs">
+                <button id="tabSignIn" class="auth-tab-btn active" onclick="window.switchAuthTab && window.switchAuthTab('signin')">Sign In</button>
+                <button id="tabSignUp" class="auth-tab-btn" onclick="window.switchAuthTab && window.switchAuthTab('signup')">Create Account</button>
+            </div>
+
+            <div id="authAlert" class="auth-alert" style="display: none;"></div>
+
+            <!-- SMART SIGN IN FORM (AUTO-LOGS IN OR REGISTERS) -->
+            <form id="signInForm" class="auth-form" onsubmit="window.handleSignIn && window.handleSignIn(event)">
+                <div class="form-group">
+                    <label for="signInEmail">Your Name or Username</label>
+                    <input type="text" id="signInEmail" placeholder="e.g., Mohammad" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="signInPassword">Password (Optional)</label>
+                    <input type="password" id="signInPassword" placeholder="Enter any password (optional)" autocomplete="current-password">
+                </div>
+                <button type="submit" class="auth-submit-btn">
+                    <span>Sign In & Sync Special Cities</span>
+                </button>
+            </form>
+
+            <!-- SIGN UP FORM -->
+            <form id="signUpForm" class="auth-form" style="display: none;" onsubmit="window.handleSignUp && window.handleSignUp(event)">
+                <div class="form-group">
+                    <label for="signUpName">Your Name</label>
+                    <input type="text" id="signUpName" placeholder="e.g., Mohammad" required autocomplete="name">
+                </div>
+                <div class="form-group">
+                    <label for="signUpEmail">Email / Username</label>
+                    <input type="text" id="signUpEmail" placeholder="Choose username or email" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="signUpPassword">Create Password (Optional)</label>
+                    <input type="password" id="signUpPassword" placeholder="Create your password (optional)" autocomplete="new-password">
+                </div>
+                <button type="submit" class="auth-submit-btn">
+                    <span>Create Account & Start Saving</span>
+                </button>
+            </form>
+
+            <!-- LOGGED-IN PROFILE & SPECIAL CITIES VIEW -->
+            <div id="profileView" class="profile-view" style="display: none;">
+                <div class="profile-user-badge">
+                    <div class="profile-avatar" id="profileAvatar">👤</div>
+                    <div class="profile-info">
+                        <h4 id="profileUserName">User Name</h4>
+                        <p id="profileUserEmail">user@example.com</p>
+                    </div>
+                </div>
+
+                <div class="special-cities-box">
+                    <div class="special-cities-header">
+                        <h4>⭐ My Special & Favorite Cities</h4>
+                        <span class="special-cities-count" id="specialCitiesCount">0 cities</span>
+                    </div>
+                    <p class="special-cities-tip">Click any city to view its live weather instantly:</p>
+                    <div id="specialCitiesList" class="special-cities-list">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <button class="auth-logout-btn" onclick="window.handleLogout && window.handleLogout()">
+                    <span>🚪</span> Sign Out
+                </button>
+            </div>
+        </div>
     </div>
 
-    <!-- MAIN JAVASCRIPT -->
-    <script src="script.js"></script>
+
+    <!-- ================= SAVE SPECIAL CITY DIALOG ================= -->
+    <div id="saveSpecialModal" class="modal-overlay" style="display: none;" onclick="if(event.target === this) window.closeSaveSpecialModal && window.closeSaveSpecialModal()">
+        <div class="modal-card-3d modal-card-sm">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <span class="modal-icon">⭐</span>
+                    <h3>Save Special City</h3>
+                </div>
+                <button class="modal-close-btn" onclick="window.closeSaveSpecialModal && window.closeSaveSpecialModal()">✕</button>
+            </div>
+
+            <div class="save-special-body">
+                <p class="save-special-city-name" id="saveSpecialCityLabel">London, United Kingdom</p>
+                
+                <label class="save-special-label">Select Special Category:</label>
+                <div class="tag-selector-grid">
+                    <button type="button" class="tag-pill active" data-tag="Home" onclick="window.selectSpecialTag && window.selectSpecialTag(this, 'Home')">🏠 Home</button>
+                    <button type="button" class="tag-pill" data-tag="Work" onclick="window.selectSpecialTag && window.selectSpecialTag(this, 'Work')">💼 Work</button>
+                    <button type="button" class="tag-pill" data-tag="Vacation" onclick="window.selectSpecialTag && window.selectSpecialTag(this, 'Vacation')">🏖️ Vacation</button>
+                    <button type="button" class="tag-pill" data-tag="Special" onclick="window.selectSpecialTag && window.selectSpecialTag(this, 'Special')">⭐ Special</button>
+                </div>
+
+                <button class="auth-submit-btn" style="margin-top: 20px;" onclick="window.confirmSaveSpecialCity && window.confirmSaveSpecialCity()">
+                    <span>Save to My Special Cities</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN JAVASCRIPT WITH CACHE BUSTING -->
+    <script src="script.js?v=5.0"></script>
 </body>
 
 </html>

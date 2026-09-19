@@ -48,6 +48,7 @@ let threeCamera = null;
 let threeRenderer = null;
 let threeCelestialGlobe = null;
 let threeOrbitRing = null;
+let threeOrbitRing2 = null;
 let threeStarParticles = null;
 let threeStarMaterial = null;
 let targetCameraX = 0;
@@ -59,6 +60,7 @@ window.toggleUnit = toggleUnit;
 window.switchHourlyDay = switchHourlyDay;
 window.openAuthModal = openAuthModal;
 window.closeAuthModal = closeAuthModal;
+window.initCard3DTilt = initCard3DTilt;
 window.switchAuthTab = switchAuthTab;
 window.handleSignIn = handleSignIn;
 window.handleSignUp = handleSignUp;
@@ -328,11 +330,17 @@ function openAuthModal() {
     }
 
     modal.style.display = "flex";
+    modal.style.opacity = "1";
+    modal.style.visibility = "visible";
+    modal.style.pointerEvents = "auto";
 }
 
 function closeAuthModal() {
     const modal = document.getElementById("authModal");
-    if (modal) modal.style.display = "none";
+    if (modal) {
+        modal.style.display = "none";
+        modal.style.opacity = "0";
+    }
 }
 
 function switchAuthTab(tab) {
@@ -380,9 +388,16 @@ function quickDemoLogin(userName = "Mohammad") {
 // Smart Unified Login: If user exists, log in; if new, auto-registers seamlessly!
 function handleSignIn(e) {
     if (e) e.preventDefault();
-    const input = document.getElementById("signInEmail").value.trim();
-    const pass = document.getElementById("signInPassword").value.trim();
-    if (!input) return;
+    const inputEl = document.getElementById("signInEmail");
+    const passEl = document.getElementById("signInPassword");
+    const input = inputEl ? inputEl.value.trim() : "";
+    const pass = passEl ? passEl.value.trim() : "";
+
+    // If blank, instantly log in as Mohammad
+    if (!input) {
+        quickDemoLogin("Mohammad");
+        return;
+    }
 
     const users = getUsers();
     let found = users.find(u => u.name.toLowerCase() === input.toLowerCase() || u.email.toLowerCase() === input.toLowerCase());
@@ -1073,6 +1088,7 @@ function renderHourlyStream(hourly, timezone, dayMode = "today") {
 
         hourlyContainer.appendChild(card);
     }
+    initCard3DTilt();
 }
 
 function updateOpenDetailsLink() {
@@ -1109,19 +1125,19 @@ function initHighImpactThreeJS() {
             color: isDark ? 0x38bdf8 : 0x0284c7,
             wireframe: true,
             transparent: true,
-            opacity: isDark ? 0.18 : 0.12
+            opacity: isDark ? 0.38 : 0.24
         });
         threeCelestialGlobe = new THREE.Mesh(globeGeo, globeMat);
         threeCelestialGlobe.position.set(0, -2, -5);
         threeScene.add(threeCelestialGlobe);
 
-        // 2. 3D Planetary Orbit Ring
-        const ringGeo = new THREE.RingGeometry(18, 18.6, 64);
+        // 2. 3D Primary Planetary Orbit Ring
+        const ringGeo = new THREE.RingGeometry(18, 18.7, 64);
         const ringMat = new THREE.MeshBasicMaterial({
             color: isDark ? 0xa855f7 : 0xf59e0b,
             side: THREE.DoubleSide,
             transparent: true,
-            opacity: isDark ? 0.22 : 0.16
+            opacity: isDark ? 0.45 : 0.32
         });
         threeOrbitRing = new THREE.Mesh(ringGeo, ringMat);
         threeOrbitRing.rotation.x = Math.PI / 2.6;
@@ -1129,16 +1145,30 @@ function initHighImpactThreeJS() {
         threeOrbitRing.position.set(0, -2, -5);
         threeScene.add(threeOrbitRing);
 
-        // 3. Floating 3D Celestial Particles
-        const particleCount = 120;
+        // 3. 3D Secondary Concentric Ring
+        const ring2Geo = new THREE.RingGeometry(22, 22.6, 64);
+        const ring2Mat = new THREE.MeshBasicMaterial({
+            color: isDark ? 0x22d3ee : 0x06b6d4,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: isDark ? 0.35 : 0.22
+        });
+        threeOrbitRing2 = new THREE.Mesh(ring2Geo, ring2Mat);
+        threeOrbitRing2.rotation.x = Math.PI / 3.4;
+        threeOrbitRing2.rotation.y = -Math.PI / 6;
+        threeOrbitRing2.position.set(0, -2, -5);
+        threeScene.add(threeOrbitRing2);
+
+        // 4. Floating 3D Celestial Particles (240 points)
+        const particleCount = 240;
         const particleGeo = new THREE.BufferGeometry();
         const posArray = new Float32Array(particleCount * 3);
         const colorArray = new Float32Array(particleCount * 3);
 
         for (let i = 0; i < particleCount * 3; i += 3) {
-            posArray[i] = (Math.random() - 0.5) * 70;
-            posArray[i + 1] = (Math.random() - 0.5) * 60;
-            posArray[i + 2] = (Math.random() - 0.5) * 40;
+            posArray[i] = (Math.random() - 0.5) * 80;
+            posArray[i + 1] = (Math.random() - 0.5) * 70;
+            posArray[i + 2] = (Math.random() - 0.5) * 50;
 
             if (isDark) {
                 // Night colors: Cyan, Indigo, Silver
@@ -1157,10 +1187,10 @@ function initHighImpactThreeJS() {
         particleGeo.setAttribute("color", new THREE.BufferAttribute(colorArray, 3));
 
         threeStarMaterial = new THREE.PointsMaterial({
-            size: 1.1,
+            size: 2.2,
             vertexColors: true,
             transparent: true,
-            opacity: isDark ? 0.7 : 0.55,
+            opacity: isDark ? 0.85 : 0.70,
             blending: THREE.AdditiveBlending
         });
 
@@ -1171,8 +1201,8 @@ function initHighImpactThreeJS() {
         window.addEventListener("mousemove", (e) => {
             const normX = (e.clientX / window.innerWidth) * 2 - 1;
             const normY = -(e.clientY / window.innerHeight) * 2 + 1;
-            targetCameraX = normX * 3;
-            targetCameraY = normY * 2;
+            targetCameraX = normX * 4;
+            targetCameraY = normY * 3;
         });
 
         window.addEventListener("resize", () => {
@@ -1187,20 +1217,23 @@ function initHighImpactThreeJS() {
 
             // Rotate 3D celestial elements
             if (threeCelestialGlobe) {
-                threeCelestialGlobe.rotation.y += 0.0012;
-                threeCelestialGlobe.rotation.x += 0.0004;
+                threeCelestialGlobe.rotation.y += 0.0014;
+                threeCelestialGlobe.rotation.x += 0.0005;
             }
             if (threeOrbitRing) {
-                threeOrbitRing.rotation.z += 0.0015;
+                threeOrbitRing.rotation.z += 0.0018;
+            }
+            if (threeOrbitRing2) {
+                threeOrbitRing2.rotation.z -= 0.0015;
             }
             if (threeStarParticles) {
-                threeStarParticles.rotation.y += 0.0006;
+                threeStarParticles.rotation.y += 0.0008;
             }
 
             // Smooth parallax lerp
             if (threeCamera) {
-                threeCamera.position.x += (targetCameraX - threeCamera.position.x) * 0.04;
-                threeCamera.position.y += (targetCameraY - threeCamera.position.y) * 0.04;
+                threeCamera.position.x += (targetCameraX - threeCamera.position.x) * 0.05;
+                threeCamera.position.y += (targetCameraY - threeCamera.position.y) * 0.05;
                 threeCamera.lookAt(0, 0, 0);
             }
 
@@ -1219,11 +1252,15 @@ function updateThreeJSPalette() {
 
     if (threeCelestialGlobe && threeCelestialGlobe.material) {
         threeCelestialGlobe.material.color.setHex(isDark ? 0x38bdf8 : 0x0284c7);
-        threeCelestialGlobe.material.opacity = isDark ? 0.18 : 0.12;
+        threeCelestialGlobe.material.opacity = isDark ? 0.38 : 0.24;
     }
     if (threeOrbitRing && threeOrbitRing.material) {
         threeOrbitRing.material.color.setHex(isDark ? 0xa855f7 : 0xf59e0b);
-        threeOrbitRing.material.opacity = isDark ? 0.22 : 0.16;
+        threeOrbitRing.material.opacity = isDark ? 0.45 : 0.32;
+    }
+    if (threeOrbitRing2 && threeOrbitRing2.material) {
+        threeOrbitRing2.material.color.setHex(isDark ? 0x22d3ee : 0x06b6d4);
+        threeOrbitRing2.material.opacity = isDark ? 0.35 : 0.22;
     }
     if (threeStarParticles && threeStarParticles.geometry) {
         const colors = threeStarParticles.geometry.attributes.color.array;
@@ -1243,8 +1280,82 @@ function updateThreeJSPalette() {
         threeStarParticles.geometry.attributes.color.needsUpdate = true;
     }
     if (threeStarMaterial) {
-        threeStarMaterial.opacity = isDark ? 0.7 : 0.55;
+        threeStarMaterial.opacity = isDark ? 0.85 : 0.70;
     }
+}
+
+/* ================= 10.1 DYNAMIC 3D TILT ENGINE FOR ALL DASHBOARD BOXES ================= */
+function initCard3DTilt() {
+    const cardSelectors = [
+        ".weather-card-3d",
+        ".monitoring-card-3d",
+        ".celestial-dome-card-3d",
+        ".hourly-card-3d"
+    ];
+
+    const cards = document.querySelectorAll(cardSelectors.join(","));
+    cards.forEach(card => {
+        if (card.dataset.tiltInitialized) return;
+        card.dataset.tiltInitialized = "true";
+
+        let rect = null;
+
+        card.addEventListener("mouseenter", () => {
+            rect = card.getBoundingClientRect();
+        });
+
+        card.addEventListener("mousemove", (e) => {
+            if (!rect) rect = card.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            const xPct = (mouseX / rect.width - 0.5) * 2; // -1 to 1
+            const yPct = (mouseY / rect.height - 0.5) * 2; // -1 to 1
+
+            const maxTilt = 8; // degrees
+            const tiltX = -yPct * maxTilt;
+            const tiltY = xPct * maxTilt;
+
+            card.style.transform = `perspective(1000px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) translateY(-8px) translateZ(16px)`;
+
+            const glare = card.querySelector(".card-glare");
+            if (glare) {
+                glare.style.opacity = "0.85";
+                glare.style.background = `radial-gradient(circle at ${(mouseX / rect.width * 100).toFixed(1)}% ${(mouseY / rect.height * 100).toFixed(1)}%, rgba(255, 255, 255, 0.42) 0%, transparent 65%)`;
+            }
+        });
+
+        card.addEventListener("mouseleave", () => {
+            card.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0) translateZ(0)";
+            const glare = card.querySelector(".card-glare");
+            if (glare) {
+                glare.style.opacity = "0.4";
+            }
+            rect = null;
+        });
+
+        // Touch support for mobile 3D tilt
+        card.addEventListener("touchmove", (e) => {
+            if (!e.touches || !e.touches[0]) return;
+            if (!rect) rect = card.getBoundingClientRect();
+            const touch = e.touches[0];
+            const touchX = touch.clientX - rect.left;
+            const touchY = touch.clientY - rect.top;
+
+            const xPct = Math.max(-1, Math.min(1, (touchX / rect.width - 0.5) * 2));
+            const yPct = Math.max(-1, Math.min(1, (touchY / rect.height - 0.5) * 2));
+
+            const tiltX = -yPct * 7;
+            const tiltY = xPct * 7;
+
+            card.style.transform = `perspective(800px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) translateY(-4px) translateZ(10px)`;
+        }, { passive: true });
+
+        card.addEventListener("touchend", () => {
+            card.style.transform = "perspective(800px) rotateX(0deg) rotateY(0deg) translateY(0) translateZ(0)";
+            rect = null;
+        });
+    });
 }
 
 /* ================= 11. WEATHER DATA RETRIEVAL ================= */
@@ -1506,11 +1617,21 @@ function initApp() {
     const unitBtn = document.getElementById("unitBtn");
     if (unitBtn) unitBtn.innerHTML = `<span class="btn-text">°${currentUnit}</span>`;
 
+    // Explicit event listener on accountBtn
+    const accountBtn = document.getElementById("accountBtn");
+    if (accountBtn) {
+        accountBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            openAuthModal();
+        });
+    }
+
     updateAccountBtnUI();
     initWelcomeExperience();
     startAutoRefreshTimer();
     renderSavedCities();
     initHighImpactThreeJS();
+    initCard3DTilt();
 
     const savedCity = safeStorage.getItem("weatherwise_last_city");
     if (savedCity) {
