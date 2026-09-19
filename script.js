@@ -42,11 +42,18 @@ let isSimulating = false;
 let simInterval = null;
 let simProgress = 0; // 0 to 1
 
-// Three.js Scene References
-let threeParticles = null;
-let threeMaterial = null;
+// Three.js 3D WebGL Planetarium Scene
+let threeScene = null;
+let threeCamera = null;
+let threeRenderer = null;
+let threeCelestialGlobe = null;
+let threeOrbitRing = null;
+let threeStarParticles = null;
+let threeStarMaterial = null;
+let targetCameraX = 0;
+let targetCameraY = 0;
 
-/* ================= EXPOSE CORE HANDLERS ON WINDOW IMMEDIATELY ================= */
+/* ================= EXPOSE ALL HANDLERS ON WINDOW IMMEDIATELY ================= */
 window.toggleTheme = toggleTheme;
 window.toggleUnit = toggleUnit;
 window.switchHourlyDay = switchHourlyDay;
@@ -56,6 +63,7 @@ window.switchAuthTab = switchAuthTab;
 window.handleSignIn = handleSignIn;
 window.handleSignUp = handleSignUp;
 window.handleLogout = handleLogout;
+window.quickDemoLogin = quickDemoLogin;
 window.handleSaveCityClick = handleSaveCityClick;
 window.openSaveSpecialModal = openSaveSpecialModal;
 window.closeSaveSpecialModal = closeSaveSpecialModal;
@@ -84,7 +92,7 @@ function initTheme() {
         document.body.classList.remove("dark");
         if (themeBtn) themeBtn.innerHTML = '<span class="btn-icon">🌙</span>';
     }
-    updateThreeJSParticleColors();
+    updateThreeJSPalette();
 }
 
 function toggleTheme() {
@@ -93,9 +101,8 @@ function toggleTheme() {
     const themeBtn = document.getElementById("themeBtn");
     if (themeBtn) themeBtn.innerHTML = isDark ? '<span class="btn-icon">☀️</span>' : '<span class="btn-icon">🌙</span>';
     safeStorage.setItem("weatherwise_theme", isDark ? "dark" : "light");
-    updateThreeJSParticleColors();
+    updateThreeJSPalette();
 
-    // Re-render celestial dome to apply day/night ambient palette
     if (lastWeatherData) {
         updateCelestialHorizonDome(lastWeatherData.daily, currentTimezone);
     }
@@ -190,13 +197,10 @@ function initWelcomeExperience() {
     }
     if (emojiEl) emojiEl.textContent = emoji;
 
-    // Pick random affirmation
     const randomAffirmation = UPLIFTING_AFFIRMATIONS[Math.floor(Math.random() * UPLIFTING_AFFIRMATIONS.length)];
     if (quoteEl) quoteEl.textContent = `"${randomAffirmation}"`;
 
     banner.style.display = "flex";
-
-    // Trigger gentle celebratory sparkles
     triggerCelebratorySparkles();
 }
 
@@ -216,7 +220,7 @@ function triggerCelebratorySparkles() {
 
     container.innerHTML = "";
     const sparkles = ["✨", "⭐", "💫", "🌟", "☀️"];
-    const count = 14;
+    const count = 16;
 
     for (let i = 0; i < count; i++) {
         const span = document.createElement("span");
@@ -224,22 +228,22 @@ function triggerCelebratorySparkles() {
         span.textContent = sparkles[Math.floor(Math.random() * sparkles.length)];
 
         const startX = Math.random() * 80 + 10;
-        const startY = Math.random() * 20 + 10;
-        const dx = (Math.random() - 0.5) * 80;
-        const dy = -(Math.random() * 60 + 20);
+        const startY = Math.random() * 25 + 5;
+        const dx = (Math.random() - 0.5) * 90;
+        const dy = -(Math.random() * 70 + 20);
 
         span.style.left = `${startX}vw`;
         span.style.top = `${startY}vh`;
         span.style.setProperty("--dx", `${dx}px`);
         span.style.setProperty("--dy", `${dy}px`);
-        span.style.animationDelay = `${Math.random() * 0.8}s`;
+        span.style.animationDelay = `${Math.random() * 0.6}s`;
 
         container.appendChild(span);
-        setTimeout(() => span.remove(), 2800);
+        setTimeout(() => span.remove(), 2400);
     }
 }
 
-/* ================= 4. USER ACCOUNT & SPECIAL CITIES AUTH MANAGER ================= */
+/* ================= 4. GENUINE & FRICTIONLESS LOGIN SYSTEM ================= */
 function getUsers() {
     const data = safeStorage.getItem("weatherwise_users");
     if (!data) return [];
@@ -277,7 +281,7 @@ function updateAccountBtnUI() {
     } else {
         accountBtn.classList.remove("logged-in");
         if (accountBtnIcon) accountBtnIcon.textContent = "👤";
-        if (accountBtnText) accountBtnText.textContent = "Log In";
+        if (accountBtnText) accountBtnText.textContent = "Sign In";
     }
 }
 
@@ -286,6 +290,7 @@ function openAuthModal() {
     if (!modal) return;
 
     const user = getCurrentUser();
+    const quickLoginBox = document.getElementById("quickLoginBox");
     const authTabs = document.getElementById("authTabs");
     const signInForm = document.getElementById("signInForm");
     const signUpForm = document.getElementById("signUpForm");
@@ -298,6 +303,7 @@ function openAuthModal() {
     if (user) {
         // Show Profile View
         if (modalTitle) modalTitle.textContent = `Welcome, ${user.name}!`;
+        if (quickLoginBox) quickLoginBox.style.display = "none";
         if (authTabs) authTabs.style.display = "none";
         if (signInForm) signInForm.style.display = "none";
         if (signUpForm) signUpForm.style.display = "none";
@@ -313,8 +319,9 @@ function openAuthModal() {
 
         renderSpecialCitiesInProfile();
     } else {
-        // Show Sign In / Register
+        // Show Sign In / 1-Click Login
         if (modalTitle) modalTitle.textContent = "WeatherWise Account";
+        if (quickLoginBox) quickLoginBox.style.display = "block";
         if (authTabs) authTabs.style.display = "flex";
         if (profileView) profileView.style.display = "none";
         switchAuthTab("signin");
@@ -350,77 +357,107 @@ function switchAuthTab(tab) {
     }
 }
 
+// 1-Click Instant Demo Login
+function quickDemoLogin(userName = "Mohammad") {
+    const users = getUsers();
+    let found = users.find(u => u.name.toLowerCase() === userName.toLowerCase());
+
+    if (!found) {
+        found = {
+            name: userName,
+            email: `${userName.toLowerCase()}@weatherwise.app`,
+            pass: "demo123",
+            specialCities: getSavedCities()
+        };
+        users.push(found);
+        saveUsers(users);
+    }
+
+    setCurrentUser(found);
+    showLoginSuccess(found.name);
+}
+
+// Smart Unified Login: If user exists, log in; if new, auto-registers seamlessly!
 function handleSignIn(e) {
-    e.preventDefault();
-    const email = document.getElementById("signInEmail").value.trim();
+    if (e) e.preventDefault();
+    const input = document.getElementById("signInEmail").value.trim();
     const pass = document.getElementById("signInPassword").value.trim();
-    const authAlert = document.getElementById("authAlert");
+    if (!input) return;
 
     const users = getUsers();
-    const found = users.find(u => (u.email.toLowerCase() === email.toLowerCase() || u.name.toLowerCase() === email.toLowerCase()) && u.pass === pass);
+    let found = users.find(u => u.name.toLowerCase() === input.toLowerCase() || u.email.toLowerCase() === input.toLowerCase());
 
     if (found) {
         setCurrentUser(found);
-        openAuthModal();
-        triggerCelebratorySparkles();
-        renderSavedCities();
-        updateSaveButtonState();
+        showLoginSuccess(found.name);
     } else {
-        // Allow instant sign-in for seamless experience if no user exists yet
-        if (users.length === 0) {
-            const newUser = { name: email, email: `${email}@weatherwise.app`, pass, specialCities: [] };
-            users.push(newUser);
-            saveUsers(users);
-            setCurrentUser(newUser);
-            openAuthModal();
-            triggerCelebratorySparkles();
-            renderSavedCities();
-            updateSaveButtonState();
-            return;
-        }
-
-        if (authAlert) {
-            authAlert.textContent = "Account not found or password incorrect. Please check your spelling or create a new account.";
-            authAlert.style.display = "block";
-        }
+        // Smart Auto-Registration: user doesn't exist yet, create and log in immediately!
+        const cleanName = input.includes("@") ? input.split("@")[0] : input;
+        const formattedName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+        const newUser = {
+            name: formattedName,
+            email: input.includes("@") ? input : `${input.toLowerCase()}@weatherwise.app`,
+            pass: pass || "123456",
+            specialCities: getSavedCities()
+        };
+        users.push(newUser);
+        saveUsers(users);
+        setCurrentUser(newUser);
+        showLoginSuccess(newUser.name);
     }
 }
 
 function handleSignUp(e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
     const name = document.getElementById("signUpName").value.trim();
     const email = document.getElementById("signUpEmail").value.trim();
     const pass = document.getElementById("signUpPassword").value.trim();
-    const authAlert = document.getElementById("authAlert");
-
-    if (!name || !email || !pass) return;
+    if (!name) return;
 
     const users = getUsers();
-    const existing = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    const existing = users.find(u => u.name.toLowerCase() === name.toLowerCase() || u.email.toLowerCase() === email.toLowerCase());
 
     if (existing) {
-        if (authAlert) {
-            authAlert.textContent = "An account with this email/ID already exists. Please Sign In.";
-            authAlert.style.display = "block";
-        }
+        setCurrentUser(existing);
+        showLoginSuccess(existing.name);
         return;
     }
 
     const newUser = {
         name,
-        email,
-        pass,
-        specialCities: getSavedCities() // migrate any previously saved guest cities
+        email: email || `${name.toLowerCase()}@weatherwise.app`,
+        pass: pass || "123456",
+        specialCities: getSavedCities()
     };
-
     users.push(newUser);
     saveUsers(users);
     setCurrentUser(newUser);
+    showLoginSuccess(newUser.name);
+}
 
-    openAuthModal();
+function showLoginSuccess(name) {
+    const authAlert = document.getElementById("authAlert");
+    if (authAlert) {
+        authAlert.style.display = "block";
+        authAlert.textContent = `🎉 Welcome, ${name}! You are now signed in.`;
+    }
+
     triggerCelebratorySparkles();
     renderSavedCities();
     updateSaveButtonState();
+
+    // Update welcome banner dynamically
+    const greetingEl = document.getElementById("welcomeGreeting");
+    const userTag = document.getElementById("welcomeUserTag");
+    if (greetingEl) greetingEl.textContent = `Welcome back, ${name}! ✨`;
+    if (userTag) {
+        userTag.style.display = "inline-block";
+        userTag.textContent = "⭐ Special Member";
+    }
+
+    setTimeout(() => {
+        closeAuthModal();
+    }, 900);
 }
 
 function handleLogout() {
@@ -428,9 +465,12 @@ function handleLogout() {
     closeAuthModal();
     renderSavedCities();
     updateSaveButtonState();
+
+    const userTag = document.getElementById("welcomeUserTag");
+    if (userTag) userTag.style.display = "none";
 }
 
-/* ================= 5. SPECIAL & FAVORITE CITIES MANAGER ================= */
+/* ================= 5. SPECIAL & FAVORITE CITIES ================= */
 function getSavedCities() {
     const user = getCurrentUser();
     if (user && user.specialCities) {
@@ -455,9 +495,8 @@ function saveCityWithTag(cityObj) {
     if (user) {
         user.specialCities = list;
         setCurrentUser(user);
-        // update in all users store
         const users = getUsers();
-        const uIdx = users.findIndex(u => u.email === user.email);
+        const uIdx = users.findIndex(u => u.name === user.name);
         if (uIdx >= 0) {
             users[uIdx].specialCities = list;
             saveUsers(users);
@@ -478,7 +517,7 @@ function removeCityFromStorage(cityName) {
         user.specialCities = list;
         setCurrentUser(user);
         const users = getUsers();
-        const uIdx = users.findIndex(u => u.email === user.email);
+        const uIdx = users.findIndex(u => u.name === user.name);
         if (uIdx >= 0) {
             users[uIdx].specialCities = list;
             saveUsers(users);
@@ -694,7 +733,7 @@ function startLocationClock(timezone) {
     clockInterval = setInterval(tick, 1000);
 }
 
-/* ================= 7. 3D ROTATING WIND COMPASS & REAL-TIME MONITORING ================= */
+/* ================= 7. 3D ROTATING WIND COMPASS & MONITORING ================= */
 function updateMonitoringDashboard(data) {
     if (!data || !data.current) return;
     const cur = data.current;
@@ -717,7 +756,7 @@ function updateMonitoringDashboard(data) {
     const precipVal = document.getElementById("precipVal");
     const feelsLikeVal = document.getElementById("feelsLikeVal");
 
-    // 1. Compass Needle Rotation
+    // Compass Needle Rotation
     const bearing = Math.round(cur.wind_direction_10m ?? 0);
     if (compassNeedle) {
         compassNeedle.style.transform = `rotate(${bearing}deg)`;
@@ -728,7 +767,7 @@ function updateMonitoringDashboard(data) {
     if (windSpeedVal) windSpeedVal.textContent = formatWind(cur.wind_speed_10m);
     if (windGustsVal) windGustsVal.textContent = formatWind(cur.wind_gusts_10m || (cur.wind_speed_10m * 1.3));
 
-    // 2. Barometric Pressure Gauge
+    // Barometric Pressure Gauge
     const pressure = cur.surface_pressure ?? 1013;
     if (pressureNumber) pressureNumber.textContent = Math.round(pressure);
 
@@ -754,7 +793,7 @@ function updateMonitoringDashboard(data) {
     if (pressureMsl) pressureMsl.textContent = `${Math.round(pressure + 2)} hPa`;
     if (elevationText) elevationText.textContent = `${data.elevation ? Math.round(data.elevation) + "m Elev." : "Standard ATM"}`;
 
-    // 3. Atmospheric Moisture & UV
+    // Atmospheric Moisture & UV
     if (humidityVal) humidityVal.textContent = `${cur.relative_humidity_2m ?? "--"}%`;
     const uv = data.daily?.uv_index_max?.[0] ?? "--";
     if (uvVal) uvVal.textContent = uv !== "--" ? `${uv} (${getUVDescription(uv)})` : "--";
@@ -816,7 +855,7 @@ function updateCelestialHorizonDome(daily, timezone, customProgress = null) {
                 progress = (customProgress - 0.5) * 2;
             }
         } else {
-            // Real-time astronomical calculation
+            // Real-time calculation
             const timeParts = new Intl.DateTimeFormat("en-US", {
                 timeZone: timezone,
                 hour: "numeric",
@@ -871,7 +910,7 @@ function updateCelestialHorizonDome(daily, timezone, customProgress = null) {
             }
         }
 
-        // Pixel-perfect orbital positioning along curved dome
+        // Mathematical Bezier position on SVG arch
         let leftPercent = 5.7 + progress * 88.5;
         let topPercent = 87.5 - 158.3 * progress * (1 - progress);
 
@@ -957,7 +996,7 @@ function handleScrubberInput(e) {
     }
 }
 
-/* ================= 9. HOURLY TIMELINE (TODAY vs TOMORROW) ================= */
+/* ================= 9. HOURLY TIMELINE ================= */
 function switchHourlyDay(mode) {
     selectedHourlyDay = mode;
     const btnToday = document.getElementById("btnToday");
@@ -1000,7 +1039,7 @@ function renderHourlyStream(hourly, timezone, dayMode = "today") {
             }
         }
     } else {
-        startIdx = 24; // Tomorrow begins at hour 24
+        startIdx = 24;
     }
 
     const endIdx = Math.min(startIdx + 24, hourly.time.length);
@@ -1019,7 +1058,7 @@ function renderHourlyStream(hourly, timezone, dayMode = "today") {
 
         const card = document.createElement("div");
         card.className = `hourly-card-3d ${isCurrent ? "current-hour" : ""}`;
-        card.title = "Click to view complete details on full page";
+        card.title = "Click to view full hourly table";
         card.innerHTML = `
             <div class="hour-time">${timeLabel}</div>
             <div class="hour-icon">${info.icon}</div>
@@ -1048,100 +1087,164 @@ function navigateToDetails(e) {
     window.location.href = targetUrl;
 }
 
-/* ================= 10. DYNAMIC THREE.JS 3D PARTICLES ================= */
-function initSafeThreeJS() {
+/* ================= 10. HIGH-IMPACT 3D WEBGL ATMOSPHERIC PLANETARIUM ================= */
+function initHighImpactThreeJS() {
     try {
         const canvas = document.getElementById("threeCanvas");
         if (!canvas || typeof THREE === "undefined") return;
 
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 500);
-        camera.position.z = 25;
+        threeScene = new THREE.Scene();
+        threeCamera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        threeCamera.position.z = 32;
 
-        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false, powerPreference: "high-performance" });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-
-        const particleCount = 75;
-        const geometry = new THREE.BufferGeometry();
-        const positions = new Float32Array(particleCount * 3);
-        const colors = new Float32Array(particleCount * 3);
+        threeRenderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "high-performance" });
+        threeRenderer.setSize(window.innerWidth, window.innerHeight);
+        threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 
         const isDark = document.body.classList.contains("dark");
 
+        // 1. Central 3D Celestial Wireframe Globe
+        const globeGeo = new THREE.SphereGeometry(14, 28, 28);
+        const globeMat = new THREE.MeshBasicMaterial({
+            color: isDark ? 0x38bdf8 : 0x0284c7,
+            wireframe: true,
+            transparent: true,
+            opacity: isDark ? 0.18 : 0.12
+        });
+        threeCelestialGlobe = new THREE.Mesh(globeGeo, globeMat);
+        threeCelestialGlobe.position.set(0, -2, -5);
+        threeScene.add(threeCelestialGlobe);
+
+        // 2. 3D Planetary Orbit Ring
+        const ringGeo = new THREE.RingGeometry(18, 18.6, 64);
+        const ringMat = new THREE.MeshBasicMaterial({
+            color: isDark ? 0xa855f7 : 0xf59e0b,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: isDark ? 0.22 : 0.16
+        });
+        threeOrbitRing = new THREE.Mesh(ringGeo, ringMat);
+        threeOrbitRing.rotation.x = Math.PI / 2.6;
+        threeOrbitRing.rotation.y = Math.PI / 8;
+        threeOrbitRing.position.set(0, -2, -5);
+        threeScene.add(threeOrbitRing);
+
+        // 3. Floating 3D Celestial Particles
+        const particleCount = 120;
+        const particleGeo = new THREE.BufferGeometry();
+        const posArray = new Float32Array(particleCount * 3);
+        const colorArray = new Float32Array(particleCount * 3);
+
         for (let i = 0; i < particleCount * 3; i += 3) {
-            positions[i] = (Math.random() - 0.5) * 55;
-            positions[i + 1] = (Math.random() - 0.5) * 55;
-            positions[i + 2] = (Math.random() - 0.5) * 30;
+            posArray[i] = (Math.random() - 0.5) * 70;
+            posArray[i + 1] = (Math.random() - 0.5) * 60;
+            posArray[i + 2] = (Math.random() - 0.5) * 40;
 
             if (isDark) {
-                // Night stars: cyan, purple, white
-                colors[i] = 0.2 + Math.random() * 0.4;
-                colors[i + 1] = 0.7 + Math.random() * 0.3;
-                colors[i + 2] = 1.0;
+                // Night colors: Cyan, Indigo, Silver
+                colorArray[i] = 0.2 + Math.random() * 0.4;
+                colorArray[i + 1] = 0.7 + Math.random() * 0.3;
+                colorArray[i + 2] = 1.0;
             } else {
-                // Day sunlight motes: golden amber, warm azure
-                colors[i] = 0.95;
-                colors[i + 1] = 0.75 + Math.random() * 0.2;
-                colors[i + 2] = 0.3 + Math.random() * 0.3;
+                // Day colors: Golden Amber, Azure, Sunlight Gold
+                colorArray[i] = 0.96;
+                colorArray[i + 1] = 0.7 + Math.random() * 0.25;
+                colorArray[i + 2] = 0.2 + Math.random() * 0.3;
             }
         }
 
-        geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-        geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+        particleGeo.setAttribute("position", new THREE.BufferAttribute(posArray, 3));
+        particleGeo.setAttribute("color", new THREE.BufferAttribute(colorArray, 3));
 
-        threeMaterial = new THREE.PointsMaterial({
-            size: 0.9,
+        threeStarMaterial = new THREE.PointsMaterial({
+            size: 1.1,
             vertexColors: true,
             transparent: true,
-            opacity: isDark ? 0.65 : 0.45,
+            opacity: isDark ? 0.7 : 0.55,
             blending: THREE.AdditiveBlending
         });
 
-        threeParticles = new THREE.Points(geometry, threeMaterial);
-        scene.add(threeParticles);
+        threeStarParticles = new THREE.Points(particleGeo, threeStarMaterial);
+        threeScene.add(threeStarParticles);
+
+        // Parallax Interaction with Mouse
+        window.addEventListener("mousemove", (e) => {
+            const normX = (e.clientX / window.innerWidth) * 2 - 1;
+            const normY = -(e.clientY / window.innerHeight) * 2 + 1;
+            targetCameraX = normX * 3;
+            targetCameraY = normY * 2;
+        });
 
         window.addEventListener("resize", () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            if (!threeCamera || !threeRenderer) return;
+            threeCamera.aspect = window.innerWidth / window.innerHeight;
+            threeCamera.updateProjectionMatrix();
+            threeRenderer.setSize(window.innerWidth, window.innerHeight);
         });
 
         function animate() {
             requestAnimationFrame(animate);
-            if (threeParticles) {
-                threeParticles.rotation.y += 0.0004;
-                threeParticles.rotation.x += 0.0002;
+
+            // Rotate 3D celestial elements
+            if (threeCelestialGlobe) {
+                threeCelestialGlobe.rotation.y += 0.0012;
+                threeCelestialGlobe.rotation.x += 0.0004;
             }
-            renderer.render(scene, camera);
+            if (threeOrbitRing) {
+                threeOrbitRing.rotation.z += 0.0015;
+            }
+            if (threeStarParticles) {
+                threeStarParticles.rotation.y += 0.0006;
+            }
+
+            // Smooth parallax lerp
+            if (threeCamera) {
+                threeCamera.position.x += (targetCameraX - threeCamera.position.x) * 0.04;
+                threeCamera.position.y += (targetCameraY - threeCamera.position.y) * 0.04;
+                threeCamera.lookAt(0, 0, 0);
+            }
+
+            threeRenderer.render(threeScene, threeCamera);
         }
 
         animate();
     } catch (err) {
-        console.warn("WebGL Three.js background skipped:", err);
+        console.warn("WebGL Three.js 3D background notice:", err);
     }
 }
 
-function updateThreeJSParticleColors() {
-    if (!threeParticles || !threeMaterial) return;
+function updateThreeJSPalette() {
+    if (!threeScene) return;
     const isDark = document.body.classList.contains("dark");
-    const colors = threeParticles.geometry.attributes.color.array;
-    const count = colors.length / 3;
 
-    for (let i = 0; i < count * 3; i += 3) {
-        if (isDark) {
-            colors[i] = 0.2 + Math.random() * 0.4;
-            colors[i + 1] = 0.7 + Math.random() * 0.3;
-            colors[i + 2] = 1.0;
-        } else {
-            colors[i] = 0.95;
-            colors[i + 1] = 0.75 + Math.random() * 0.2;
-            colors[i + 2] = 0.3 + Math.random() * 0.3;
-        }
+    if (threeCelestialGlobe && threeCelestialGlobe.material) {
+        threeCelestialGlobe.material.color.setHex(isDark ? 0x38bdf8 : 0x0284c7);
+        threeCelestialGlobe.material.opacity = isDark ? 0.18 : 0.12;
     }
+    if (threeOrbitRing && threeOrbitRing.material) {
+        threeOrbitRing.material.color.setHex(isDark ? 0xa855f7 : 0xf59e0b);
+        threeOrbitRing.material.opacity = isDark ? 0.22 : 0.16;
+    }
+    if (threeStarParticles && threeStarParticles.geometry) {
+        const colors = threeStarParticles.geometry.attributes.color.array;
+        const count = colors.length / 3;
 
-    threeParticles.geometry.attributes.color.needsUpdate = true;
-    threeMaterial.opacity = isDark ? 0.65 : 0.45;
+        for (let i = 0; i < count * 3; i += 3) {
+            if (isDark) {
+                colors[i] = 0.2 + Math.random() * 0.4;
+                colors[i + 1] = 0.7 + Math.random() * 0.3;
+                colors[i + 2] = 1.0;
+            } else {
+                colors[i] = 0.96;
+                colors[i + 1] = 0.7 + Math.random() * 0.25;
+                colors[i + 2] = 0.2 + Math.random() * 0.3;
+            }
+        }
+        threeStarParticles.geometry.attributes.color.needsUpdate = true;
+    }
+    if (threeStarMaterial) {
+        threeStarMaterial.opacity = isDark ? 0.7 : 0.55;
+    }
 }
 
 /* ================= 11. WEATHER DATA RETRIEVAL ================= */
@@ -1407,7 +1510,7 @@ function initApp() {
     initWelcomeExperience();
     startAutoRefreshTimer();
     renderSavedCities();
-    initSafeThreeJS();
+    initHighImpactThreeJS();
 
     const savedCity = safeStorage.getItem("weatherwise_last_city");
     if (savedCity) {

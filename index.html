@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <meta name="description" content="WeatherWise 3D - Aesthetic Real-Time Atmospheric Station, 3D Wind Compass, Celestial Horizon Dome, Account Sync, and Detailed Hourly Telemetry.">
+    <meta name="description" content="WeatherWise 3D - High-Fidelity 3D Atmospheric Weather Station, Rotating Wind Compass, Celestial Horizon Dome, and Account Sync.">
     <meta name="theme-color" content="#0f172a">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌦️</text></svg>">
@@ -14,17 +14,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,700&display=swap" rel="stylesheet">
 
-    <!-- Lightweight Three.js for 3D Background Atmosphere -->
+    <!-- Three.js for Interactive 3D Background Planetarium -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-    <title>WeatherWise 3D | Real-Time Atmospheric Station & Special Cities</title>
+    <title>WeatherWise 3D | Real-Time Atmospheric Station</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <!-- 3D AMBIENT BACKGROUND CANVAS -->
+    <!-- 3D INTERACTIVE CELESTIAL PLANETARIUM CANVAS -->
     <canvas id="threeCanvas"></canvas>
 
     <!-- CELEBRATORY / HAPPY MIND SPARKLE CONTAINER -->
@@ -74,7 +74,7 @@
                 <!-- USER ACCOUNT / AUTH BUTTON -->
                 <button id="accountBtn" class="action-btn-3d account-btn" onclick="window.openAuthModal && window.openAuthModal()" title="Account & Special Cities">
                     <span id="accountBtnIcon" class="btn-icon">👤</span>
-                    <span id="accountBtnText" class="account-btn-text">Log In</span>
+                    <span id="accountBtnText" class="account-btn-text">Sign In</span>
                 </button>
 
                 <!-- TEMPERATURE UNIT TOGGLE -->
@@ -106,9 +106,9 @@
                     </button>
                 </div>
 
-                <h1 class="hero-title">Atmospheric Station in <span class="gradient-text-shimmer">Vibrant 3D</span></h1>
+                <h1 class="hero-title">Atmospheric Station in <span class="gradient-text-shimmer">Deep 3D</span></h1>
                 <p class="hero-subtitle">
-                    Ultra-smooth live barometric pressure tracking, 3D rotating wind compass, and full day/night astronomical celestial horizon dome.
+                    Interactive 3D celestial planetarium, 3D rotating wind compass, live barometric pressure, and astronomical horizon dome.
                 </p>
             </section>
 
@@ -176,37 +176,42 @@
             </div>
 
 
-            <!-- ================= MAIN 3D WEATHER CARD ================= -->
-            <section id="weatherCard" class="weather-card-3d card-3d-interactive">
+            <!-- ================= MAIN 3D WEATHER CARD (TRUE 3D DEPTH STAGE) ================= -->
+            <section id="weatherCard" class="weather-card-3d card-3d-interactive card-3d-stage">
+                <div class="card-3d-glow-ring"></div>
                 <div class="card-glare"></div>
 
-                <div class="weather-top">
-                    <div class="location-meta">
-                        <div class="live-status-pill">
-                            <span class="live-ping"></span> REAL-TIME TELEMETRY
+                <div class="weather-card-inner-3d">
+                    <div class="weather-top">
+                        <div class="location-meta card-3d-layer-base">
+                            <div class="live-status-pill">
+                                <span class="live-ping"></span> REAL-TIME TELEMETRY
+                            </div>
+                            <h2 id="cityName" class="city-heading-3d">London, United Kingdom</h2>
+                            <p id="timezoneText" class="timezone-tag">Timezone: Europe/London</p>
                         </div>
-                        <h2 id="cityName" class="city-heading-3d">London, United Kingdom</h2>
-                        <p id="timezoneText" class="timezone-tag">Timezone: Europe/London</p>
+
+                        <!-- 3D POPOUT WEATHER ICON -->
+                        <div class="weather-icon-wrapper-3d card-3d-layer-pop">
+                            <div id="weatherIcon" class="weather-icon-3d">⛅</div>
+                            <div class="icon-glow-ring"></div>
+                        </div>
                     </div>
 
-                    <div class="weather-icon-wrapper-3d">
-                        <div id="weatherIcon" class="weather-icon-3d">⛅</div>
-                        <div class="icon-glow-ring"></div>
+                    <!-- 3D POPOUT TEMPERATURE SECTION -->
+                    <div class="temperature-section card-3d-layer-mid">
+                        <div class="temp-wrapper">
+                            <span id="temperature" class="temp-digits">18</span>
+                            <span id="tempUnit" class="degree-3d">°C</span>
+                        </div>
+                        <div class="high-low-badge-3d">
+                            <span id="tempHighLow">Feels like 18°C</span>
+                        </div>
                     </div>
-                </div>
 
-                <div class="temperature-section">
-                    <div class="temp-wrapper">
-                        <span id="temperature" class="temp-digits">18</span>
-                        <span id="tempUnit" class="degree-3d">°C</span>
+                    <div class="condition-badge-wrap card-3d-layer-base">
+                        <p id="condition" class="condition-text">Partly Cloudy</p>
                     </div>
-                    <div class="high-low-badge-3d">
-                        <span id="tempHighLow">Feels like 18°C</span>
-                    </div>
-                </div>
-
-                <div class="condition-badge-wrap">
-                    <p id="condition" class="condition-text">Partly Cloudy</p>
                 </div>
             </section>
 
@@ -354,7 +359,7 @@
             </section>
 
 
-            <!-- ================= PROMINENT 3D CELESTIAL HORIZON DOME (ZERO-JITTER / BUTTERY SMOOTH) ================= -->
+            <!-- ================= 3D CELESTIAL HORIZON DOME (OBSERVATORY ARCH) ================= -->
             <section class="celestial-section-below">
                 <div class="section-title">
                     <h2>🌅 3D Celestial Horizon Dome: Sunrise to Sunset & Night Cycle</h2>
@@ -363,11 +368,10 @@
                     </span>
                 </div>
 
-                <!-- ZERO-JITTER DOME CARD (No unstable mousemove tilt) -->
                 <div class="celestial-dome-card-3d card-3d-glow" id="celestialDomeCard">
                     <div class="dome-meta-header">
                         <div class="dome-info">
-                            <h3 id="celestialHeading">Sun Orbit Trajectory (Day to Night)</h3>
+                            <h3 id="celestialHeading">Sun Orbit Trajectory (Sunrise to Sunset)</h3>
                             <p id="celestialRemainingText">Calculating astronomical elevation...</p>
                         </div>
 
@@ -387,18 +391,18 @@
                         <svg class="dome-svg" id="domeSvg" viewBox="0 0 700 240" preserveAspectRatio="xMidYMid meet">
                             <defs>
                                 <linearGradient id="domeArcGradDay" x1="0%" y1="0%" x2="100%" y2="0%">
-                                    <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.9" />
+                                    <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.95" />
                                     <stop offset="50%" stop-color="#38bdf8" stop-opacity="1" />
-                                    <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.9" />
+                                    <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.95" />
                                 </linearGradient>
                                 <linearGradient id="domeArcGradNight" x1="0%" y1="0%" x2="100%" y2="0%">
-                                    <stop offset="0%" stop-color="#6366f1" stop-opacity="0.9" />
+                                    <stop offset="0%" stop-color="#6366f1" stop-opacity="0.95" />
                                     <stop offset="50%" stop-color="#38bdf8" stop-opacity="1" />
-                                    <stop offset="100%" stop-color="#818cf8" stop-opacity="0.9" />
+                                    <stop offset="100%" stop-color="#818cf8" stop-opacity="0.95" />
                                 </linearGradient>
                                 <radialGradient id="skyGlowGrad" cx="50%" cy="100%" r="90%">
-                                    <stop offset="0%" stop-color="rgba(56, 189, 248, 0.28)" />
-                                    <stop offset="60%" stop-color="rgba(245, 158, 11, 0.08)" />
+                                    <stop offset="0%" stop-color="rgba(56, 189, 248, 0.35)" />
+                                    <stop offset="50%" stop-color="rgba(245, 158, 11, 0.12)" />
                                     <stop offset="100%" stop-color="rgba(56, 189, 248, 0.0)" />
                                 </radialGradient>
                             </defs>
@@ -407,11 +411,11 @@
                             <path d="M 40 210 Q 350 20 660 210 Z" fill="url(#skyGlowGrad)" />
 
                             <!-- 3D Perspective Elevation Guide Arcs (Zenith 90°, 60°, 30°) -->
-                            <path d="M 120 210 Q 350 70 580 210" fill="none" stroke="rgba(255,255,255,0.18)" stroke-dasharray="5,6" stroke-width="1.5" />
-                            <path d="M 200 210 Q 350 115 500 210" fill="none" stroke="rgba(255,255,255,0.12)" stroke-dasharray="3,5" stroke-width="1.2" />
+                            <path d="M 120 210 Q 350 70 580 210" fill="none" stroke="rgba(255,255,255,0.22)" stroke-dasharray="6,6" stroke-width="1.6" />
+                            <path d="M 200 210 Q 350 115 500 210" fill="none" stroke="rgba(255,255,255,0.15)" stroke-dasharray="4,5" stroke-width="1.3" />
 
                             <!-- Main Celestial Trajectory Arch -->
-                            <path id="celestialSvgArc" d="M 40 210 Q 350 20 660 210" fill="none" stroke="url(#domeArcGradDay)" stroke-width="5" stroke-linecap="round" />
+                            <path id="celestialSvgArc" d="M 40 210 Q 350 20 660 210" fill="none" stroke="url(#domeArcGradDay)" stroke-width="5.5" stroke-linecap="round" />
                         </svg>
 
                         <!-- 3D GLOWING CELESTIAL ORBITER (SUN / MOON) -->
@@ -425,7 +429,7 @@
                         <div class="dome-horizon-ground">
                             <div class="horizon-gate horizon-east">
                                 <span class="gate-icon">🌅</span>
-                                <span class="gate-name" id="eastGateLabel">East (Start)</span>
+                                <span class="gate-name" id="eastGateLabel">East (Sunrise)</span>
                                 <strong id="sunriseTime">06:00</strong>
                             </div>
 
@@ -435,7 +439,7 @@
 
                             <div class="horizon-gate horizon-west">
                                 <span class="gate-icon">🌇</span>
-                                <span class="gate-name" id="westGateLabel">West (End)</span>
+                                <span class="gate-name" id="westGateLabel">West (Sunset)</span>
                                 <strong id="sunsetTime">18:00</strong>
                             </div>
                         </div>
@@ -484,7 +488,7 @@
         </main>
 
 
-        <!-- ================= USER ACCOUNT & SPECIAL CITIES MODAL ================= -->
+        <!-- ================= USER ACCOUNT & SPECIAL CITIES MODAL (GENUINE & FRICTIONLESS) ================= -->
         <div id="authModal" class="modal-overlay" style="display: none;" onclick="if(event.target === this) window.closeAuthModal && window.closeAuthModal()">
             <div class="modal-card-3d">
                 <div class="modal-header">
@@ -495,6 +499,14 @@
                     <button class="modal-close-btn" onclick="window.closeAuthModal && window.closeAuthModal()" title="Close modal">✕</button>
                 </div>
 
+                <!-- 1-CLICK INSTANT DEMO LOGIN BUTTON -->
+                <div id="quickLoginBox" class="quick-login-box">
+                    <button type="button" class="quick-login-btn" onclick="window.quickDemoLogin && window.quickDemoLogin('Mohammad')">
+                        <span>🚀</span> Instant 1-Click Login (as Mohammad)
+                    </button>
+                    <div class="quick-login-divider"><span>or enter your name</span></div>
+                </div>
+
                 <!-- AUTH TABS -->
                 <div class="auth-tabs" id="authTabs">
                     <button id="tabSignIn" class="auth-tab-btn active" onclick="window.switchAuthTab && window.switchAuthTab('signin')">Sign In</button>
@@ -503,15 +515,15 @@
 
                 <div id="authAlert" class="auth-alert" style="display: none;"></div>
 
-                <!-- SIGN IN FORM -->
+                <!-- SMART SIGN IN FORM (AUTO-LOGS IN OR REGISTERS) -->
                 <form id="signInForm" class="auth-form" onsubmit="window.handleSignIn && window.handleSignIn(event)">
                     <div class="form-group">
-                        <label for="signInEmail">Your Name or Email</label>
-                        <input type="text" id="signInEmail" placeholder="Enter your registered name or email" required autocomplete="username">
+                        <label for="signInEmail">Your Name or Username</label>
+                        <input type="text" id="signInEmail" placeholder="e.g., Mohammad" required autocomplete="username">
                     </div>
                     <div class="form-group">
                         <label for="signInPassword">Password</label>
-                        <input type="password" id="signInPassword" placeholder="Enter password" required autocomplete="current-password">
+                        <input type="password" id="signInPassword" placeholder="Enter any password" required autocomplete="current-password">
                     </div>
                     <button type="submit" class="auth-submit-btn">
                         <span>Sign In & Sync Special Cities</span>
@@ -525,15 +537,15 @@
                         <input type="text" id="signUpName" placeholder="e.g., Mohammad" required autocomplete="name">
                     </div>
                     <div class="form-group">
-                        <label for="signUpEmail">Email / Login ID</label>
-                        <input type="text" id="signUpEmail" placeholder="Choose a username or email" required autocomplete="username">
+                        <label for="signUpEmail">Email / Username</label>
+                        <input type="text" id="signUpEmail" placeholder="Choose username or email" required autocomplete="username">
                     </div>
                     <div class="form-group">
                         <label for="signUpPassword">Create Password</label>
-                        <input type="password" id="signUpPassword" placeholder="Minimum 4 characters" required autocomplete="new-password">
+                        <input type="password" id="signUpPassword" placeholder="Create your password" required autocomplete="new-password">
                     </div>
                     <button type="submit" class="auth-submit-btn">
-                        <span>Create Free Account & Start Saving</span>
+                        <span>Create Account & Start Saving</span>
                     </button>
                 </form>
 
