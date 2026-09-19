@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="WeatherWise 3D - Comprehensive Hour-by-Hour Weather Details for Today and Tomorrow.">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌦️</text></svg>">
+
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <title>WeatherWise | Detailed Hourly Forecast</title>
+
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Specific enhancements for Detailed View */
+        .details-page-app {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 20px 60px;
+        }
+
+        .back-nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--card-glass);
+            border: 1px solid var(--card-border);
+            color: var(--primary);
+            padding: 10px 20px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: var(--shadow-main);
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover {
+            transform: translateX(-3px);
+            border-color: var(--primary);
+        }
+
+        .details-hero {
+            background: var(--card-glass);
+            border: 1.5px solid var(--card-border);
+            border-radius: 28px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-main);
+        }
+
+        .details-hero-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .details-day-tabs {
+            display: inline-flex;
+            gap: 8px;
+            background: var(--card-inner);
+            padding: 6px;
+            border-radius: 16px;
+            border: 1px solid var(--card-border);
+            margin-bottom: 24px;
+        }
+
+        .details-tab-btn {
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            padding: 10px 22px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 800;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .details-tab-btn.active {
+            background: var(--primary);
+            color: #ffffff;
+            box-shadow: 0 4px 14px var(--primary-glow);
+        }
+
+        .day-summary-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: var(--card-inner);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 18px;
+            text-align: center;
+        }
+
+        .summary-card p {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .summary-card strong {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-heading);
+        }
+
+        /* Detailed Hourly Table */
+        .table-wrap {
+            overflow-x: auto;
+            background: var(--card-glass);
+            border: 1.5px solid var(--card-border);
+            border-radius: 24px;
+            box-shadow: var(--shadow-main);
+            padding: 10px;
+        }
+
+        .hourly-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            min-width: 780px;
+        }
+
+        .hourly-table th {
+            padding: 16px 14px;
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1.5px solid var(--card-border);
+        }
+
+        .hourly-table td {
+            padding: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            border-bottom: 1px solid var(--card-border);
+            vertical-align: middle;
+        }
+
+        .hourly-table tr:hover td {
+            background: var(--card-inner);
+        }
+
+        .table-time {
+            font-weight: 800;
+            color: var(--text-heading);
+        }
+
+        .table-cond {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .table-cond-icon {
+            font-size: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .day-summary-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="details-page-app">
+
+        <!-- NAVIGATION -->
+        <nav class="back-nav-bar">
+            <a href="index.html" class="back-btn">
+                <span>⬅️</span> Back to 3D Dashboard
+            </a>
+
+            <div class="header-actions">
+                <button id="unitBtn" class="action-btn-3d unit-btn" title="Toggle °C / °F">
+                    <span class="btn-text">°C</span>
+                </button>
+                <button id="themeBtn" class="action-btn-3d theme-btn" title="Toggle Dark/Light Mode">
+                    <span class="btn-icon">🌙</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- DETAILS HERO -->
+        <header class="details-hero">
+            <div class="details-hero-top">
+                <div>
+                    <span class="live-status-pill">
+                        <span class="live-ping"></span> HIGH-RESOLUTION TELEMETRY
+                    </span>
+                    <h1 id="detailsCityName">Loading City Details...</h1>
+                    <p id="detailsTimezone" class="timezone-tag">Timezone: Europe/London</p>
+                </div>
+
+                <div class="location-clock-card">
+                    <span class="clock-icon">🕒</span>
+                    <div class="clock-details">
+                        <span id="localTimeDisplay" class="clock-time">--:--:--</span>
+                        <span id="localDateDisplay" class="clock-date">Live Local Time</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB SWITCHER: TODAY vs TOMORROW -->
+            <div class="details-day-tabs">
+                <button id="tabToday" class="details-tab-btn active">
+                    Today's 24-Hour Breakdown
+                </button>
+                <button id="tabTomorrow" class="details-tab-btn">
+                    Tomorrow's Complete Outlook
+                </button>
+            </div>
+
+            <!-- DAY SUMMARY METRICS -->
+            <div class="day-summary-cards">
+                <div class="summary-card">
+                    <p>Temperature Range</p>
+                    <strong id="sumTempRange">-- / --</strong>
+                </div>
+                <div class="summary-card">
+                    <p>Precipitation Max</p>
+                    <strong id="sumPrecip">--%</strong>
+                </div>
+                <div class="summary-card">
+                    <p>UV Index Peak</p>
+                    <strong id="sumUV">--</strong>
+                </div>
+                <div class="summary-card">
+                    <p>Sun Schedule</p>
+                    <strong id="sumSun">↑--:-- ↓--:--</strong>
+                </div>
+            </div>
+        </header>
+
+
+        <!-- STATUS / LOADING -->
+        <div id="error" class="error-box-3d" style="display: none;"></div>
+
+        <div id="loading" class="loading-box-3d" style="display: none;">
+            <div class="spinner-3d"></div>
+            <p>Loading complete atmospheric hourly telemetry...</p>
+        </div>
+
+
+        <!-- DETAILED HOURLY DATA TABLE -->
+        <section class="table-wrap">
+            <table class="hourly-table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Condition</th>
+                        <th>Temp</th>
+                        <th>Feels Like</th>
+                        <th>Rain %</th>
+                        <th>Wind</th>
+                        <th>Pressure</th>
+                        <th>Humidity</th>
+                    </tr>
+                </thead>
+                <tbody id="detailsHourlyBody">
+                    <!-- Populated dynamically via JavaScript -->
+                </tbody>
+            </table>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="footer-3d" style="margin-top: 40px;">
+            <p>
+                <strong>WeatherWise Detailed Telemetry</strong> • Data via Open-Meteo High-Resolution Models
+            </p>
+        </footer>
+
+    </div>
+
+    <script>
+        /* ================= DETAILS PAGE SCRIPT ================= */
+        const urlParams = new URLSearchParams(window.location.search);
+        let cityName = urlParams.get("city") || "London, United Kingdom";
+        let lat = parseFloat(urlParams.get("lat")) || 51.5085;
+        let lon = parseFloat(urlParams.get("lon")) || -0.1257;
+        let unit = urlParams.get("unit") || localStorage.getItem("weatherwise_unit") || "C";
+        let fullData = null;
+        let activeTab = "today";
+        let clockTimer = null;
+
+        const detailsCityName = document.getElementById("detailsCityName");
+        const detailsTimezone = document.getElementById("detailsTimezone");
+        const localTimeDisplay = document.getElementById("localTimeDisplay");
+        const localDateDisplay = document.getElementById("localDateDisplay");
+        const tabToday = document.getElementById("tabToday");
+        const tabTomorrow = document.getElementById("tabTomorrow");
+        const detailsHourlyBody = document.getElementById("detailsHourlyBody");
+        const unitBtn = document.getElementById("unitBtn");
+        const themeBtn = document.getElementById("themeBtn");
+
+        const sumTempRange = document.getElementById("sumTempRange");
+        const sumPrecip = document.getElementById("sumPrecip");
+        const sumUV = document.getElementById("sumUV");
+        const sumSun = document.getElementById("sumSun");
+
+        // Theme init
+        function initTheme() {
+            const saved = localStorage.getItem("weatherwise_theme");
+            if (saved === "dark") {
+                document.body.classList.add("dark");
+                if (themeBtn) themeBtn.querySelector(".btn-icon").textContent = "☀️";
+            }
+        }
+
+        themeBtn.addEventListener("click", () => {
+            document.body.classList.toggle("dark");
+            const isDark = document.body.classList.contains("dark");
+            themeBtn.querySelector(".btn-icon").textContent = isDark ? "☀️" : "🌙";
+            localStorage.setItem("weatherwise_theme", isDark ? "dark" : "light");
+        });
+
+        unitBtn.addEventListener("click", () => {
+            unit = unit === "C" ? "F" : "C";
+            localStorage.setItem("weatherwise_unit", unit);
+            unitBtn.querySelector(".btn-text").textContent = `°${unit}`;
+            if (fullData) renderDetailsView();
+        });
+
+        tabToday.addEventListener("click", () => {
+            activeTab = "today";
+            tabToday.classList.add("active");
+            tabTomorrow.classList.remove("active");
+            renderDetailsView();
+        });
+
+        tabTomorrow.addEventListener("click", () => {
+            activeTab = "tomorrow";
+            tabTomorrow.classList.add("active");
+            tabToday.classList.remove("active");
+            renderDetailsView();
+        });
+
+        function formatTemp(c) {
+            if (c === undefined || c === null) return "--";
+            return unit === "F" ? Math.round((c * 9) / 5 + 32) : Math.round(c);
+        }
+
+        function formatWind(kmh) {
+            if (kmh === undefined || kmh === null) return "--";
+            return unit === "F" ? `${Math.round(kmh * 0.621371)} mph` : `${Math.round(kmh)} km/h`;
+        }
+
+        function getWeatherInfo(code) {
+            switch (code) {
+                case 0: return { desc: "Clear Sky", icon: "☀️" };
+                case 1: return { desc: "Mainly Clear", icon: "🌤️" };
+                case 2: return { desc: "Partly Cloudy", icon: "⛅" };
+                case 3: return { desc: "Overcast", icon: "☁️" };
+                case 45: case 48: return { desc: "Foggy Mist", icon: "🌫️" };
+                case 51: case 53: case 55: return { desc: "Drizzle", icon: "🌦️" };
+                case 61: case 63: case 65: return { desc: "Rain", icon: "🌧️" };
+                case 71: case 73: case 75: return { desc: "Snowfall", icon: "❄️" };
+                case 80: case 81: case 82: return { desc: "Showers", icon: "🌦️" };
+                case 95: case 96: case 99: return { desc: "Thunderstorm", icon: "⛈️⚡" };
+                default: return { desc: "Clear", icon: "☀️" };
+            }
+        }
+
+        function startClock(tz) {
+            if (clockTimer) clearInterval(clockTimer);
+            function tick() {
+                try {
+                    const now = new Date();
+                    localTimeDisplay.textContent = new Intl.DateTimeFormat("en-US", {
+                        timeZone: tz, hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true
+                    }).format(now);
+                    localDateDisplay.textContent = new Intl.DateTimeFormat("en-US", {
+                        timeZone: tz, weekday: "short", month: "short", day: "numeric"
+                    }).format(now);
+                } catch (e) {
+                    localTimeDisplay.textContent = new Date().toLocaleTimeString();
+                }
+            }
+            tick();
+            clockTimer = setInterval(tick, 1000);
+        }
+
+        async function loadData() {
+            detailsCityName.textContent = cityName;
+            unitBtn.querySelector(".btn-text").textContent = `°${unit}`;
+            initTheme();
+
+            try {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure&hourly=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,precipitation_probability,surface_pressure&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,uv_index_max,precipitation_probability_max&timezone=auto`;
+                const res = await fetch(url);
+                const data = await res.json();
+                fullData = data;
+
+                detailsTimezone.textContent = `Timezone: ${data.timezone.replace(/_/g, " ")}`;
+                startClock(data.timezone);
+                renderDetailsView();
+            } catch (err) {
+                console.error(err);
+                alert("Failed to load detailed forecast.");
+            }
+        }
+
+        function renderDetailsView() {
+            if (!fullData || !fullData.hourly) return;
+            const daily = fullData.daily;
+            const hourly = fullData.hourly;
+            const dayIdx = (activeTab === "today") ? 0 : 1;
+
+            // Summary Cards
+            const maxT = formatTemp(daily.temperature_2m_max[dayIdx]);
+            const minT = formatTemp(daily.temperature_2m_min[dayIdx]);
+            sumTempRange.textContent = `H: ${maxT}°${unit} • L: ${minT}°${unit}`;
+            sumPrecip.textContent = `${daily.precipitation_probability_max[dayIdx] || 0}%`;
+            sumUV.textContent = daily.uv_index_max[dayIdx] || "--";
+
+            const sr = daily.sunrise[dayIdx]?.split("T")[1] || "--:--";
+            const ss = daily.sunset[dayIdx]?.split("T")[1] || "--:--";
+            sumSun.textContent = `↑${sr}  ↓${ss}`;
+
+            // Hourly rows (24 hours for chosen day)
+            const startHour = dayIdx * 24;
+            const endHour = startHour + 24;
+            detailsHourlyBody.innerHTML = "";
+
+            for (let i = startHour; i < Math.min(endHour, hourly.time.length); i++) {
+                const iso = hourly.time[i];
+                const hNum = parseInt(iso.split("T")[1].split(":")[0], 10);
+                const timeStr = `${hNum % 12 || 12}:00 ${hNum >= 12 ? "PM" : "AM"}`;
+                const info = getWeatherInfo(hourly.weather_code[i]);
+                const t = formatTemp(hourly.temperature_2m[i]);
+                const appT = formatTemp(hourly.apparent_temperature[i]);
+                const rain = hourly.precipitation_probability ? (hourly.precipitation_probability[i] || 0) : 0;
+                const wind = formatWind(hourly.wind_speed_10m[i]);
+                const press = Math.round(hourly.surface_pressure[i] || 1013);
+                const hum = hourly.relative_humidity_2m[i] || "--";
+
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td class="table-time">${timeStr}</td>
+                    <td>
+                        <span class="table-cond">
+                            <span class="table-cond-icon">${info.icon}</span>
+                            <span>${info.desc}</span>
+                        </span>
+                    </td>
+                    <td><strong>${t}°${unit}</strong></td>
+                    <td>${appT}°${unit}</td>
+                    <td><span style="color: var(--primary); font-weight: 700;">💧 ${rain}%</span></td>
+                    <td>${wind}</td>
+                    <td>${press} hPa</td>
+                    <td>${hum}%</td>
+                `;
+                detailsHourlyBody.appendChild(tr);
+            }
+        }
+
+        loadData();
+    </script>
+</body>
+
+</html>

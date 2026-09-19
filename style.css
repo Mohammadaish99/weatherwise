@@ -8,14 +8,14 @@
 :root {
     --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     
-    /* LIGHT MODE PALETTE */
-    --bg-base: #f0f7ff;
-    --bg-ambient: radial-gradient(circle at 10% 20%, #dbeafe 0%, #eff6ff 50%, #f0fdf4 100%);
+    /* LIGHT MODE PALETTE (Optimized for 60fps) */
+    --bg-base: #f1f6fc;
+    --bg-ambient: radial-gradient(circle at 10% 20%, #dbeafe 0%, #eff6ff 45%, #f0fdf4 100%);
     
-    --card-glass: rgba(255, 255, 255, 0.76);
-    --card-glass-hover: rgba(255, 255, 255, 0.92);
-    --card-inner: rgba(255, 255, 255, 0.65);
-    --card-border: rgba(255, 255, 255, 0.85);
+    --card-glass: rgba(255, 255, 255, 0.82);
+    --card-glass-hover: rgba(255, 255, 255, 0.95);
+    --card-inner: rgba(255, 255, 255, 0.70);
+    --card-border: rgba(255, 255, 255, 0.90);
     --card-border-glow: rgba(56, 189, 248, 0.45);
     
     --text: #0f172a;
@@ -25,34 +25,32 @@
     
     --primary: #2563eb;
     --primary-hover: #1d4ed8;
-    --primary-glow: rgba(37, 99, 235, 0.32);
+    --primary-glow: rgba(37, 99, 235, 0.28);
     --accent-cyan: #06b6d4;
     --accent-gold: #f59e0b;
     --accent-emerald: #10b981;
     
-    --shadow-main: 0 25px 60px -12px rgba(15, 23, 42, 0.12),
-                   0 10px 25px -5px rgba(37, 99, 235, 0.08),
-                   inset 0 1px 2px rgba(255, 255, 255, 0.95);
-    --shadow-hover: 0 35px 80px -10px rgba(37, 99, 235, 0.24),
-                    0 15px 35px -5px rgba(15, 23, 42, 0.12),
-                    inset 0 1px 2px rgba(255, 255, 255, 1);
+    --shadow-main: 0 16px 35px -8px rgba(15, 23, 42, 0.08),
+                   0 6px 15px -4px rgba(37, 99, 235, 0.05);
+    --shadow-hover: 0 24px 50px -8px rgba(37, 99, 235, 0.18),
+                    0 10px 22px -4px rgba(15, 23, 42, 0.08);
     
-    --pill-bg: rgba(255, 255, 255, 0.8);
-    --pill-border: rgba(255, 255, 255, 0.9);
+    --pill-bg: rgba(255, 255, 255, 0.85);
+    --pill-border: rgba(255, 255, 255, 0.95);
     --pill-hover: #ffffff;
     
-    --compass-dial: linear-gradient(135deg, #e2e8f0, #ffffff);
-    --compass-rim: #cbd5e1;
+    --compass-dial: linear-gradient(135deg, #f8fafc, #e2e8f0);
+    --compass-bezel: linear-gradient(135deg, #cbd5e1, #94a3b8);
 }
 
 body.dark {
-    /* DARK LUXURY PALETTE */
+    /* DARK LUXURY PALETTE (Optimized for 60fps) */
     --bg-base: #060913;
     --bg-ambient: radial-gradient(circle at 10% 20%, #0c1527 0%, #030712 60%, #060913 100%);
     
-    --card-glass: rgba(15, 23, 42, 0.68);
-    --card-glass-hover: rgba(30, 41, 59, 0.85);
-    --card-inner: rgba(2, 6, 23, 0.6);
+    --card-glass: rgba(15, 23, 42, 0.78);
+    --card-glass-hover: rgba(30, 41, 59, 0.90);
+    --card-inner: rgba(2, 6, 23, 0.65);
     --card-border: rgba(255, 255, 255, 0.12);
     --card-border-glow: rgba(56, 189, 248, 0.45);
     
@@ -63,24 +61,22 @@ body.dark {
     
     --primary: #38bdf8;
     --primary-hover: #0ea5e9;
-    --primary-glow: rgba(56, 189, 248, 0.45);
+    --primary-glow: rgba(56, 189, 248, 0.40);
     --accent-cyan: #22d3ee;
     --accent-gold: #fbbf24;
     --accent-emerald: #34d399;
     
-    --shadow-main: 0 30px 70px -15px rgba(0, 0, 0, 0.8),
-                   0 12px 30px -8px rgba(0, 0, 0, 0.65),
-                   inset 0 1px 1px rgba(255, 255, 255, 0.15);
-    --shadow-hover: 0 40px 90px -10px rgba(0, 0, 0, 0.9),
-                    0 15px 40px -5px rgba(56, 189, 248, 0.3),
-                    inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    --shadow-main: 0 20px 45px -10px rgba(0, 0, 0, 0.75),
+                   0 8px 20px -5px rgba(0, 0, 0, 0.55);
+    --shadow-hover: 0 28px 60px -8px rgba(0, 0, 0, 0.85),
+                    0 12px 28px -4px rgba(56, 189, 248, 0.25);
     
-    --pill-bg: rgba(30, 41, 59, 0.7);
+    --pill-bg: rgba(30, 41, 59, 0.75);
     --pill-border: rgba(255, 255, 255, 0.12);
-    --pill-hover: rgba(51, 65, 85, 0.9);
+    --pill-hover: rgba(51, 65, 85, 0.95);
     
     --compass-dial: linear-gradient(135deg, #0f172a, #1e293b);
-    --compass-rim: rgba(255, 255, 255, 0.15);
+    --compass-bezel: linear-gradient(135deg, #334155, #0f172a);
 }
 
 /* ================= 3D ENVIRONMENT & CANVAS ================= */
@@ -92,7 +88,7 @@ body {
     color: var(--text);
     overflow-x: hidden;
     position: relative;
-    transition: background 0.4s ease, color 0.4s ease;
+    transition: background 0.3s ease, color 0.3s ease;
     line-height: 1.5;
     perspective: 1200px;
 }
@@ -105,24 +101,25 @@ body {
     height: 100vh;
     pointer-events: none;
     z-index: 0;
-    opacity: 0.9;
+    opacity: 0.85;
 }
 
 .app {
     position: relative;
     z-index: 1;
     width: 100%;
-    max-width: 1160px;
+    max-width: 1180px;
     margin: 0 auto;
-    padding: 30px 24px 60px;
+    padding: 28px 22px 60px;
     transform-style: preserve-3d;
 }
 
-/* ================= 3D SCROLL DYNAMICS ================= */
+/* 60FPS OPTIMIZATION HELPER */
 .scroll-3d-item {
     transform-style: preserve-3d;
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
     will-change: transform;
+    transform: translate3d(0, 0, 0);
 }
 
 /* ================= HEADER ================= */
@@ -147,7 +144,7 @@ body {
 
 .logo-icon-3d {
     font-size: 32px;
-    filter: drop-shadow(0 8px 16px rgba(37, 99, 235, 0.3));
+    filter: drop-shadow(0 6px 12px rgba(37, 99, 235, 0.3));
     animation: floatIcon 4s ease-in-out infinite alternate;
 }
 
@@ -164,11 +161,11 @@ body {
     gap: 12px;
     background: var(--card-glass);
     border: 1px solid var(--card-border);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     padding: 8px 18px;
     border-radius: 20px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-main);
 }
 
 .clock-icon {
@@ -211,23 +208,23 @@ body {
     padding: 0 16px;
     background: var(--card-glass);
     border: 1px solid var(--card-border);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(14px);
     border-radius: 14px;
     color: var(--text);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
     cursor: pointer;
     font-size: 15px;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .action-btn-3d:hover {
-    transform: translateY(-3px) scale(1.05);
+    transform: translateY(-2px) scale(1.04);
     border-color: var(--primary);
-    box-shadow: 0 12px 25px var(--primary-glow);
+    box-shadow: 0 8px 20px var(--primary-glow);
 }
 
 .theme-btn {
@@ -241,7 +238,7 @@ body {
 .hero {
     text-align: center;
     max-width: 760px;
-    margin: 0 auto 36px;
+    margin: 0 auto 34px;
 }
 
 .monitor-live-bar {
@@ -250,11 +247,11 @@ body {
     gap: 14px;
     background: var(--card-glass);
     border: 1.5px solid var(--card-border);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(14px);
     padding: 8px 20px;
     border-radius: 30px;
     margin-bottom: 20px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-main);
     flex-wrap: wrap;
     justify-content: center;
 }
@@ -315,18 +312,10 @@ body {
     transform: translateY(-1px);
 }
 
-.manual-refresh-btn:active .refresh-icon {
-    transform: rotate(360deg);
-}
-
-.refresh-icon {
-    transition: transform 0.5s ease;
-}
-
 .hero h1 {
-    font-size: 50px;
+    font-size: 48px;
     font-weight: 800;
-    line-height: 1.12;
+    line-height: 1.14;
     margin-bottom: 12px;
     letter-spacing: -1.6px;
     color: var(--text-heading);
@@ -338,7 +327,7 @@ body {
     line-height: 1.6;
 }
 
-/* ================= SEARCH & ACTIONS ================= */
+/* ================= SEARCH & SAVED CITIES ================= */
 .search-section {
     max-width: 820px;
     margin: 0 auto 30px;
@@ -349,17 +338,17 @@ body {
     align-items: center;
     gap: 12px;
     background: var(--card-glass);
-    backdrop-filter: blur(25px) saturate(180%);
+    backdrop-filter: blur(16px);
     border: 1.5px solid var(--card-border);
     padding: 8px 10px 8px 18px;
     border-radius: 22px;
     box-shadow: var(--shadow-main);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.25s ease;
 }
 
 .search-box-3d:focus-within {
     border-color: var(--primary);
-    box-shadow: 0 20px 50px var(--primary-glow);
+    box-shadow: 0 14px 35px var(--primary-glow);
     transform: translateY(-2px);
 }
 
@@ -394,13 +383,13 @@ body {
     font-weight: 700;
     font-family: inherit;
     cursor: pointer;
-    box-shadow: 0 6px 20px var(--primary-glow);
-    transition: all 0.25s ease;
+    box-shadow: 0 4px 16px var(--primary-glow);
+    transition: all 0.2s ease;
 }
 
 .search-btn-3d:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 10px 25px var(--primary-glow);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px var(--primary-glow);
 }
 
 .search-actions-row {
@@ -417,7 +406,7 @@ body {
     gap: 8px;
     border: 1px solid var(--card-border);
     background: var(--card-glass);
-    backdrop-filter: blur(14px);
+    backdrop-filter: blur(12px);
     color: var(--primary);
     cursor: pointer;
     font-size: 14px;
@@ -425,14 +414,13 @@ body {
     font-family: inherit;
     padding: 8px 18px;
     border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
-    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease;
 }
 
 .control-btn-3d:hover {
     transform: translateY(-2px);
     border-color: var(--primary);
-    box-shadow: 0 8px 22px var(--primary-glow);
 }
 
 .save-btn {
@@ -463,7 +451,7 @@ body {
 .city-pill-3d {
     background: var(--pill-bg);
     border: 1px solid var(--pill-border);
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(10px);
     color: var(--text);
     padding: 6px 16px;
     border-radius: 30px;
@@ -471,25 +459,24 @@ body {
     font-weight: 600;
     font-family: inherit;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease;
 }
 
 .city-pill-3d:hover {
     background: var(--pill-hover);
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
     border-color: var(--primary);
 }
 
-/* ================= SAVED CITIES DRAWER ================= */
+/* SAVED CITIES DRAWER */
 .saved-cities-section {
     max-width: 820px;
-    margin: 0 auto 35px;
-    display: none; /* Shown via JS when >= 1 city saved */
+    margin: 0 auto 30px;
+    display: none;
     background: var(--card-glass);
     border: 1px solid var(--card-border);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(16px);
     border-radius: 24px;
     padding: 20px 24px;
     box-shadow: var(--shadow-main);
@@ -533,18 +520,12 @@ body {
     padding: 10px 14px;
     border-radius: 16px;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 0.2s ease;
 }
 
 .saved-city-card:hover {
-    transform: translateY(-3px) scale(1.03);
+    transform: translateY(-2px);
     border-color: var(--primary);
-    box-shadow: 0 8px 20px var(--primary-glow);
-}
-
-.saved-city-info {
-    display: flex;
-    flex-direction: column;
 }
 
 .saved-city-name {
@@ -565,70 +546,28 @@ body {
     color: var(--text-subtle);
     font-size: 14px;
     cursor: pointer;
-    padding: 4px 6px;
-    border-radius: 8px;
-    transition: color 0.2s ease;
+    padding: 4px;
 }
 
 .saved-delete-btn:hover {
     color: #ef4444;
 }
 
-/* ================= 3D STATUS & LOADING ================= */
-.error-box-3d {
-    background: rgba(239, 68, 68, 0.14);
-    border: 1.5px solid rgba(239, 68, 68, 0.35);
-    backdrop-filter: blur(16px);
-    color: #ef4444;
-    padding: 16px 24px;
-    border-radius: 18px;
-    text-align: center;
-    font-weight: 700;
-    font-size: 14px;
-    margin: 0 auto 26px;
-    max-width: 820px;
-}
-
-.loading-box-3d {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
-    padding: 35px;
-    text-align: center;
-    color: var(--text-muted);
-    font-weight: 600;
-}
-
-.spinner-3d {
-    width: 44px;
-    height: 44px;
-    border: 4px solid var(--card-border);
-    border-top-color: var(--primary);
-    border-right-color: var(--accent-cyan);
-    border-radius: 50%;
-    animation: spin 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
-    filter: drop-shadow(0 4px 12px var(--primary-glow));
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
 /* ================= MAIN 3D WEATHER CARD ================= */
 .weather-card-3d {
     position: relative;
     background: var(--card-glass);
-    backdrop-filter: blur(30px) saturate(190%);
-    -webkit-backdrop-filter: blur(30px) saturate(190%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1.5px solid var(--card-border);
-    border-radius: 34px;
-    padding: 44px;
+    border-radius: 32px;
+    padding: 38px;
     box-shadow: var(--shadow-main);
-    margin-bottom: 45px;
+    margin-bottom: 40px;
     transform-style: preserve-3d;
-    transition: transform 0.15s ease-out, box-shadow 0.35s ease, border-color 0.35s ease;
+    transition: transform 0.15s ease-out, box-shadow 0.25s ease, border-color 0.25s ease;
     overflow: hidden;
+    will-change: transform;
 }
 
 .weather-card-3d:hover {
@@ -642,8 +581,8 @@ body {
     pointer-events: none;
     border-radius: inherit;
     opacity: 0;
-    background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.28) 0%, transparent 65%);
-    transition: opacity 0.3s ease;
+    background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.25) 0%, transparent 65%);
+    transition: opacity 0.25s ease;
     z-index: 2;
 }
 
@@ -655,7 +594,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    transform: translateZ(28px);
+    transform: translateZ(24px);
 }
 
 .live-status-pill {
@@ -678,7 +617,7 @@ body {
 }
 
 .location-meta h2 {
-    font-size: 42px;
+    font-size: 40px;
     font-weight: 800;
     color: var(--text-heading);
     margin-bottom: 4px;
@@ -699,36 +638,36 @@ body {
 }
 
 .weather-icon-3d {
-    font-size: 92px;
+    font-size: 88px;
     line-height: 1;
-    filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.18));
+    filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.15));
     animation: floatIcon 4s ease-in-out infinite alternate;
     z-index: 1;
 }
 
 .icon-glow-ring {
     position: absolute;
-    width: 115px;
-    height: 115px;
+    width: 110px;
+    height: 110px;
     border-radius: 50%;
     background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
-    filter: blur(12px);
+    filter: blur(10px);
     z-index: 0;
 }
 
 @keyframes floatIcon {
     0% { transform: translateY(0) rotate(0deg); }
-    100% { transform: translateY(-10px) rotate(4deg); }
+    100% { transform: translateY(-8px) rotate(3deg); }
 }
 
 /* TEMPERATURE */
 .temperature-section {
-    margin-top: 24px;
+    margin-top: 20px;
     display: flex;
     align-items: baseline;
     gap: 24px;
     flex-wrap: wrap;
-    transform: translateZ(32px);
+    transform: translateZ(28px);
 }
 
 .temp-wrapper {
@@ -737,16 +676,15 @@ body {
 }
 
 .temp-digits {
-    font-size: 112px;
+    font-size: 104px;
     font-weight: 800;
     line-height: 0.92;
-    letter-spacing: -6px;
+    letter-spacing: -5px;
     color: var(--text-heading);
-    text-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 .degree-3d {
-    font-size: 38px;
+    font-size: 36px;
     font-weight: 800;
     color: var(--text-muted);
     margin-left: 4px;
@@ -756,19 +694,18 @@ body {
 .high-low-badge-3d {
     background: var(--card-inner);
     border: 1px solid var(--card-border);
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(10px);
     padding: 8px 18px;
     border-radius: 16px;
     font-size: 14px;
     font-weight: 700;
     color: var(--text-muted);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
 }
 
 .condition-badge-wrap {
     margin-top: 14px;
-    margin-bottom: 34px;
-    transform: translateZ(24px);
+    margin-bottom: 25px;
+    transform: translateZ(20px);
 }
 
 .condition-text {
@@ -778,162 +715,7 @@ body {
     display: inline-block;
 }
 
-/* ================= 3D SUN & MOON CELESTIAL ARC TRACKER ================= */
-.celestial-tracker-3d {
-    background: var(--card-inner);
-    border: 1.5px solid var(--card-border);
-    backdrop-filter: blur(20px);
-    border-radius: 26px;
-    padding: 24px 28px 20px;
-    margin-top: 15px;
-    transform: translateZ(26px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
-}
-
-.celestial-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.celestial-title {
-    font-size: 15px;
-    font-weight: 800;
-    color: var(--text-heading);
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.celestial-remaining {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--primary);
-    background: var(--card-glass);
-    border: 1px solid var(--card-border);
-    padding: 4px 12px;
-    border-radius: 12px;
-}
-
-.orbit-stage {
-    position: relative;
-    width: 100%;
-    height: 140px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-}
-
-.orbit-svg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 120px;
-    overflow: visible;
-}
-
-/* 3D ORBITER BODY (SUN / MOON) */
-.celestial-orbiter {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    transition: left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), top 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-    z-index: 5;
-    pointer-events: none;
-}
-
-.celestial-body {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    position: relative;
-    z-index: 2;
-    animation: rotateBody 20s linear infinite;
-}
-
-@keyframes rotateBody {
-    to { transform: rotate(360deg); }
-}
-
-.sun-body {
-    background: radial-gradient(circle at 35% 35%, #fffbeb, #f59e0b 60%, #d97706);
-    box-shadow: 0 0 25px #f59e0b, 0 0 50px rgba(245, 158, 11, 0.5);
-}
-
-.moon-body {
-    background: radial-gradient(circle at 35% 35%, #ffffff, #e0f2fe 50%, #38bdf8);
-    box-shadow: 0 0 25px #38bdf8, 0 0 50px rgba(56, 189, 248, 0.5);
-}
-
-.orbiter-glow {
-    position: absolute;
-    inset: -12px;
-    border-radius: 50%;
-    background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
-    filter: blur(8px);
-    z-index: 1;
-}
-
-.orbit-horizon {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    border-top: 1.5px dashed var(--card-border);
-    padding-top: 10px;
-    position: relative;
-    z-index: 3;
-}
-
-.horizon-point {
-    display: flex;
-    flex-direction: column;
-}
-
-.horizon-point.start-point {
-    align-items: flex-start;
-}
-
-.horizon-point.end-point {
-    align-items: flex-end;
-}
-
-.point-icon {
-    font-size: 18px;
-    margin-bottom: 2px;
-}
-
-.point-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.horizon-point strong {
-    font-size: 14px;
-    font-weight: 800;
-    color: var(--text-heading);
-}
-
-.point-badge {
-    background: var(--card-glass);
-    border: 1px solid var(--card-border);
-    padding: 3px 12px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text-muted);
-}
-
-/* ================= 3D REAL-TIME ATMOSPHERIC MONITORING DASHBOARD ================= */
+/* ================= 3D ROTATING WIND COMPASS & REAL-TIME DASHBOARD ================= */
 .monitoring-section {
     margin-bottom: 45px;
     transform-style: preserve-3d;
@@ -943,13 +725,13 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 22px;
+    margin-bottom: 20px;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
 }
 
 .section-title h2 {
-    font-size: 26px;
+    font-size: 25px;
     font-weight: 800;
     color: var(--text-heading);
     letter-spacing: -0.5px;
@@ -961,7 +743,7 @@ body {
     gap: 8px;
     background: var(--card-glass);
     border: 1px solid var(--card-border);
-    backdrop-filter: blur(14px);
+    backdrop-filter: blur(12px);
     padding: 6px 14px;
     border-radius: 14px;
     font-size: 12px;
@@ -978,21 +760,21 @@ body {
 .monitoring-card-3d {
     position: relative;
     background: var(--card-glass);
-    backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(16px);
     border: 1.5px solid var(--card-border);
     border-radius: 28px;
-    padding: 26px;
+    padding: 24px;
     box-shadow: var(--shadow-main);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     min-height: 310px;
     transform-style: preserve-3d;
-    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 0.25s ease;
 }
 
 .monitoring-card-3d:hover {
-    transform: translateY(-6px) scale(1.02);
+    transform: translateY(-4px);
     border-color: var(--primary);
     box-shadow: var(--shadow-hover);
 }
@@ -1001,7 +783,7 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
 }
 
 .monitor-icon {
@@ -1014,25 +796,33 @@ body {
     color: var(--text-heading);
 }
 
-/* 3D WIND COMPASS */
+/* 3D EMBOSSED WIND COMPASS ROSE */
 .compass-stage {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 10px 0 18px;
+    margin: 8px 0 16px;
+    perspective: 800px;
 }
 
-.compass-rose {
+.compass-rose-3d {
     position: relative;
-    width: 140px;
-    height: 140px;
+    width: 145px;
+    height: 145px;
     border-radius: 50%;
     background: var(--compass-dial);
-    border: 4px solid var(--compass-rim);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), inset 0 2px 5px rgba(0, 0, 0, 0.15);
+    border: 6px solid var(--compass-bezel);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.16),
+                inset 0 2px 6px rgba(0, 0, 0, 0.12),
+                inset 0 -2px 6px rgba(255, 255, 255, 0.8);
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: transform 0.3s ease;
+}
+
+.compass-rose-3d:hover {
+    transform: rotateX(15deg) scale(1.04);
 }
 
 .cardinal {
@@ -1042,54 +832,62 @@ body {
     color: var(--text-muted);
 }
 
-.cardinal-n { top: 6px; color: #ef4444; font-weight: 900; }
+.cardinal-n { top: 6px; color: #ef4444; font-weight: 900; font-size: 13px; }
 .cardinal-e { right: 8px; }
-.cardinal-s { bottom: 6px; }
+.cardinal-s { bottom: 6px; color: #3b82f6; }
 .cardinal-w { left: 8px; }
 
 .compass-dial-ring {
     position: absolute;
     inset: 22px;
     border-radius: 50%;
-    border: 1px dashed var(--card-border);
+    border: 1.5px dashed var(--card-border);
 }
 
+/* ROTATING 3D COMPASS NEEDLE */
 .compass-needle {
     position: absolute;
-    width: 8px;
-    height: 100px;
+    width: 10px;
+    height: 105px;
     display: flex;
     flex-direction: column;
     align-items: center;
     transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
     transform-origin: center center;
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25));
+    filter: drop-shadow(0 6px 10px rgba(0,0,0,0.3));
+    z-index: 5;
 }
 
 .needle-north {
     width: 0;
     height: 0;
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-bottom: 46px solid #ef4444;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-bottom: 48px solid #ef4444;
+    position: relative;
+}
+
+.needle-tip-n {
+    display: none;
 }
 
 .needle-center-pin {
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
-    background: #172033;
-    border: 2px solid #ffffff;
-    z-index: 3;
-    margin: -7px 0;
+    background: radial-gradient(circle at 35% 35%, #ffffff, #94a3b8);
+    border: 2px solid #0f172a;
+    z-index: 6;
+    margin: -8px 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4);
 }
 
 .needle-south {
     width: 0;
     height: 0;
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-top: 46px solid #3b82f6;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 48px solid #3b82f6;
 }
 
 .compass-readout {
@@ -1098,7 +896,7 @@ body {
     gap: 8px;
     text-align: center;
     border-top: 1px solid var(--card-border);
-    padding-top: 14px;
+    padding-top: 12px;
 }
 
 .compass-val {
@@ -1120,21 +918,16 @@ body {
     color: var(--text-heading);
 }
 
-/* BAROMETRIC PRESSURE GAUGE */
+/* BAROMETRIC PRESSURE */
 .pressure-gauge-stage {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 10px 0 16px;
-}
-
-.gauge-dial {
-    text-align: center;
-    margin-bottom: 16px;
+    margin: 8px 0 14px;
 }
 
 .big-pressure {
-    font-size: 46px;
+    font-size: 44px;
     font-weight: 800;
     color: var(--text-heading);
     letter-spacing: -2px;
@@ -1210,7 +1003,7 @@ body {
     grid-template-columns: 1fr 1fr;
     gap: 12px;
     border-top: 1px solid var(--card-border);
-    padding-top: 14px;
+    padding-top: 12px;
     text-align: center;
 }
 
@@ -1218,7 +1011,6 @@ body {
     font-size: 11px;
     font-weight: 700;
     color: var(--text-muted);
-    margin-bottom: 2px;
 }
 
 .gauge-stat strong {
@@ -1227,13 +1019,11 @@ body {
     color: var(--text-heading);
 }
 
-/* ATMOSPHERIC MOISTURE & UV METRICS STACK */
+/* METRICS STACK */
 .metrics-stack {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    height: 100%;
-    justify-content: center;
+    gap: 10px;
 }
 
 .metric-row {
@@ -1242,9 +1032,9 @@ body {
     align-items: center;
     background: var(--card-inner);
     border: 1px solid var(--card-border);
-    padding: 12px 16px;
-    border-radius: 16px;
-    transition: all 0.2s ease;
+    padding: 10px 14px;
+    border-radius: 14px;
+    transition: transform 0.2s ease;
 }
 
 .metric-row:hover {
@@ -1255,7 +1045,7 @@ body {
 .metric-left {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     font-size: 13px;
     font-weight: 600;
     color: var(--text-muted);
@@ -1267,24 +1057,296 @@ body {
     color: var(--text-heading);
 }
 
-/* ================= 24-HOUR REAL-TIME HOURLY TIMELINE ================= */
+/* ================= PROMINENT 3D CELESTIAL HORIZON DOME (BELOW) ================= */
+.celestial-section-below {
+    margin-bottom: 50px;
+    transform-style: preserve-3d;
+}
+
+.celestial-dome-card-3d {
+    position: relative;
+    background: var(--card-glass);
+    border: 1.5px solid var(--card-border);
+    backdrop-filter: blur(16px);
+    border-radius: 32px;
+    padding: 32px 34px 26px;
+    box-shadow: var(--shadow-main);
+    transform-style: preserve-3d;
+    overflow: hidden;
+}
+
+.dome-meta-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.dome-info h3 {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-heading);
+}
+
+.dome-info p {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.simulation-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.sim-play-btn, .sim-reset-btn {
+    border: 1px solid var(--card-border);
+    background: var(--card-inner);
+    color: var(--text);
+    padding: 6px 14px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sim-play-btn:hover, .sim-reset-btn:hover {
+    background: var(--primary);
+    color: #ffffff;
+}
+
+/* 3D HORIZON DOME PERSPECTIVE STAGE */
+.horizon-dome-stage {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    perspective: 1000px;
+}
+
+.dome-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 200px;
+    overflow: visible;
+}
+
+/* 3D GLOWING CELESTIAL ORBITER (SUN / MOON) */
+.celestial-orbiter-3d {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1), top 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 10;
+    pointer-events: none;
+    will-change: left, top;
+}
+
+.celestial-sphere-3d {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    position: relative;
+    z-index: 2;
+    transition: all 0.4s ease;
+}
+
+.sun-sphere {
+    background: radial-gradient(circle at 35% 35%, #fffbeb, #f59e0b 60%, #d97706);
+    box-shadow: 0 0 30px #f59e0b, 0 0 60px rgba(245, 158, 11, 0.6);
+    animation: pulseSun 3s ease-in-out infinite alternate;
+}
+
+@keyframes pulseSun {
+    0% { transform: scale(1); box-shadow: 0 0 25px #f59e0b, 0 0 50px rgba(245, 158, 11, 0.5); }
+    100% { transform: scale(1.1); box-shadow: 0 0 40px #f59e0b, 0 0 80px rgba(245, 158, 11, 0.8); }
+}
+
+.moon-sphere {
+    background: radial-gradient(circle at 35% 35%, #ffffff, #c7d2fe 50%, #6366f1);
+    box-shadow: 0 0 30px #818cf8, 0 0 60px rgba(99, 102, 241, 0.6);
+    animation: pulseMoon 4s ease-in-out infinite alternate;
+}
+
+@keyframes pulseMoon {
+    0% { transform: scale(1); box-shadow: 0 0 25px #818cf8, 0 0 50px rgba(99, 102, 241, 0.5); }
+    100% { transform: scale(1.08); box-shadow: 0 0 35px #818cf8, 0 0 75px rgba(99, 102, 241, 0.7); }
+}
+
+/* HORIZON GROUND LINE */
+.dome-horizon-ground {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-top: 2px dashed var(--card-border);
+    padding-top: 14px;
+    position: relative;
+    z-index: 3;
+}
+
+.horizon-gate {
+    display: flex;
+    flex-direction: column;
+}
+
+.horizon-east { align-items: flex-start; }
+.horizon-west { align-items: flex-end; }
+
+.gate-icon {
+    font-size: 20px;
+    margin-bottom: 2px;
+}
+
+.gate-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.horizon-gate strong {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-heading);
+}
+
+.apex-pill {
+    background: var(--card-glass);
+    border: 1px solid var(--card-border);
+    padding: 4px 14px;
+    border-radius: 14px;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+/* SCRUBBER SLIDER */
+.scrubber-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 20px;
+    padding-top: 14px;
+    border-top: 1px solid var(--card-border);
+}
+
+.scrub-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.celestial-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 6px;
+    background: var(--card-inner);
+    border-radius: 5px;
+    outline: none;
+}
+
+.celestial-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--primary);
+}
+
+/* ================= HOURLY SECTION: TODAY vs TOMORROW ================= */
 .hourly-section {
     margin-bottom: 45px;
     transform-style: preserve-3d;
 }
 
-.hourly-container-3d {
-    display: flex;
-    gap: 14px;
-    overflow-x: auto;
-    padding: 10px 4px 20px;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
+.day-toggle-group {
+    display: inline-flex;
+    background: var(--card-glass);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 4px;
+    gap: 4px;
 }
 
-/* Scrollbar polish */
+.day-toggle-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    padding: 6px 18px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.day-toggle-btn.active {
+    background: var(--primary);
+    color: #ffffff;
+    box-shadow: 0 4px 12px var(--primary-glow);
+}
+
+.open-new-page-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.hourly-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.open-page-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card-glass);
+    border: 1px solid var(--card-border);
+    color: var(--primary);
+    padding: 6px 16px;
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.open-page-link:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px var(--primary-glow);
+}
+
+/* HOURLY SCROLL CARDS */
+.hourly-container-3d {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 10px 4px 16px;
+    scroll-behavior: smooth;
+}
+
 .hourly-container-3d::-webkit-scrollbar {
-    height: 8px;
+    height: 7px;
 }
 
 .hourly-container-3d::-webkit-scrollbar-track {
@@ -1301,28 +1363,27 @@ body {
     flex: 0 0 115px;
     background: var(--card-glass);
     border: 1.2px solid var(--card-border);
-    backdrop-filter: blur(18px);
-    border-radius: 22px;
-    padding: 18px 10px;
+    backdrop-filter: blur(14px);
+    border-radius: 20px;
+    padding: 16px 10px;
     text-align: center;
     box-shadow: var(--shadow-main);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    min-height: 175px;
-    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    min-height: 170px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
 .hourly-card-3d.current-hour {
     border-color: var(--primary);
     background: var(--card-glass-hover);
-    box-shadow: 0 12px 30px var(--primary-glow);
+    box-shadow: 0 8px 24px var(--primary-glow);
 }
 
 .hourly-card-3d:hover {
-    transform: translateY(-6px) scale(1.05);
-    box-shadow: 0 16px 35px var(--primary-glow);
+    transform: translateY(-4px);
     border-color: var(--accent-cyan);
 }
 
@@ -1333,9 +1394,8 @@ body {
 }
 
 .hour-icon {
-    font-size: 32px;
-    margin: 6px 0;
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.12));
+    font-size: 30px;
+    margin: 4px 0;
 }
 
 .hour-temp {
@@ -1348,7 +1408,7 @@ body {
     font-size: 11px;
     font-weight: 700;
     color: var(--primary);
-    margin-top: 4px;
+    margin-top: 3px;
 }
 
 .hour-wind {
@@ -1383,7 +1443,7 @@ body {
     opacity: 0.85;
 }
 
-/* ================= RESPONSIVE DESIGN ================= */
+/* ================= RESPONSIVE ================= */
 @media (max-width: 1024px) {
     .monitoring-grid {
         grid-template-columns: 1fr;
@@ -1399,23 +1459,6 @@ body {
         font-size: 36px;
     }
 
-    .weather-card-3d {
-        padding: 28px 20px;
-    }
-
-    .weather-top {
-        flex-direction: column-reverse;
-        gap: 14px;
-    }
-
-    .weather-icon-3d {
-        font-size: 70px;
-    }
-
-    .temp-digits {
-        font-size: 80px;
-    }
-
     .header {
         flex-direction: column;
         align-items: stretch;
@@ -1424,6 +1467,16 @@ body {
     .location-clock-card {
         justify-content: center;
     }
+
+    .horizon-dome-stage {
+        height: 180px;
+    }
+
+    .celestial-sphere-3d {
+        width: 44px;
+        height: 44px;
+        font-size: 22px;
+    }
 }
 
 @media (max-width: 520px) {
@@ -1431,27 +1484,11 @@ body {
         font-size: 30px;
     }
 
-    .search-box-3d {
-        flex-direction: column;
-        align-items: stretch;
-        border-radius: 20px;
-        padding: 12px;
-    }
-
-    .search-btn-3d {
-        width: 100%;
-    }
-
     .temp-digits {
-        font-size: 64px;
-    }
-
-    .orbit-stage {
-        height: 120px;
+        font-size: 68px;
     }
 
     .compass-readout {
         grid-template-columns: 1fr;
-        gap: 4px;
     }
 }

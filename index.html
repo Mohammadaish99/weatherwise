@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="WeatherWise 3D - Fully 3D Real-Time Atmospheric Weather Monitoring, Celestial Sun & Moon Tracker, and Live Location Clock.">
+    <meta name="description" content="WeatherWise 3D - High-Accuracy Real-Time Atmospheric Station, 3D Celestial Sun & Moon Horizon Dome, and 3D Wind Compass.">
     <meta name="theme-color" content="#0f172a">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌦️</text></svg>">
@@ -14,10 +14,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Three.js for true 3D WebGL rendering -->
+    <!-- Three.js for 3D WebGL -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-    <title>WeatherWise 3D | Real-Time Atmospheric Monitoring</title>
+    <title>WeatherWise 3D | Real-Time Weather Station</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
@@ -36,12 +36,12 @@
                 <span class="logo-text">Weather<span class="gradient-text">Wise 3D</span></span>
             </div>
 
-            <!-- LOCATION LIVE CLOCK -->
-            <div class="location-clock-card" id="locationClockCard" title="Current Local Time at Location">
+            <!-- LOCATION-ACCURATE LIVE CLOCK -->
+            <div class="location-clock-card" id="locationClockCard" title="Current Local Time at Selected Location">
                 <span class="clock-icon">🕒</span>
                 <div class="clock-details">
                     <span id="localTimeDisplay" class="clock-time">--:--:--</span>
-                    <span id="localDateDisplay" class="clock-date">Live Local Time</span>
+                    <span id="localDateDisplay" class="clock-date">Synchronizing...</span>
                 </div>
             </div>
 
@@ -60,22 +60,22 @@
         <!-- MAIN -->
         <main>
 
-            <!-- HERO & MONITORING BADGE -->
+            <!-- HERO & MONITORING STATUS -->
             <section class="hero scroll-3d-item">
                 <div class="monitor-live-bar">
                     <div class="monitor-pulse">
                         <span class="pulse-dot"></span>
-                        <span class="monitor-label">REAL-TIME MONITORING:</span>
-                        <span id="refreshTimerText" class="timer-countdown">Next update in 15:00</span>
+                        <span class="monitor-label">REAL-TIME TELEMETRY:</span>
+                        <span id="refreshTimerText" class="timer-countdown">Refreshing in 15:00</span>
                     </div>
                     <button id="manualRefreshBtn" class="manual-refresh-btn" title="Force Refresh Live Data">
                         <span class="refresh-icon">🔄</span> Refresh Now
                     </button>
                 </div>
 
-                <h1>Atmosphere in <span class="gradient-text">Complete 3D</span></h1>
+                <h1>Atmospheric Station in <span class="gradient-text">Smooth 3D</span></h1>
                 <p>
-                    Live barometric pressure tracking, wind direction compass, and astronomical Sun & Moon trajectory.
+                    Precision barometric pressure monitoring, real-time 3D wind compass, and live day/night astronomical horizon dome.
                 </p>
             </section>
 
@@ -87,7 +87,7 @@
                     <input
                         type="text"
                         id="cityInput"
-                        placeholder="Search any city worldwide (e.g., Tokyo, London, New York)..."
+                        placeholder="Search any global city (e.g., Tokyo, London, New York)..."
                         autocomplete="off"
                     >
                     <button id="searchBtn" class="search-btn-3d">
@@ -97,7 +97,7 @@
 
                 <div class="search-actions-row">
                     <button id="locationBtn" class="control-btn-3d">
-                        <span>📍</span> My Current Location
+                        <span>📍</span> Use My Current Location
                     </button>
                     <button id="saveCityBtn" class="control-btn-3d save-btn" title="Save this city to favorites">
                         <span id="saveCityIcon">⭐</span> <span id="saveCityText">Save City</span>
@@ -106,7 +106,7 @@
 
                 <!-- QUICK POPULAR PILLS -->
                 <div class="quick-cities">
-                    <span class="quick-label">Trending:</span>
+                    <span class="quick-label">Popular:</span>
                     <button class="city-pill-3d" data-city="New York">New York</button>
                     <button class="city-pill-3d" data-city="London">London</button>
                     <button class="city-pill-3d" data-city="Tokyo">Tokyo</button>
@@ -138,14 +138,14 @@
             </div>
 
 
-            <!-- MAIN WEATHER 3D CARD -->
+            <!-- MAIN 3D WEATHER CARD -->
             <section id="weatherCard" class="weather-card-3d card-tilt scroll-3d-item" data-tilt>
                 <div class="card-glare"></div>
 
                 <div class="weather-top">
                     <div class="location-meta">
                         <div class="live-status-pill">
-                            <span class="live-ping"></span> LIVE CONDITIONS
+                            <span class="live-ping"></span> REAL-TIME TELEMETRY
                         </div>
                         <h2 id="cityName">London, United Kingdom</h2>
                         <p id="timezoneText" class="timezone-tag">Timezone: Europe/London</p>
@@ -170,66 +170,6 @@
                 <div class="condition-badge-wrap">
                     <p id="condition" class="condition-text">Partly Cloudy</p>
                 </div>
-
-
-                <!-- ================= 3D SUN & MOON CELESTIAL ARC TRACKER ================= -->
-                <div class="celestial-tracker-3d" id="celestialTracker">
-                    <div class="celestial-header">
-                        <span class="celestial-title">
-                            <span id="celestialModeIcon">☀️</span> 3D Celestial Trajectory (<span id="celestialModeName">Day Sun Path</span>)
-                        </span>
-                        <span id="celestialRemainingText" class="celestial-remaining">Calculating trajectory...</span>
-                    </div>
-
-                    <!-- Visual 3D Orbit Arc -->
-                    <div class="orbit-stage">
-                        <svg class="orbit-svg" viewBox="0 0 500 160" preserveAspectRatio="none">
-                            <defs>
-                                <linearGradient id="arcGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                    <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.4" />
-                                    <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.9" />
-                                    <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.4" />
-                                </linearGradient>
-                                <linearGradient id="orbitFillGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                    <stop offset="0%" stop-color="rgba(56, 189, 248, 0.15)" />
-                                    <stop offset="100%" stop-color="rgba(56, 189, 248, 0.0)" />
-                                </linearGradient>
-                            </defs>
-                            <!-- Background filled arc -->
-                            <path d="M 30 140 Q 250 15 470 140 Z" fill="url(#orbitFillGradient)" />
-                            <!-- Orbit curve -->
-                            <path id="orbitCurve" d="M 30 140 Q 250 15 470 140" fill="none" stroke="url(#arcGradient)" stroke-width="4" stroke-dasharray="8,6" />
-                        </svg>
-
-                        <!-- 3D Sun / Moon Orbiter Body -->
-                        <div id="celestialOrbiter" class="celestial-orbiter" style="left: 50%; top: 30px;">
-                            <div id="celestialBody" class="celestial-body sun-body">
-                                <span id="celestialEmoji">☀️</span>
-                            </div>
-                            <div class="orbiter-glow"></div>
-                        </div>
-
-                        <!-- Ground Horizon Line -->
-                        <div class="orbit-horizon">
-                            <div class="horizon-point start-point">
-                                <span class="point-icon">🌅</span>
-                                <span class="point-label">Sunrise</span>
-                                <strong id="sunriseTime">06:00</strong>
-                            </div>
-
-                            <div class="horizon-point mid-point">
-                                <span class="point-badge" id="solarProgressBadge">50% Orbit</span>
-                            </div>
-
-                            <div class="horizon-point end-point">
-                                <span class="point-icon">🌇</span>
-                                <span class="point-label">Sunset</span>
-                                <strong id="sunsetTime">18:00</strong>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
             </section>
 
 
@@ -238,30 +178,35 @@
                 <div class="section-title">
                     <h2>⚡ Real-Time Atmospheric Monitoring</h2>
                     <span class="refresh-badge-3d">
-                        <span class="live-dot"></span> Live Gauge Network
+                        <span class="live-dot"></span> 15-Min Live Updates
                     </span>
                 </div>
 
                 <div class="monitoring-grid">
 
-                    <!-- 3D WIND COMPASS CARD -->
+                    <!-- 3D ROTATING WIND VECTOR COMPASS -->
                     <div class="monitoring-card-3d card-tilt" data-tilt>
                         <div class="card-glare"></div>
                         <div class="monitor-card-header">
                             <span class="monitor-icon">🧭</span>
-                            <h4>3D Wind Vector Compass</h4>
+                            <h4>3D Rotating Wind Compass</h4>
                         </div>
 
                         <div class="compass-stage">
-                            <div class="compass-rose">
+                            <div class="compass-rose-3d" id="compassRose">
                                 <span class="cardinal cardinal-n">N</span>
                                 <span class="cardinal cardinal-e">E</span>
                                 <span class="cardinal cardinal-s">S</span>
                                 <span class="cardinal cardinal-w">W</span>
+                                
+                                <div class="compass-bezel-rim"></div>
                                 <div class="compass-dial-ring"></div>
+                                
                                 <!-- 3D ROTATING NEEDLE -->
                                 <div id="compassNeedle" class="compass-needle" style="transform: rotate(0deg);">
-                                    <div class="needle-north"></div>
+                                    <div class="needle-north">
+                                        <span class="needle-tip-n">▲</span>
+                                    </div>
                                     <div class="needle-center-pin"></div>
                                     <div class="needle-south"></div>
                                 </div>
@@ -275,11 +220,11 @@
                             </div>
                             <div class="compass-val">
                                 <span class="readout-label">Wind Speed</span>
-                                <strong id="windSpeedVal">-- km/h</strong>
+                                <strong id="windSpeedVal">14 km/h</strong>
                             </div>
                             <div class="compass-val">
                                 <span class="readout-label">Wind Gusts</span>
-                                <strong id="windGustsVal">-- km/h</strong>
+                                <strong id="windGustsVal">19 km/h</strong>
                             </div>
                         </div>
                     </div>
@@ -322,14 +267,14 @@
                                 <strong id="pressureMsl">1014 hPa</strong>
                             </div>
                             <div class="gauge-stat">
-                                <p>Elevation Context</p>
+                                <p>Atmospheric Context</p>
                                 <strong id="elevationText">Standard ATM</strong>
                             </div>
                         </div>
                     </div>
 
 
-                    <!-- AIR QUALITY & ATMOSPHERIC METRICS -->
+                    <!-- ATMOSPHERIC MOISTURE & UV METRICS -->
                     <div class="monitoring-card-3d card-tilt" data-tilt>
                         <div class="card-glare"></div>
                         <div class="monitor-card-header">
@@ -357,7 +302,7 @@
                             <div class="metric-row">
                                 <div class="metric-left">
                                     <span class="m-icon">🌧️</span>
-                                    <span>Precipitation Probability</span>
+                                    <span>Precipitation Chance</span>
                                 </div>
                                 <strong id="precipVal">10%</strong>
                             </div>
@@ -376,15 +321,119 @@
             </section>
 
 
-            <!-- ================= 24-HOUR REAL-TIME HOURLY STREAM ================= -->
+            <!-- ================= PROMINENT 3D SUN & MOON HORIZON DOME (BELOW) ================= -->
+            <section class="celestial-section-below scroll-3d-item">
+                <div class="section-title">
+                    <h2>🌅 3D Celestial Horizon Dome: Sunrise to Sunset & Night Cycle</h2>
+                    <span class="refresh-badge-3d">
+                        <span id="celestialModeIcon">☀️</span> <span id="celestialModeName">Day Sun Path</span>
+                    </span>
+                </div>
+
+                <div class="celestial-dome-card-3d card-tilt" data-tilt>
+                    <div class="card-glare"></div>
+
+                    <div class="dome-meta-header">
+                        <div class="dome-info">
+                            <h3 id="celestialHeading">Sun Orbit Trajectory (Day to Night)</h3>
+                            <p id="celestialRemainingText">Calculating astronomical elevation...</p>
+                        </div>
+
+                        <!-- SIMULATION CONTROLS -->
+                        <div class="simulation-controls">
+                            <button id="simPlayBtn" class="sim-play-btn" title="Simulate 24-Hour Cycle">
+                                <span>▶️</span> Play 24h Arc
+                            </button>
+                            <button id="simResetBtn" class="sim-reset-btn" title="Reset to Real-Time">
+                                <span>↺</span> Real-Time
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3D PERSPECTIVE HORIZON DOME STAGE -->
+                    <div class="horizon-dome-stage">
+                        <svg class="dome-svg" viewBox="0 0 700 240" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="domeArcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.8" />
+                                    <stop offset="50%" stop-color="#38bdf8" stop-opacity="1" />
+                                    <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.8" />
+                                </linearGradient>
+                                <linearGradient id="domeNightGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#6366f1" stop-opacity="0.5" />
+                                    <stop offset="50%" stop-color="#a855f7" stop-opacity="0.9" />
+                                    <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.5" />
+                                </linearGradient>
+                                <radialGradient id="skyGlowGrad" cx="50%" cy="100%" r="90%">
+                                    <stop offset="0%" stop-color="rgba(56, 189, 248, 0.25)" />
+                                    <stop offset="100%" stop-color="rgba(56, 189, 248, 0.0)" />
+                                </radialGradient>
+                            </defs>
+                            <!-- Sky glow area under arch -->
+                            <path d="M 40 210 Q 350 20 660 210 Z" fill="url(#skyGlowGrad)" />
+                            <!-- 3D Perspective Elevation Guide Lines -->
+                            <path d="M 120 210 Q 350 60 580 210" fill="none" stroke="rgba(255,255,255,0.15)" stroke-dasharray="4,6" stroke-width="1.5" />
+                            <!-- Main Celestial Arch -->
+                            <path id="celestialSvgArc" d="M 40 210 Q 350 20 660 210" fill="none" stroke="url(#domeArcGrad)" stroke-width="5" stroke-linecap="round" />
+                        </svg>
+
+                        <!-- 3D GLOWING CELESTIAL ORBITER (SUN / MOON) -->
+                        <div id="celestialOrbiter" class="celestial-orbiter-3d" style="left: 50%; top: 40px;">
+                            <div id="celestialBody" class="celestial-sphere-3d sun-sphere">
+                                <span id="celestialEmoji">☀️</span>
+                            </div>
+                            <div id="celestialRayRings" class="celestial-ray-rings"></div>
+                        </div>
+
+                        <!-- 3D HORIZON BASE -->
+                        <div class="dome-horizon-ground">
+                            <div class="horizon-gate horizon-east">
+                                <span class="gate-icon">🌅</span>
+                                <span class="gate-name">East Horizon (Start)</span>
+                                <strong id="sunriseTime">06:00</strong>
+                            </div>
+
+                            <div class="horizon-apex-badge">
+                                <span id="solarProgressBadge" class="apex-pill">50% Solar Zenith</span>
+                            </div>
+
+                            <div class="horizon-gate horizon-west">
+                                <span class="gate-icon">🌇</span>
+                                <span class="gate-name">West Horizon (End)</span>
+                                <strong id="sunsetTime">18:00</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Trajectory Scrubber -->
+                    <div class="scrubber-bar-wrap">
+                        <span class="scrub-label">Manual Celestial Scrub:</span>
+                        <input type="range" id="celestialScrubber" min="0" max="100" value="50" class="celestial-slider">
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ================= DETAILED HOURLY TIMELINE (TODAY vs TOMORROW) ================= -->
             <section class="hourly-section scroll-3d-item">
                 <div class="section-title">
-                    <h2>⏳ 24-Hour Real-Time Atmospheric Timeline</h2>
-                    <span class="forecast-badge-3d">Continuous Hourly Updates</span>
+                    <h2>⏳ Detailed Hourly Telemetry</h2>
+
+                    <div class="day-toggle-group">
+                        <button id="btnToday" class="day-toggle-btn active">Today</button>
+                        <button id="btnTomorrow" class="day-toggle-btn">Tomorrow</button>
+                    </div>
+                </div>
+
+                <div class="open-new-page-row">
+                    <p class="hourly-subtitle">Showing 24-hour hour-by-hour continuous metrics.</p>
+                    <a id="openDetailsPageBtn" href="details.html" target="_blank" class="open-page-link" title="Open complete table and charts in a new window">
+                        <span>📄</span> Open Complete View on New Page ↗
+                    </a>
                 </div>
 
                 <div id="hourlyContainer" class="hourly-container-3d">
-                    <!-- Populated dynamically via JavaScript with 24 real-time hourly cards -->
+                    <!-- Populated dynamically via JavaScript with 24 hours of Today or Tomorrow -->
                 </div>
             </section>
 
@@ -394,10 +443,10 @@
         <!-- FOOTER -->
         <footer class="footer-3d scroll-3d-item">
             <p>
-                <strong>WeatherWise 3D</strong> • High-Accuracy 3D Real-Time Atmospheric Station
+                <strong>WeatherWise 3D Station</strong> • High-Accuracy Global Atmospheric Intelligence
             </p>
             <p class="sub-footer">
-                Live Data powered by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo API</a> • High-Resolution Forecast Models
+                Live Data powered by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo API</a> • 100% Free & Open-Source
             </p>
         </footer>
 
