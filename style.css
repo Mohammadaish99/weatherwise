@@ -137,6 +137,7 @@ body {
 .gradient-text-shimmer {
     background: linear-gradient(90deg, var(--primary) 0%, var(--accent-cyan) 25%, var(--accent-gold) 50%, var(--accent-cyan) 75%, var(--primary) 100%);
     background-size: 200% auto;
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: textShimmer 7s linear infinite;
@@ -147,6 +148,7 @@ body {
 body.dark .gradient-text-shimmer {
     background: linear-gradient(90deg, #38bdf8 0%, #a855f7 25%, #fbbf24 50%, #22d3ee 75%, #38bdf8 100%);
     background-size: 200% auto;
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: textShimmer 7s linear infinite;
@@ -1644,6 +1646,7 @@ body.dark .big-pressure {
 .celestial-slider {
     flex: 1;
     -webkit-appearance: none;
+    appearance: none;
     height: 6px;
     background: var(--card-inner);
     border-radius: 5px;
