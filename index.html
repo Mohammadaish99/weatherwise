@@ -70,8 +70,14 @@
                 </div>
             </div>
 
-            <!-- HEADER ACTIONS: ACCOUNT + UNIT + THEME -->
+            <!-- HEADER ACTIONS: ACCOUNT + UNIT + THEME + PRESENTATION -->
             <div class="header-actions">
+                <!-- PRESENTATION DECK LINK -->
+                <a href="presentation.html" target="_blank" class="action-btn-3d presentation-btn" title="View Keynote Presentation (PPT)" style="text-decoration: none; color: var(--accent-gold); border-color: rgba(245, 158, 11, 0.45); display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; font-weight: 800; font-size: 13px;">
+                    <span class="btn-icon">📊</span>
+                    <span class="btn-text">PPT</span>
+                </a>
+
                 <!-- USER ACCOUNT / AUTH BUTTON -->
                 <button id="accountBtn" class="action-btn-3d account-btn" onclick="window.openAuthModal && window.openAuthModal()" title="Account & Special Cities">
                     <span id="accountBtnIcon" class="btn-icon">👤</span>
@@ -496,6 +502,11 @@
         <footer class="footer-3d">
             <p>
                 <strong>WeatherWise 3D Station</strong> • Real-Time Global Atmospheric Telemetry
+            </p>
+            <p style="margin: 8px 0;">
+                <a href="presentation.html" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: rgba(255, 215, 0, 0.12); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 20px; color: #ffd700; text-decoration: none; font-size: 0.85rem; font-weight: 700; transition: all 0.3s ease;">
+                    📊 View College & Office Presentation Deck (14 Slides) ↗
+                </a>
             </p>
             <p class="sub-footer">
                 Live Data powered by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo API</a> • 100% Free & Open-Source Domain

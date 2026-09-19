@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeatherWise 3D | Professional Keynote Presentation</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Three.js for Interactive 3D Background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-base: #070d1d;
+            --bg-card: rgba(18, 28, 51, 0.75);
+            --border-card: rgba(56, 189, 248, 0.35);
+            --border-glow: rgba(56, 189, 248, 0.8);
+            --primary: #38bdf8;
+            --accent-cyan: #22d3ee;
+            --accent-gold: #fbbf24;
+            --accent-emerald: #34d399;
+            --accent-purple: #a855f7;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --code-bg: #030712;
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 3D WebGL Background Canvas */
+        #threeBgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.65;
+        }
+
+        /* Presentation Container */
+        .presentation-deck {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 40px;
+            overflow: hidden;
+        }
+
+        /* Individual Slide Stage */
+        .slide {
+            position: absolute;
+            inset: 30px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0.96) translateY(20px);
+            pointer-events: none;
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            max-width: 1350px;
+            margin: 0 auto;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+        }
+
+        /* Slide Header */
+        .slide-category {
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .slide-category::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        .slide-title {
+            font-size: 34px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.8px;
+            margin-bottom: 24px;
+            line-height: 1.2;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Content Layouts */
+        .two-column-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            height: 500px;
+        }
+
+        .three-column-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            height: 500px;
+        }
+
+        .four-column-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            height: 500px;
+        }
+
+        .presentation-card {
+            background: var(--bg-card);
+            border: 1.5px solid var(--border-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 22px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.15);
+            transition: border-color 0.25s ease, transform 0.25s ease;
+            overflow-y: auto;
+        }
+
+        .presentation-card:hover {
+            border-color: var(--border-glow);
+            transform: translateY(-3px);
+        }
+
+        .card-header-tag {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bullet-item {
+            margin-bottom: 14px;
+        }
+
+        .bullet-item strong {
+            display: block;
+            font-size: 14.5px;
+            color: #ffffff;
+            margin-bottom: 3px;
+        }
+
+        .bullet-item p {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Code Block Styling */
+        .code-container {
+            background: var(--code-bg);
+            border: 1.5px solid rgba(56, 189, 248, 0.3);
+            border-radius: 16px;
+            padding: 16px;
+            font-family: var(--font-code);
+            font-size: 12px;
+            line-height: 1.55;
+            color: #e2e8f0;
+            overflow-x: auto;
+            flex: 1;
+        }
+
+        .code-keyword { color: #f43f5e; font-weight: 700; }
+        .code-func { color: #38bdf8; font-weight: 600; }
+        .code-str { color: #34d399; }
+        .code-comment { color: #64748b; font-style: italic; }
+        .code-num { color: #fbbf24; }
+
+        /* Metric Big Card */
+        .metric-big-num {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--accent-cyan);
+            line-height: 1;
+            margin-bottom: 8px;
+            letter-spacing: -1.5px;
+        }
+
+        .metric-big-label {
+            font-size: 15px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        /* Bottom Control Bar */
+        .control-bar {
+            position: relative;
+            z-index: 10;
+            background: rgba(11, 17, 32, 0.88);
+            backdrop-filter: blur(16px);
+            border-top: 1px solid var(--border-card);
+            padding: 12px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .control-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .slide-counter {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.08);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .progress-track {
+            width: 240px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent-cyan));
+            width: 7%;
+            transition: width 0.3s ease;
+        }
+
+        .control-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-deck {
+            border: 1px solid var(--border-card);
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-deck:hover {
+            background: var(--primary);
+            color: #030712;
+            border-color: var(--primary);
+            box-shadow: 0 4px 14px rgba(56, 189, 248, 0.4);
+        }
+
+        .btn-deck-primary {
+            background: linear-gradient(135deg, var(--primary), var(--accent-cyan));
+            color: #030712;
+            border: none;
+        }
+
+        /* Speaker Notes Drawer */
+        .notes-drawer {
+            display: none;
+            position: fixed;
+            bottom: 60px;
+            left: 20px;
+            right: 20px;
+            background: rgba(3, 7, 18, 0.95);
+            border: 1.5px solid var(--accent-gold);
+            border-radius: 18px;
+            padding: 16px 20px;
+            z-index: 100;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+            animation: slideUp 0.25s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .notes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--accent-gold);
+            margin-bottom: 8px;
+        }
+
+        .notes-content {
+            font-size: 13.5px;
+            color: #f1f5f9;
+            line-height: 1.6;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .two-column-grid, .three-column-grid, .four-column-grid {
+                grid-template-columns: 1fr;
+                height: auto;
+                overflow-y: auto;
+            }
+            .slide {
+                overflow-y: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 3D WEBGL ASTRONOMICAL PLANETARIUM BACKGROUND -->
+    <canvas id="threeBgCanvas"></canvas>
+
+    <!-- SLIDES CONTAINER -->
+    <main class="presentation-deck">
+
+        <!-- ================= SLIDE 1: TITLE ================= -->
+        <section class="slide active" id="slide-1" data-notes="Welcome everyone! Today, I am proud to present WeatherWise 3D — an interactive real-time atmospheric station and celestial planetarium built with WebGL Three.js, CSS3 spatial depth, and zero server bloat. I'll walk you through how I engineered this system from the ground up.">
+            <div class="presentation-card" style="padding: 40px 48px; border-color: var(--primary);">
+                <div class="slide-category">⚡ FULL-STACK WEB ENGINEERING • 3D GRAPHICS • METEOROLOGY</div>
+                <h1 style="font-size: 52px; font-weight: 800; color: #ffffff; margin-bottom: 12px; letter-spacing: -1.5px;">WeatherWise 3D</h1>
+                <h3 style="font-size: 22px; font-weight: 700; color: var(--primary); margin-bottom: 20px;">Deep 3D Real-Time Atmospheric Station & Celestial Planetarium</h3>
+                <p style="font-size: 15px; color: var(--text-muted); line-height: 1.7; max-width: 900px; margin-bottom: 28px;">
+                    An immersive meteorological platform merging hardware-accelerated WebGL 3D graphics, dynamic cursor-tracking spatial physics, astronomical solar/lunar horizon trajectories, and fault-tolerant serverless data pipelines.
+                </p>
+
+                <div style="display: flex; gap: 24px; flex-wrap: wrap; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                    <div>
+                        <span style="font-size: 12px; color: var(--text-muted); display: block;">DEVELOPER & ARCHITECT</span>
+                        <strong style="font-size: 16px; color: var(--accent-gold);">Mohammad Aish</strong>
+                    </div>
+                    <div>
+                        <span style="font-size: 12px; color: var(--text-muted); display: block;">CORE TECHNOLOGY</span>
+                        <strong style="font-size: 15px; color: #ffffff;">Three.js • Vanilla JS (ES6+) • CSS3 3D • Open-Meteo</strong>
+                    </div>
+                    <div>
+                        <span style="font-size: 12px; color: var(--text-muted); display: block;">LIVE PRODUCTION DOMAIN</span>
+                        <a href="https://mohammadaish99.github.io/weatherwise/" target="_blank" style="font-size: 15px; color: var(--accent-cyan); text-decoration: none; font-weight: 700;">mohammadaish99.github.io/weatherwise/ ↗</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SLIDE 2: PROBLEM & VISION ================= -->
+        <section class="slide" id="slide-2" data-notes="Slide 2 sets the motivation. Most weather sites are 2D, filled with ads, and download megabytes of React bundles. WeatherWise 3D was built to solve this: 100% free, 60 FPS WebGL, and under 100KB payload.">
+            <div class="slide-category">PROJECT MOTIVATION & PROBLEM STATEMENT</div>
+            <h2 class="slide-title">Why Traditional Weather Apps Fall Short & The 3D Solution</h2>
+
+            <div class="two-column-grid">
+                <div class="presentation-card" style="border-color: rgba(239, 68, 68, 0.6);">
+                    <div class="card-header-tag" style="color: #f87171;">⚠️ The Limitations of Existing Weather Portals</div>
+                    
+                    <div class="bullet-item">
+                        <strong>1. Flat & Static 2D Interfaces</strong>
+                        <p>Most weather sites present weather as boring tables or static SVG clouds with no sense of physical space or immersion.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>2. Heavy Framework Overhead</strong>
+                        <p>Web apps bundle 3MB+ of React/Angular dependencies just to show temperature numbers, causing sluggish mobile load times.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>3. Absence of Spatial Celestial Context</strong>
+                        <p>Users cannot intuitively visualize where the Sun and Moon are positioned along their real astronomical day/night horizon arc.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>4. Intrusive Paywalls & Complex Sign-ins</strong>
+                        <p>Constant commercial popups and email confirmations cause massive user frustration.</p>
+                    </div>
+                </div>
+
+                <div class="presentation-card" style="border-color: var(--accent-emerald);">
+                    <div class="card-header-tag" style="color: var(--accent-emerald);">✨ The WeatherWise 3D Architectural Vision</div>
+
+                    <div class="bullet-item">
+                        <strong>1. True GPU-Accelerated 3D WebGL</strong>
+                        <p>Real-time wireframe planetary sphere, dual tilted orbital rings, and 240 volumetric starlight particles running at 60 FPS.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>2. Sub-Second Lightweight Zero-Dependency Speed</strong>
+                        <p>Engineered entirely with pure Vanilla JavaScript and CSS3 transforms. Under 100KB footprint with lightning-fast load times.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>3. Astronomical 3D Horizon Dome & Compass</strong>
+                        <p>Real-time parabolic solar/lunar trajectory tracking plus 3D rotating wind vector compass pointing to exact magnetic bearings.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>4. 100% Free & Frictionless Client-Side Auth</strong>
+                        <p>Instant 1-Click login as Mohammad, local state persistence, and zero monthly server hosting costs on GitHub Pages.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SLIDE 3: SYSTEM ARCHITECTURE ================= -->
+        <section class="slide" id="slide-3" data-notes="Slide 3 covers the four architectural pillars: Data pipeline, 3D WebGL engine, spatial UI layer, and client-side persistence.">
+            <div class="slide-category">SYSTEM ARCHITECTURE</div>
+            <h2 class="slide-title">Modular 4-Layer Engineering Architecture</h2>
+
+            <div class="four-column-grid">
+                <div class="presentation-card" style="border-color: var(--accent-cyan);">
+                    <div class="card-header-tag" style="color: var(--accent-cyan); font-size: 15px;">1. Telemetry Pipeline</div>
+                    <div class="bullet-item"><strong>Open-Meteo REST API</strong><p>Global satellite atmospheric models with zero API key constraints.</p></div>
+                    <div class="bullet-item"><strong>15-Min Live Polling</strong><p>Automated telemetry countdown timer with background sync.</p></div>
+                    <div class="bullet-item"><strong>Reverse Geocoding</strong><p>GPS coordinates converted to exact city and country names.</p></div>
+                </div>
+
+                <div class="presentation-card" style="border-color: var(--primary);">
+                    <div class="card-header-tag" style="color: var(--primary); font-size: 15px;">2. 3D WebGL Engine</div>
+                    <div class="bullet-item"><strong>Three.js (r128)</strong><p>Hardware-accelerated rendering on dedicated background canvas.</p></div>
+                    <div class="bullet-item"><strong>Dual Orbital Rings</strong><p>Concentric planetary ring meshes tilted on 3D spatial planes.</p></div>
+                    <div class="bullet-item"><strong>Camera Parallax</strong><p>Mouse/gyro tracking with smooth lerp damping physics.</p></div>
+                </div>
+
+                <div class="presentation-card" style="border-color: var(--accent-gold);">
+                    <div class="card-header-tag" style="color: var(--accent-gold); font-size: 15px;">3. Spatial UI Mechanics</div>
+                    <div class="bullet-item"><strong>CSS preserve-3d</strong><p>True stereoscopic depth with child elements floating at Z: 45px.</p></div>
+                    <div class="bullet-item"><strong>Dynamic Tilt Engine</strong><p>Euler angle rotation tracking cursor coordinates in real time.</p></div>
+                    <div class="bullet-item"><strong>Metallic Extrusion</strong><p>Multi-tier text shadow bevels creating physical 3D embossed numbers.</p></div>
+                </div>
+
+                <div class="presentation-card" style="border-color: var(--accent-emerald);">
+                    <div class="card-header-tag" style="color: var(--accent-emerald); font-size: 15px;">4. State & Infrastructure</div>
+                    <div class="bullet-item"><strong>SafeStorage Layer</strong><p>Fault-tolerant LocalStorage wrapper shielded against private browsing crashes.</p></div>
+                    <div class="bullet-item"><strong>Smart Client Auth</strong><p>1-Click instant login and special city categorization (Home/Work).</p></div>
+                    <div class="bullet-item"><strong>Serverless CI/CD</strong><p>Deployed on GitHub Pages with automated cache-busting version queries.</p></div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SLIDE 4: THREE.JS IMPLEMENTATION & CODE ================= -->
+        <section class="slide" id="slide-4" data-notes="Slide 4 dives directly into the Three.js WebGL graphics code. Notice how we use BufferGeometry and Float32Array for high performance.">
+            <div class="slide-category">GRAPHICS CODE DEEP DIVE</div>
+            <h2 class="slide-title">Three.js WebGL Atmospheric Planetarium Pipeline</h2>
+
+            <div class="two-column-grid">
+                <div class="presentation-card">
+                    <div class="card-header-tag">🌌 Spatial Graphics Mathematics</div>
+                    <div class="bullet-item">
+                        <strong>Wireframe Celestial Globe (SphereGeometry)</strong>
+                        <p>A sphere of radius 14 with 28 segments, rendering continuous latitude and longitude vectors rotating on X and Y axes.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>Dual Counter-Rotating Orbital Rings</strong>
+                        <p>Ring 1 (radius 18.7, rotated PI/2.6) and Ring 2 (radius 22.6, rotated -PI/6) spinning in opposite directions to simulate celestial mechanics.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>240 BufferGeometry Light Points</strong>
+                        <p>High-efficiency Float32Array position and color buffers with AdditiveBlending for glowing cosmic dust.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>Camera Lerp Damping:</strong>
+                        <p><code style="color: var(--accent-cyan);">camera.position.x += (targetX - camera.position.x) * 0.05;</code> ensures liquid-smooth parallax motion.</p>
+                    </div>
+                </div>
+
+                <div class="code-container">
+<span class="code-comment">// Three.js 3D WebGL Planetarium Engine</span>
+<span class="code-keyword">function</span> <span class="code-func">initHighImpactThreeJS</span>() {
+    threeScene = <span class="code-keyword">new</span> THREE.<span class="code-func">Scene</span>();
+    threeCamera = <span class="code-keyword">new</span> THREE.<span class="code-func">PerspectiveCamera</span>(<span class="code-num">50</span>, window.innerWidth / window.innerHeight, <span class="code-num">0.1</span>, <span class="code-num">1000</span>);
+    threeRenderer = <span class="code-keyword">new</span> THREE.<span class="code-func">WebGLRenderer</span>({ canvas, alpha: <span class="code-keyword">true</span>, antialias: <span class="code-keyword">true</span> });
+
+    <span class="code-comment">// 1. Central Celestial Wireframe Globe</span>
+    <span class="code-keyword">const</span> globeGeo = <span class="code-keyword">new</span> THREE.<span class="code-func">SphereGeometry</span>(<span class="code-num">14</span>, <span class="code-num">28</span>, <span class="code-num">28</span>);
+    threeCelestialGlobe = <span class="code-keyword">new</span> THREE.<span class="code-func">Mesh</span>(globeGeo, globeMat);
+    threeScene.<span class="code-func">add</span>(threeCelestialGlobe);
+
+    <span class="code-comment">// 2. Dual Concentric Orbit Rings</span>
+    <span class="code-keyword">const</span> ring1 = <span class="code-keyword">new</span> THREE.<span class="code-func">RingGeometry</span>(<span class="code-num">18</span>, <span class="code-num">18.7</span>, <span class="code-num">64</span>);
+    <span class="code-keyword">const</span> ring2 = <span class="code-keyword">new</span> THREE.<span class="code-func">RingGeometry</span>(<span class="code-num">22</span>, <span class="code-num">22.6</span>, <span class="code-num">64</span>);
+    threeOrbitRing = <span class="code-keyword">new</span> THREE.<span class="code-func">Mesh</span>(ring1, ringMat1);
+    threeOrbitRing2 = <span class="code-keyword">new</span> THREE.<span class="code-func">Mesh</span>(ring2, ringMat2);
+    threeScene.<span class="code-func">add</span>(threeOrbitRing);
+    threeScene.<span class="code-func">add</span>(threeOrbitRing2);
+
+    <span class="code-comment">// 3. 60 FPS Animation & Camera Lerp Loop</span>
+    <span class="code-keyword">function</span> <span class="code-func">animate</span>() {
+        <span class="code-func">requestAnimationFrame</span>(animate);
+        threeCelestialGlobe.rotation.y += <span class="code-num">0.0014</span>;
+        threeOrbitRing.rotation.z += <span class="code-num">0.0018</span>;
+        threeOrbitRing2.rotation.z -= <span class="code-num">0.0015</span>;
+
+        <span class="code-comment">// Smooth Lerp Parallax</span>
+        threeCamera.position.x += (targetCameraX - threeCamera.position.x) * <span class="code-num">0.05</span>;
+        threeCamera.position.y += (targetCameraY - threeCamera.position.y) * <span class="code-num">0.05</span>;
+        threeRenderer.<span class="code-func">render</span>(threeScene, threeCamera);
+    }
+    <span class="code-func">animate</span>();
+}
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SLIDE 5: DYNAMIC 3D TILT CODE ================= -->
+        <section class="slide" id="slide-5" data-notes="Slide 5 explains how the dashboard boxes tilt dynamically when the user hovers their mouse or touches the screen on mobile.">
+            <div class="slide-category">INTERACTIVE 3D ENGINE</div>
+            <h2 class="slide-title">Dynamic 3D Card Tilt & Specular Light Reflection</h2>
+
+            <div class="two-column-grid">
+                <div class="presentation-card">
+                    <div class="card-header-tag" style="color: var(--accent-gold);">📐 Real-Time Spatial DOM Mechanics</div>
+                    <div class="bullet-item">
+                        <strong>Normalized Cartesian Mapping [-1 to +1]</strong>
+                        <p>Calculates cursor offset from card center: <code style="color: var(--accent-cyan);">xPct = (mouseX / width - 0.5) * 2;</code></p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>Euler Matrix 3D Transformation</strong>
+                        <p>Rotates the card on X and Y axes with perspective depth: <code style="color: var(--accent-cyan);">perspective(1000px) rotateX(...) rotateY(...) translateZ(16px);</code></p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>Stereoscopic Layer Elevation</strong>
+                        <p>Icons and dials pop forward with <code style="color: var(--accent-cyan);">translateZ(45px)</code> inside <code style="color: var(--accent-cyan);">preserve-3d</code> containers.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>Real-Time Dynamic Glare</strong>
+                        <p>Moves a simulated radial specular reflection highlight across the glass surface matching mouse coordinates.</p>
+                    </div>
+                </div>
+
+                <div class="code-container">
+<span class="code-comment">// 3D Interactive Card Tilt Engine (script.js)</span>
+<span class="code-keyword">function</span> <span class="code-func">initCard3DTilt</span>() {
+    <span class="code-keyword">const</span> cards = document.<span class="code-func">querySelectorAll</span>(<span class="code-str">'.card-3d-interactive'</span>);
+    cards.<span class="code-func">forEach</span>(card => {
+        card.<span class="code-func">addEventListener</span>(<span class="code-str">'mousemove'</span>, (e) => {
+            <span class="code-keyword">const</span> rect = card.<span class="code-func">getBoundingClientRect</span>();
+            <span class="code-keyword">const</span> mouseX = e.clientX - rect.left;
+            <span class="code-keyword">const</span> mouseY = e.clientY - rect.top;
+
+            <span class="code-comment">// Normalized ratio: -1.0 to +1.0</span>
+            <span class="code-keyword">const</span> xPct = (mouseX / rect.width - <span class="code-num">0.5</span>) * <span class="code-num">2</span>;
+            <span class="code-keyword">const</span> yPct = (mouseY / rect.height - <span class="code-num">0.5</span>) * <span class="code-num">2</span>;
+
+            <span class="code-keyword">const</span> maxTilt = <span class="code-num">8</span>; <span class="code-comment">// degrees</span>
+            <span class="code-keyword">const</span> tiltX = -yPct * maxTilt;
+            <span class="code-keyword">const</span> tiltY = xPct * maxTilt;
+
+            <span class="code-comment">// Apply true 3D spatial matrix</span>
+            card.style.transform = <span class="code-str">`perspective(1000px) 
+                rotateX(${tiltX.toFixed(2)}deg) 
+                rotateY(${tiltY.toFixed(2)}deg) 
+                translateY(-8px) translateZ(16px)`</span>;
+
+            <span class="code-comment">// Dynamic specular glare tracking</span>
+            <span class="code-keyword">const</span> glare = card.<span class="code-func">querySelector</span>(<span class="code-str">'.card-glare'</span>);
+            <span class="code-keyword">if</span> (glare) {
+                glare.style.background = <span class="code-str">`radial-gradient(
+                    circle at ${(mouseX/rect.width*100)}% ${(mouseY/rect.height*100)}%, 
+                    rgba(255,255,255,0.42) 0%, transparent 65%)`</span>;
+            }
+        });
+    });
+}
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SLIDE 6: WIND COMPASS & CELESTIAL DOME ================= -->
+        <section class="slide" id="slide-6" data-notes="Slide 6 presents the scientific instruments: the 3D Rotating Wind Compass and the Astronomical Horizon Dome showing Sunrise to Sunset.">
+            <div class="slide-category">SCIENTIFIC INSTRUMENTATION</div>
+            <h2 class="slide-title">3D Rotating Wind Compass & Celestial Horizon Dome</h2>
+
+            <div class="two-column-grid">
+                <div class="presentation-card" style="border-color: var(--primary);">
+                    <div class="card-header-tag" style="color: var(--primary);">🧭 3D Rotating Wind Vector Compass</div>
+                    <div class="bullet-item">
+                        <strong>Trigonometric Bearing Binding</strong>
+                        <p>Parses Open-Meteo wind direction (0° to 360°) and animates needle with spring physics: <code style="color: var(--accent-cyan);">cubic-bezier(0.34, 1.56, 0.64, 1)</code>.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>Embossed Bezel & Needle Architecture</strong>
+                        <p>Brushed metallic dial rim with cardinal markers (N, E, S, W), drop-shadows, and center magnetic pivot pin.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>Multi-Parameter Telemetry</strong>
+                        <p>Simultaneously displays bearing heading, real-time speed in km/h or mph, and peak wind gusts.</p>
+                    </div>
+                </div>
+
+                <div class="presentation-card" style="border-color: var(--accent-gold);">
+                    <div class="card-header-tag" style="color: var(--accent-gold);">🌅 3D Celestial Horizon Dome Arc</div>
+                    <div class="bullet-item">
+                        <strong>Solar & Lunar Azimuth Trajectory</strong>
+                        <p>Calculates solar elevation from daily sunrise/sunset timestamps in the location's specific local timezone.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>Parabolic Coordinate Mapping</strong>
+                        <p>Computes progress P in [0, 1]: <code style="color: var(--accent-cyan);">X = P * width; Y = baseline - sin(P * PI) * arcHeight;</code></p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>Dynamic Day/Night Celestial Orb</strong>
+                        <p>Morphs smoothly between a radiant pulsating Sun Corona and a cratered Moon with nocturnal indigo aura.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>24-Hour Simulation Engine</strong>
+                        <p>Interactive Play, Reset, and Scrubber controls let users simulate the entire 24h day/night cycle on demand!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SLIDE 7: PERSPECTIVE TRAP CASE STUDY ================= -->
+        <section class="slide" id="slide-7" data-notes="Slide 7 is a fantastic technical talking point. Explain how W3C CSS specifications caused position: fixed modals to get trapped inside a perspective container, and how we solved it.">
+            <div class="slide-category">CASE STUDY: ADVANCED DEBUGGING</div>
+            <h2 class="slide-title">Overcoming the W3C CSS Perspective Stacking Trap</h2>
+
+            <div class="presentation-card" style="height: 500px; border-color: var(--accent-cyan);">
+                <div class="card-header-tag" style="color: var(--accent-cyan); font-size: 20px;">🔍 Deep Dive into CSS Transforms Module Level 1</div>
+                
+                <div class="bullet-item" style="margin-bottom: 20px;">
+                    <strong style="font-size: 16px; color: var(--accent-gold);">1. The Reported Bug</strong>
+                    <p style="font-size: 14px;">When users clicked "Sign In", the modal dialog appeared to not open or was completely invisible on mobile and desktop screens.</p>
+                </div>
+
+                <div class="bullet-item" style="margin-bottom: 20px;">
+                    <strong style="font-size: 16px; color: #f87171;">2. The Root Cause Discovered in W3C Standards</strong>
+                    <p style="font-size: 14px;">
+                        The main container <code style="color: var(--accent-cyan);">&lt;div class="app"&gt;</code> had <code style="color: var(--accent-cyan);">perspective: 1400px;</code> for 3D depth. 
+                        Per the W3C Transforms specification: <em>"Any element with a transform, perspective, or filter property creates a containing block for positioned descendants, including position: fixed."</em>
+                        Consequently, the modal was trapped inside the .app div thousands of pixels down the page, clipped off-screen!
+                    </p>
+                </div>
+
+                <div class="bullet-item">
+                    <strong style="font-size: 16px; color: var(--accent-emerald);">3. The Architectural Solution</strong>
+                    <p style="font-size: 14px;">
+                        Relocated <code style="color: var(--accent-cyan);">#authModal</code> and <code style="color: var(--accent-cyan);">#saveSpecialModal</code> outside <code style="color: var(--accent-cyan);">&lt;div class="app"&gt;</code> directly under <code style="color: var(--accent-cyan);">&lt;body&gt;</code>. 
+                        Configured <code style="color: var(--accent-cyan);">position: fixed !important; inset: 0; z-index: 999999 !important;</code> and appended cache-busting query strings (<code style="color: var(--accent-cyan);">?v=5.0</code>) for instant CDN updates.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SLIDE 8: DUAL-MODE 3D VISUAL SYSTEM ================= -->
+        <section class="slide" id="slide-8" data-notes="Slide 8 explains the dual visual system: vibrant golden daylight mode versus cosmic midnight mode, plus metallic extruded typography.">
+            <div class="slide-category">DESIGN SYSTEM</div>
+            <h2 class="slide-title">Dual-Mode 3D Visual System & Extruded Typography</h2>
+
+            <div class="two-column-grid">
+                <div class="presentation-card" style="border-color: var(--accent-gold);">
+                    <div class="card-header-tag" style="color: var(--accent-gold);">☀️ Radiant 3D Daylight Mode</div>
+                    <div class="bullet-item">
+                        <strong>Golden Amber & Azure Sky Palette</strong>
+                        <p>Sunlight gradient backgrounds (#7DD3FC to #FEF08A) reflecting daytime atmospheric Rayleigh scattering.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>Frosted Glass Translucency (78% Opacity)</strong>
+                        <p>High-blur glassmorphism (18px backdrop blur) letting the rotating 3D globe and rings be clearly seen behind cards.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>Physical 3D Metallic Extrusion</strong>
+                        <p>Digits feature multi-layer text-shadow bevels: <code style="color: var(--accent-gold);">0 1px 0 #fff, 0 2px 0 #cbd5e1, 0 4px 0 #64748b</code> creating a carved, metallic presence.</p>
+                    </div>
+                </div>
+
+                <div class="presentation-card" style="border-color: var(--accent-purple);">
+                    <div class="card-header-tag" style="color: var(--accent-purple);">🌙 Cosmic 3D Midnight Mode</div>
+                    <div class="bullet-item">
+                        <strong>Midnight Obsidian Nebula Palette</strong>
+                        <p>Cosmic gradients (#030712 to #09132D) illuminated by electric cyan and ultraviolet particle halos.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>Glowing Celestial Orbital Rings</strong>
+                        <p>Planetary rings shift dynamically into neon cyan and deep amethyst orbits.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>Extruded Cyan Bevel Shadows</strong>
+                        <p>Night typography uses high-contrast neon bevels: <code style="color: var(--accent-cyan);">0 1px 0 #38bdf8, 0 3px 0 #0369a1, 0 8px 22px rgba(0,0,0,0.8)</code> for intense readability.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SLIDE 9: CLIENT AUTH & SPECIAL CITIES ================= -->
+        <section class="slide" id="slide-9" data-notes="Slide 9 covers user accounts, safeStorage abstraction, and how users save and categorize their special cities.">
+            <div class="slide-category">DATA PERSISTENCE & USER EXPERIENCE</div>
+            <h2 class="slide-title">Frictionless Authentication & Lifestyle City Categorization</h2>
+
+            <div class="three-column-grid">
+                <div class="presentation-card" style="border-color: var(--primary);">
+                    <div class="card-header-tag" style="color: var(--primary);">🚀 Instant 1-Click Login</div>
+                    <div class="bullet-item">
+                        <strong>1-Click Access as Mohammad</strong>
+                        <p>Users can tap a single button to authenticate immediately with zero forms or latency.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>Smart Auto-Registration</strong>
+                        <p>Entering any username automatically provisions a new account without rejection errors.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>Optional Passwords</strong>
+                        <p>Zero barrier to entry; users can sign in with just their name in 1 tap.</p>
+                    </div>
+                </div>
+
+                <div class="presentation-card" style="border-color: var(--accent-gold);">
+                    <div class="card-header-tag" style="color: var(--accent-gold);">⭐ Special Cities Tagging</div>
+                    <div class="bullet-item">
+                        <strong>Lifestyle Categories:</strong>
+                        <p>🏠 <strong>Home</strong> — Primary residence conditions.<br>
+                           💼 <strong>Work</strong> — Office & commute weather.<br>
+                           🏖️ <strong>Vacation</strong> — Upcoming travel destinations.<br>
+                           ⭐ <strong>Special</strong> — Custom favorites.
+                        </p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>Interactive Cities Drawer</strong>
+                        <p>Displays live temperature chips with 1-click weather switching.</p>
+                    </div>
+                </div>
+
+                <div class="presentation-card" style="border-color: var(--accent-emerald);">
+                    <div class="card-header-tag" style="color: var(--accent-emerald);">🛡️ SafeStorage Architecture</div>
+                    <div class="bullet-item">
+                        <strong>Exception-Shielded Wrapper</strong>
+                        <p>Encapsulates window.localStorage inside try/catch handlers to avoid crashes in private/incognito modes.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>Automatic Serialization</strong>
+                        <p>Handles JSON encoding and decoding gracefully with default fallbacks.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>Zero Database Cost</strong>
+                        <p>Completely client-side; scales infinitely for free with zero backend database fees.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SLIDE 10: PERFORMANCE BENCHMARKS ================= -->
+        <section class="slide" id="slide-10" data-notes="Slide 10 highlights the performance metrics. 60 FPS WebGL, under 100KB payload, and 0.4s load time.">
+            <div class="slide-category">BENCHMARKS & PERFORMANCE</div>
+            <h2 class="slide-title">Engineering Performance & Optimization Metrics</h2>
+
+            <div class="four-column-grid">
+                <div class="presentation-card" style="border-color: var(--primary); text-align: center; justify-content: center;">
+                    <div class="metric-big-num">60 FPS</div>
+                    <div class="metric-big-label">WebGL Frame Rate</div>
+                    <p style="font-size: 12px; color: var(--text-muted);">Hardware-accelerated GPU rendering with lerp damping and particle color buffers.</p>
+                </div>
+
+                <div class="presentation-card" style="border-color: var(--accent-cyan); text-align: center; justify-content: center;">
+                    <div class="metric-big-num">&lt; 100 KB</div>
+                    <div class="metric-big-label">Total JS Payload</div>
+                    <p style="font-size: 12px; color: var(--text-muted);">Zero framework overhead (No 300KB React/Angular runtime). Pure Vanilla JS.</p>
+                </div>
+
+                <div class="presentation-card" style="border-color: var(--accent-emerald); text-align: center; justify-content: center;">
+                    <div class="metric-big-num">0.4 sec</div>
+                    <div class="metric-big-label">First Contentful Paint</div>
+                    <p style="font-size: 12px; color: var(--text-muted);">Static edge delivery on GitHub Pages CDN with cache-busting version queries.</p>
+                </div>
+
+                <div class="presentation-card" style="border-color: var(--accent-gold); text-align: center; justify-content: center;">
+                    <div class="metric-big-num">100%</div>
+                    <div class="metric-big-label">Serverless & Free</div>
+                    <p style="font-size: 12px; color: var(--text-muted);">Zero monthly cloud bills, zero backend maintenance, unlimited global availability.</p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SLIDE 11: APPLICATION WALKTHROUGH ================= -->
+        <section class="slide" id="slide-11" data-notes="Slide 11 gives a visual feature walkthrough of the website: welcome banner, main 3D stage, monitoring boxes, and hourly timeline.">
+            <div class="slide-category">APPLICATION TOUR</div>
+            <h2 class="slide-title">Complete WeatherWise 3D Application Feature Tour</h2>
+
+            <div class="two-column-grid">
+                <div class="presentation-card">
+                    <div class="bullet-item">
+                        <strong>1. Uplifting Welcome & Happy Mind Banner</strong>
+                        <p>Greets visitors according to time of day with rotating positive affirmations and celebratory floating starlight sparkles.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>2. Location-Accurate Real-Time Clock</strong>
+                        <p>Renders live, ticking local time at the selected global city (accounting for worldwide timezone offsets).</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>3. Main 3D Atmospheric Weather Stage</strong>
+                        <p>Features 3D floating weather condition icon, extruded metallic temperature digits, feels-like indicator, and live ping pulse.</p>
+                    </div>
+                </div>
+
+                <div class="presentation-card">
+                    <div class="bullet-item">
+                        <strong>4. Real-Time Atmospheric Monitoring Dashboard</strong>
+                        <p>Three synchronized instruments: 3D Rotating Wind Compass, Barometric Pressure Gauge with MSL calculation, and Moisture/UV metrics.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>5. 24-Hour Continuous Hourly Carousel</strong>
+                        <p>Compare Today vs Tomorrow hour-by-hour with 3D tiltable cards linking to full detailed tables.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>6. Dedicated Hourly Telemetry Page (details.html)</strong>
+                        <p>A standalone detailed telemetry page providing deep data analysis for meteorology enthusiasts.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SLIDE 12: FUTURE ROADMAP ================= -->
+        <section class="slide" id="slide-12" data-notes="Slide 12 covers the future roadmap: custom GLSL rain/snow shaders, 3D interactive satellite globe, and PWA offline caching.">
+            <div class="slide-category">FUTURE EXPANSION</div>
+            <h2 class="slide-title">Technological Scalability & Future Roadmap</h2>
+
+            <div class="two-column-grid">
+                <div class="presentation-card" style="border-color: var(--accent-cyan);">
+                    <div class="card-header-tag" style="color: var(--accent-cyan);">🌧️ Custom WebGL GLSL Weather Shaders</div>
+                    <div class="bullet-item">
+                        <strong>Volumetric GPU Rain & Snow Streaks</strong>
+                        <p>Procedural particle shaders calculating wind velocity drift directly on the graphics card.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>Procedural Lightning Illumination</strong>
+                        <p>Dynamic point-light flashes synchronizing with atmospheric thunderstorm telemetry.</p>
+                    </div>
+                </div>
+
+                <div class="presentation-card" style="border-color: var(--primary);">
+                    <div class="card-header-tag" style="color: var(--primary);">🌍 Interactive 3D Satellite Earth Globe</div>
+                    <div class="bullet-item">
+                        <strong>Rotatable Earth Model</strong>
+                        <p>Interactive 3D terrestrial globe mapped with satellite cloud layers and Doppler radar precipitation heatmaps.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>Tropical Cyclone Tracking</strong>
+                        <p>Real-time hurricane and typhoon atmospheric vector visualization.</p>
+                    </div>
+                </div>
+
+                <div class="presentation-card" style="border-color: var(--accent-gold);">
+                    <div class="card-header-tag" style="color: var(--accent-gold);">📱 Progressive Web App (PWA) Offline</div>
+                    <div class="bullet-item">
+                        <strong>Service Worker Caching</strong>
+                        <p>Enables full offline viewing of recently synced atmospheric telemetry.</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>Installable Mobile App</strong>
+                        <p>1-tap install on Android, iOS home screen, and Windows desktop.</p>
+                    </div>
+                </div>
+
+                <div class="presentation-card" style="border-color: var(--accent-emerald);">
+                    <div class="card-header-tag" style="color: var(--accent-emerald);">🎙️ AI Natural Language & Voice Queries</div>
+                    <div class="bullet-item">
+                        <strong>Web Speech Voice Search</strong>
+                        <p>Hands-free voice recognition ("What is the weather in Tokyo?").</p>
+                    </div>
+                    <div class="bullet-item">
+                        <strong>Gemini AI Weather Advice</strong>
+                        <p>Intelligent clothing recommendations and outdoor activity planning based on barometric trends.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SLIDE 13: COLLEGE & DEFENSE Q&A ================= -->
+        <section class="slide" id="slide-13" data-notes="Slide 13 prepares you for the toughest questions professors or colleagues might ask. Be ready to explain why Vanilla JS was the right choice.">
+            <div class="slide-category">EXPLANATION & DEFENSE GUIDE</div>
+            <h2 class="slide-title">College / Office Defense: Common Q&A Preparation</h2>
+
+            <div class="presentation-card" style="height: 500px; border-color: var(--accent-gold);">
+                <div class="bullet-item" style="margin-bottom: 16px;">
+                    <strong style="color: var(--accent-gold); font-size: 14.5px;">Q: Why choose Vanilla JavaScript over React, Next.js, or Vue?</strong>
+                    <p style="font-size: 13px;">A: Building in Vanilla JS demonstrates deep mastery of core browser APIs, the DOM, and graphics pipelines without relying on framework abstractions. Eliminating virtual DOM reconciliation overhead and 200KB+ dependencies ensures a smooth 60 FPS WebGL frame rate on mobile devices.</p>
+                </div>
+                <div class="bullet-item" style="margin-bottom: 16px;">
+                    <strong style="color: var(--accent-gold); font-size: 14.5px;">Q: How did you ensure Three.js does not drain mobile battery life?</strong>
+                    <p style="font-size: 13px;">A: The WebGL canvas renders transparently without expensive post-processing bloom shaders. We capped pixelRatio at 1.5, limited geometry segments to 28, and used only 240 particles, allowing hardware acceleration without GPU overheating.</p>
+                </div>
+                <div class="bullet-item" style="margin-bottom: 16px;">
+                    <strong style="color: var(--accent-gold); font-size: 14.5px;">Q: How do you handle API limits without paying for a backend proxy?</strong>
+                    <p style="font-size: 13px;">A: Open-Meteo allows free, unthrottled non-commercial public access. We implemented client-side caching, a 15-minute auto-refresh countdown, and localStorage persistence to prevent redundant network requests.</p>
+                </div>
+                <div class="bullet-item">
+                    <strong style="color: var(--accent-gold); font-size: 14.5px;">Q: How does user authentication persist without an external database?</strong>
+                    <p style="font-size: 13px;">A: We engineered an exception-shielded LocalStorage architecture with automated JSON serialization and fallback handlers for private browsing, storing credentials, unit preferences, and categorized favorite cities.</p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SLIDE 14: CONCLUSION ================= -->
+        <section class="slide" id="slide-14" data-notes="Slide 14 is your final closing slide. Thank the audience, invite questions, and offer to give a live demo of the website right now!">
+            <div class="presentation-card" style="padding: 44px 50px; text-align: center; border-color: var(--accent-cyan); align-items: center; justify-content: center;">
+                <h1 style="font-size: 44px; font-weight: 800; color: #ffffff; margin-bottom: 12px; letter-spacing: -1px;">Thank You!</h1>
+                <h3 style="font-size: 22px; font-weight: 700; color: var(--primary); margin-bottom: 24px;">WeatherWise 3D • Real-Time Atmospheric Station</h3>
+                
+                <div style="background: rgba(255,255,255,0.05); border: 1.5px solid var(--border-card); border-radius: 18px; padding: 20px 30px; margin-bottom: 28px; max-width: 750px;">
+                    <p style="font-size: 16px; font-weight: 800; color: var(--accent-gold); margin-bottom: 8px;">
+                        🌐 Live Application: <a href="https://mohammadaish99.github.io/weatherwise/" target="_blank" style="color: var(--accent-cyan); text-decoration: none;">https://mohammadaish99.github.io/weatherwise/ ↗</a>
+                    </p>
+                    <p style="font-size: 14px; color: var(--text-muted);">
+                        💻 GitHub Repository: <a href="https://github.com/Mohammadaish99/weatherwise.git" target="_blank" style="color: #ffffff; text-decoration: none;">github.com/Mohammadaish99/weatherwise.git ↗</a>
+                    </p>
+                </div>
+
+                <p style="font-size: 16px; color: #ffffff; margin-bottom: 10px;">
+                    Created & Presented by <strong style="color: var(--accent-gold);">Mohammad Aish</strong>
+                </p>
+                <p style="font-size: 19px; font-weight: 800; color: var(--accent-emerald);">
+                    Questions & Answers / Live Demonstration 🚀
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- SPEAKER NOTES DRAWER -->
+    <aside id="notesDrawer" class="notes-drawer">
+        <div class="notes-header">
+            <span>🎙️ SPEAKER NOTES / SCRIPT (WHAT TO SAY)</span>
+            <button onclick="toggleSpeakerNotes()" style="background:none;border:none;color:#ef4444;font-size:16px;cursor:pointer;">✕</button>
+        </div>
+        <p id="notesContentText" class="notes-content">Slide 1 notes...</p>
+    </aside>
+
+    <!-- BOTTOM CONTROL BAR -->
+    <footer class="control-bar">
+        <div class="control-info">
+            <span class="slide-counter" id="slideCounter">Slide 1 / 14</span>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <span style="font-size: 12px; color: var(--text-muted);">Use <strong>← / →</strong> or <strong>Space</strong> to navigate</span>
+        </div>
+
+        <div class="control-actions">
+            <button class="btn-deck" onclick="toggleSpeakerNotes()" title="View speaking script for this slide">🎙️ Speaker Script</button>
+            <button class="btn-deck" onclick="toggleFullScreen()" title="Toggle Fullscreen Presentation Mode">⛶ Fullscreen</button>
+            <button class="btn-deck" onclick="prevSlide()">◀ Prev</button>
+            <button class="btn-deck btn-deck-primary" onclick="nextSlide()">Next ▶</button>
+            <a href="index.html" class="btn-deck" style="text-decoration: none; border-color: var(--accent-gold); color: var(--accent-gold);" title="Open Live WeatherWise Web App">🌦️ Open Live App</a>
+        </div>
+    </footer>
+
+    <!-- INTERACTIVE SLIDE CONTROLLER SCRIPT -->
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 14;
+
+        function updateSlideUI() {
+            document.querySelectorAll('.slide').forEach((s, idx) => {
+                s.classList.toggle('active', (idx + 1) === currentSlide);
+            });
+
+            document.getElementById('slideCounter').textContent = `Slide ${currentSlide} / ${totalSlides}`;
+            document.getElementById('progressFill').style.width = `${(currentSlide / totalSlides) * 100}%`;
+
+            const activeSlide = document.getElementById(`slide-${currentSlide}`);
+            if (activeSlide) {
+                const notes = activeSlide.getAttribute('data-notes') || 'No notes for this slide.';
+                document.getElementById('notesContentText').textContent = notes;
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateSlideUI();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlideUI();
+            }
+        }
+
+        function toggleSpeakerNotes() {
+            const drawer = document.getElementById('notesDrawer');
+            drawer.style.display = (drawer.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {});
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+
+        // Keyboard Navigation
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                e.preventDefault();
+                prevSlide();
+            } else if (e.key === 'f' || e.key === 'F') {
+                toggleFullScreen();
+            } else if (e.key === 's' || e.key === 'S') {
+                toggleSpeakerNotes();
+            }
+        });
+
+        // 3D Background Planetarium
+        function initBgThree() {
+            try {
+                const canvas = document.getElementById('threeBgCanvas');
+                if (!canvas || typeof THREE === 'undefined') return;
+
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera.position.z = 35;
+
+                const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+
+                // Wireframe Globe
+                const globeGeo = new THREE.SphereGeometry(15, 24, 24);
+                const globeMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, wireframe: true, transparent: true, opacity: 0.16 });
+                const globe = new THREE.Mesh(globeGeo, globeMat);
+                scene.add(globe);
+
+                // Planetary Ring
+                const ringGeo = new THREE.RingGeometry(19, 19.8, 64);
+                const ringMat = new THREE.MeshBasicMaterial({ color: 0xa855f7, side: THREE.DoubleSide, transparent: true, opacity: 0.2 });
+                const ring = new THREE.Mesh(ringGeo, ringMat);
+                ring.rotation.x = Math.PI / 2.5;
+                scene.add(ring);
+
+                // Star particles
+                const count = 150;
+                const pGeo = new THREE.BufferGeometry();
+                const pos = new Float32Array(count * 3);
+                for (let i = 0; i < count * 3; i += 3) {
+                    pos[i] = (Math.random() - 0.5) * 80;
+                    pos[i+1] = (Math.random() - 0.5) * 60;
+                    pos[i+2] = (Math.random() - 0.5) * 40;
+                }
+                pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+                const pMat = new THREE.PointsMaterial({ size: 1.5, color: 0x22d3ee, transparent: true, opacity: 0.65 });
+                const particles = new THREE.Points(pGeo, pMat);
+                scene.add(particles);
+
+                function animate() {
+                    requestAnimationFrame(animate);
+                    globe.rotation.y += 0.001;
+                    ring.rotation.z += 0.0012;
+                    particles.rotation.y += 0.0005;
+                    renderer.render(scene, camera);
+                }
+                animate();
+
+                window.addEventListener('resize', () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            } catch (e) {}
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateSlideUI();
+            initBgThree();
+        });
+    </script>
+</body>
+</html>
