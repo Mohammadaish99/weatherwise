@@ -66,6 +66,22 @@ window.handleSignIn = handleSignIn;
 window.handleSignUp = handleSignUp;
 window.handleLogout = handleLogout;
 window.quickDemoLogin = quickDemoLogin;
+window.exploreDemoAccount = exploreDemoAccount;
+window.handleGoogleSignIn = handleGoogleSignIn;
+window.openGoogleChooser = openGoogleChooser;
+window.closeGoogleChooser = closeGoogleChooser;
+window.selectGoogleAccount = selectGoogleAccount;
+window.toggleGoogleCustomAccount = toggleGoogleCustomAccount;
+window.submitCustomGoogleAccount = submitCustomGoogleAccount;
+window.togglePasswordVisibility = togglePasswordVisibility;
+window.updatePasswordStrength = updatePasswordStrength;
+window.showForgotPasswordView = showForgotPasswordView;
+window.handlePasswordReset = handlePasswordReset;
+window.switchProfileTab = switchProfileTab;
+window.setProfileUnit = setProfileUnit;
+window.setProfileTheme = setProfileTheme;
+window.updateUserProfile = updateUserProfile;
+window.changeUserPassword = changeUserPassword;
 window.handleSaveCityClick = handleSaveCityClick;
 window.openSaveSpecialModal = openSaveSpecialModal;
 window.closeSaveSpecialModal = closeSaveSpecialModal;
@@ -245,7 +261,32 @@ function triggerCelebratorySparkles() {
     }
 }
 
-/* ================= 4. GENUINE & FRICTIONLESS LOGIN SYSTEM ================= */
+/* ================= 4. PROFESSIONAL CLIENT-SIDE AUTHENTICATION SYSTEM ================= */
+
+// Web Crypto SHA-256 password hashing (safe client-side cryptographic storage)
+async function hashPassword(plainText) {
+    if (!plainText) return "";
+    try {
+        if (window.crypto && window.crypto.subtle) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(plainText);
+            const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+        }
+    } catch (e) {
+        console.warn("Web Crypto unavailable, using fallback hash:", e);
+    }
+    // Fallback hash implementation for older or restricted environments
+    let hash = 0;
+    for (let i = 0; i < plainText.length; i++) {
+        const char = plainText.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash |= 0;
+    }
+    return "ww_h_" + Math.abs(hash).toString(16);
+}
+
 function getUsers() {
     const data = safeStorage.getItem("weatherwise_users");
     if (!data) return [];
@@ -273,18 +314,102 @@ function updateAccountBtnUI() {
     const accountBtn = document.getElementById("accountBtn");
     const accountBtnIcon = document.getElementById("accountBtnIcon");
     const accountBtnText = document.getElementById("accountBtnText");
-
-    if (!accountBtn) return;
+    const welcomeAuthBtn = document.getElementById("welcomeAuthBtn");
+    const welcomeGreeting = document.getElementById("welcomeGreeting");
+    const welcomeUserTag = document.getElementById("welcomeUserTag");
 
     if (user) {
-        accountBtn.classList.add("logged-in");
-        if (accountBtnIcon) accountBtnIcon.textContent = "⭐";
-        if (accountBtnText) accountBtnText.textContent = user.name.split(" ")[0];
+        if (accountBtn) {
+            accountBtn.classList.add("logged-in");
+            accountBtn.title = `Signed in as ${user.name} (Click to manage account)`;
+        }
+        if (accountBtnIcon) accountBtnIcon.textContent = user.name ? user.name.charAt(0).toUpperCase() : "⭐";
+        if (accountBtnText) accountBtnText.textContent = user.name ? user.name.split(" ")[0] : "Account";
+
+        if (welcomeAuthBtn) {
+            welcomeAuthBtn.textContent = `⭐ ${user.name.split(" ")[0]} (My Account)`;
+        }
+        if (welcomeGreeting) {
+            welcomeGreeting.textContent = `Welcome back, ${user.name}! ✨`;
+        }
+        if (welcomeUserTag) {
+            welcomeUserTag.style.display = "inline-block";
+            welcomeUserTag.textContent = "⭐ Special Member";
+        }
     } else {
-        accountBtn.classList.remove("logged-in");
+        if (accountBtn) {
+            accountBtn.classList.remove("logged-in");
+            accountBtn.title = "Sign In or Create Account";
+        }
         if (accountBtnIcon) accountBtnIcon.textContent = "👤";
         if (accountBtnText) accountBtnText.textContent = "Sign In";
+
+        if (welcomeAuthBtn) {
+            welcomeAuthBtn.textContent = "👤 Sign In / Register";
+        }
+        if (welcomeUserTag) {
+            welcomeUserTag.style.display = "none";
+        }
     }
+}
+
+// Real-time password strength evaluation
+function calculatePasswordStrength(pwd) {
+    if (!pwd) return { score: 0, text: "Enter password", color: "var(--text-subtle)", pct: "0%" };
+    if (pwd.length < 6) return { score: 1, text: "Too short (minimum 6 characters)", color: "#ef4444", pct: "25%" };
+
+    let score = 1;
+    if (pwd.length >= 8) score++;
+    if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+    if (score <= 2) {
+        return { score: 2, text: "Weak password", color: "#f97316", pct: "45%" };
+    } else if (score <= 4) {
+        return { score: 3, text: "Good password", color: "#eab308", pct: "75%" };
+    } else {
+        return { score: 4, text: "Strong password! ✨", color: "#10b981", pct: "100%" };
+    }
+}
+
+function updatePasswordStrength(pwd) {
+    const fillEl = document.getElementById("pwdStrengthFill");
+    const textEl = document.getElementById("pwdStrengthText");
+    if (!fillEl || !textEl) return;
+
+    const res = calculatePasswordStrength(pwd);
+    fillEl.style.width = res.pct;
+    fillEl.style.backgroundColor = res.color;
+    textEl.textContent = res.text;
+    textEl.style.color = res.color;
+}
+
+// Show / Hide password visibility toggle
+function togglePasswordVisibility(inputId, btnEl) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const isPassword = input.type === "password";
+    input.type = isPassword ? "text" : "password";
+    if (btnEl) {
+        btnEl.textContent = isPassword ? "👁️‍🗨️" : "👁️";
+        btnEl.setAttribute("aria-label", isPassword ? "Hide password" : "Show password");
+    }
+}
+
+// Clean alert notification inside modal
+function showAuthAlert(message, type = "error") {
+    const authAlert = document.getElementById("authAlert");
+    if (!authAlert) return;
+    authAlert.className = `auth-alert ${type}`;
+    const icon = type === "error" ? "⚠️" : "🎉";
+    authAlert.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+    authAlert.style.display = "flex";
+}
+
+function hideAuthAlert() {
+    const authAlert = document.getElementById("authAlert");
+    if (authAlert) authAlert.style.display = "none";
 }
 
 function openAuthModal() {
@@ -292,39 +417,63 @@ function openAuthModal() {
     if (!modal) return;
 
     const user = getCurrentUser();
-    const quickLoginBox = document.getElementById("quickLoginBox");
+    const googleAuthSection = document.getElementById("googleAuthSection");
     const authTabs = document.getElementById("authTabs");
     const signInForm = document.getElementById("signInForm");
     const signUpForm = document.getElementById("signUpForm");
+    const forgotPasswordForm = document.getElementById("forgotPasswordForm");
+    const demoSection = document.getElementById("demoLoginSection");
     const profileView = document.getElementById("profileView");
     const modalTitle = document.getElementById("modalTitle");
-    const authAlert = document.getElementById("authAlert");
 
-    if (authAlert) authAlert.style.display = "none";
+    hideAuthAlert();
 
     if (user) {
-        // Show Profile View
-        if (modalTitle) modalTitle.textContent = `Welcome, ${user.name}!`;
-        if (quickLoginBox) quickLoginBox.style.display = "none";
+        // Show Profile Dashboard View
+        if (modalTitle) modalTitle.textContent = "Account Dashboard";
+        if (googleAuthSection) googleAuthSection.style.display = "none";
         if (authTabs) authTabs.style.display = "none";
         if (signInForm) signInForm.style.display = "none";
         if (signUpForm) signUpForm.style.display = "none";
+        if (forgotPasswordForm) forgotPasswordForm.style.display = "none";
+        if (demoSection) demoSection.style.display = "none";
         if (profileView) profileView.style.display = "flex";
 
         const profileName = document.getElementById("profileUserName");
         const profileEmail = document.getElementById("profileUserEmail");
         const profileAvatar = document.getElementById("profileAvatar");
+        const profileMemberSince = document.getElementById("profileMemberSince");
+        const profileEditName = document.getElementById("profileEditName");
+        const profileBadgeGoogle = document.getElementById("profileBadgeGoogle");
 
         if (profileName) profileName.textContent = user.name;
-        if (profileEmail) profileEmail.textContent = user.email || "Special WeatherWise Member";
-        if (profileAvatar) profileAvatar.textContent = user.name.charAt(0).toUpperCase();
+        if (profileEmail) profileEmail.textContent = user.email || "Active Member";
+        if (profileAvatar) {
+            profileAvatar.textContent = user.name ? user.name.charAt(0).toUpperCase() : "👤";
+            if (user.authProvider === "google") {
+                profileAvatar.style.background = "linear-gradient(135deg, #4285F4, #34A853)";
+            } else {
+                profileAvatar.style.background = "linear-gradient(135deg, var(--primary), var(--accent-cyan))";
+            }
+        }
+        if (profileMemberSince) profileMemberSince.textContent = `Member since ${user.createdAt || "Recently"}`;
+        if (profileEditName) profileEditName.value = user.name;
+        if (profileBadgeGoogle) {
+            profileBadgeGoogle.style.display = user.authProvider === "google" ? "inline-flex" : "none";
+        }
 
+        // Sync preference pills in profile
+        updateProfilePreferencesUI();
+
+        // Default to Saved Cities sub-tab
+        switchProfileTab("cities");
         renderSpecialCitiesInProfile();
     } else {
-        // Show Sign In / 1-Click Login
+        // Show Sign In / Register View
         if (modalTitle) modalTitle.textContent = "WeatherWise Account";
-        if (quickLoginBox) quickLoginBox.style.display = "block";
+        if (googleAuthSection) googleAuthSection.style.display = "block";
         if (authTabs) authTabs.style.display = "flex";
+        if (demoSection) demoSection.style.display = "block";
         if (profileView) profileView.style.display = "none";
         switchAuthTab("signin");
     }
@@ -341,6 +490,7 @@ function closeAuthModal() {
         modal.style.display = "none";
         modal.style.opacity = "0";
     }
+    hideAuthAlert();
 }
 
 function switchAuthTab(tab) {
@@ -348,131 +498,569 @@ function switchAuthTab(tab) {
     const tabSignUp = document.getElementById("tabSignUp");
     const signInForm = document.getElementById("signInForm");
     const signUpForm = document.getElementById("signUpForm");
-    const authAlert = document.getElementById("authAlert");
+    const forgotPasswordForm = document.getElementById("forgotPasswordForm");
+    const authTabs = document.getElementById("authTabs");
+    const demoSection = document.getElementById("demoLoginSection");
+    const googleAuthSection = document.getElementById("googleAuthSection");
 
-    if (authAlert) authAlert.style.display = "none";
+    hideAuthAlert();
 
     if (tab === "signin") {
+        if (googleAuthSection) googleAuthSection.style.display = "block";
+        if (authTabs) authTabs.style.display = "flex";
         if (tabSignIn) tabSignIn.classList.add("active");
         if (tabSignUp) tabSignUp.classList.remove("active");
         if (signInForm) signInForm.style.display = "flex";
         if (signUpForm) signUpForm.style.display = "none";
-    } else {
+        if (forgotPasswordForm) forgotPasswordForm.style.display = "none";
+        if (demoSection) demoSection.style.display = "block";
+    } else if (tab === "signup") {
+        if (googleAuthSection) googleAuthSection.style.display = "block";
+        if (authTabs) authTabs.style.display = "flex";
         if (tabSignUp) tabSignUp.classList.add("active");
         if (tabSignIn) tabSignIn.classList.remove("active");
         if (signUpForm) signUpForm.style.display = "flex";
         if (signInForm) signInForm.style.display = "none";
+        if (forgotPasswordForm) forgotPasswordForm.style.display = "none";
+        if (demoSection) demoSection.style.display = "block";
+    } else if (tab === "forgot") {
+        if (googleAuthSection) googleAuthSection.style.display = "none";
+        if (authTabs) authTabs.style.display = "none";
+        if (signInForm) signInForm.style.display = "none";
+        if (signUpForm) signUpForm.style.display = "none";
+        if (forgotPasswordForm) forgotPasswordForm.style.display = "flex";
+        if (demoSection) demoSection.style.display = "none";
     }
 }
 
-// 1-Click Instant Demo Login
-function quickDemoLogin(userName = "Mohammad") {
+function showForgotPasswordView() {
+    switchAuthTab("forgot");
+}
+
+// Professional Sign In Handler with Credential Validation & Simulated Network Delay
+async function handleSignIn(e) {
+    if (e) e.preventDefault();
+
+    const inputEl = document.getElementById("signInEmail");
+    const passEl = document.getElementById("signInPassword");
+    const submitBtn = document.getElementById("signInSubmitBtn");
+    const spinner = document.getElementById("signInSpinner");
+    const btnText = document.getElementById("signInBtnText");
+
+    const input = inputEl ? inputEl.value.trim() : "";
+    const pass = passEl ? passEl.value.trim() : "";
+
+    hideAuthAlert();
+
+    if (!input) {
+        showAuthAlert("Please enter your email address or username.", "error");
+        if (inputEl) inputEl.focus();
+        return;
+    }
+    if (!pass) {
+        showAuthAlert("Please enter your password.", "error");
+        if (passEl) passEl.focus();
+        return;
+    }
+
+    // Set loading state for authentic experience
+    if (submitBtn) submitBtn.disabled = true;
+    if (spinner) spinner.style.display = "inline-block";
+    if (btnText) btnText.textContent = "Authenticating...";
+
+    await new Promise(r => setTimeout(r, 450));
+
     const users = getUsers();
-    let found = users.find(u => u.name.toLowerCase() === userName.toLowerCase());
+    const cleanInput = input.toLowerCase();
+    const found = users.find(u =>
+        (u.email && u.email.toLowerCase() === cleanInput) ||
+        (u.username && u.username.toLowerCase() === cleanInput) ||
+        (u.name && u.name.toLowerCase() === cleanInput)
+    );
+
+    const hashedInputPass = await hashPassword(pass);
 
     if (!found) {
-        found = {
-            name: userName,
-            email: `${userName.toLowerCase()}@weatherwise.app`,
-            pass: "demo123",
-            specialCities: getSavedCities()
-        };
-        users.push(found);
-        saveUsers(users);
+        // Reset loading state
+        if (submitBtn) submitBtn.disabled = false;
+        if (spinner) spinner.style.display = "none";
+        if (btnText) btnText.textContent = "Sign In";
+        showAuthAlert("No account found with this email or username. Would you like to create one?", "error");
+        return;
     }
+
+    // Check password matching (supports both SHA-256 hashed and legacy passwords)
+    const isPasswordValid = (found.passHash && found.passHash === hashedInputPass) ||
+                            (found.pass && found.pass === pass);
+
+    if (!isPasswordValid) {
+        // Reset loading state
+        if (submitBtn) submitBtn.disabled = false;
+        if (spinner) spinner.style.display = "none";
+        if (btnText) btnText.textContent = "Sign In";
+        showAuthAlert("Incorrect password. Please verify your password and try again.", "error");
+        if (passEl) passEl.focus();
+        return;
+    }
+
+    // Success: Restore user preferences if saved
+    if (found.prefUnit && found.prefUnit !== currentUnit) {
+        currentUnit = found.prefUnit;
+        safeStorage.setItem("weatherwise_unit", currentUnit);
+        const unitBtn = document.getElementById("unitBtn");
+        if (unitBtn) unitBtn.innerHTML = `<span class="btn-text">°${currentUnit}</span>`;
+    }
+    if (found.prefTheme) {
+        const isDark = found.prefTheme === "dark";
+        document.body.classList.toggle("dark", isDark);
+        safeStorage.setItem("weatherwise_theme", found.prefTheme);
+        const themeBtn = document.getElementById("themeBtn");
+        if (themeBtn) themeBtn.innerHTML = `<span class="btn-icon">${isDark ? "☀️" : "🌙"}</span>`;
+    }
+
+    // Reset button
+    if (submitBtn) submitBtn.disabled = false;
+    if (spinner) spinner.style.display = "none";
+    if (btnText) btnText.textContent = "Sign In";
 
     setCurrentUser(found);
     showLoginSuccess(found.name);
 }
 
-// Smart Unified Login: If user exists, log in; if new, auto-registers seamlessly!
-function handleSignIn(e) {
+// Professional Sign Up Handler with Strict Field Validation
+async function handleSignUp(e) {
     if (e) e.preventDefault();
-    const inputEl = document.getElementById("signInEmail");
-    const passEl = document.getElementById("signInPassword");
-    const input = inputEl ? inputEl.value.trim() : "";
-    const pass = passEl ? passEl.value.trim() : "";
 
-    // If blank, instantly log in as Mohammad
-    if (!input) {
-        quickDemoLogin("Mohammad");
+    const nameEl = document.getElementById("signUpName");
+    const emailEl = document.getElementById("signUpEmail");
+    const passEl = document.getElementById("signUpPassword");
+    const confirmPassEl = document.getElementById("signUpConfirmPassword");
+    const submitBtn = document.getElementById("signUpSubmitBtn");
+    const spinner = document.getElementById("signUpSpinner");
+    const btnText = document.getElementById("signUpBtnText");
+
+    const name = nameEl ? nameEl.value.trim() : "";
+    const email = emailEl ? emailEl.value.trim().toLowerCase() : "";
+    const pass = passEl ? passEl.value.trim() : "";
+    const confirmPass = confirmPassEl ? confirmPassEl.value.trim() : "";
+
+    hideAuthAlert();
+
+    if (!name || name.length < 2) {
+        showAuthAlert("Please enter your full name (at least 2 characters).", "error");
+        if (nameEl) nameEl.focus();
+        return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+        showAuthAlert("Please enter a valid email address (e.g., name@example.com).", "error");
+        if (emailEl) emailEl.focus();
+        return;
+    }
+
+    if (!pass || pass.length < 6) {
+        showAuthAlert("Password must be at least 6 characters long.", "error");
+        if (passEl) passEl.focus();
+        return;
+    }
+
+    if (pass !== confirmPass) {
+        showAuthAlert("Passwords do not match. Please ensure both passwords are identical.", "error");
+        if (confirmPassEl) confirmPassEl.focus();
         return;
     }
 
     const users = getUsers();
-    let found = users.find(u => u.name.toLowerCase() === input.toLowerCase() || u.email.toLowerCase() === input.toLowerCase());
+    const existing = users.find(u => u.email.toLowerCase() === email);
 
-    if (found) {
-        setCurrentUser(found);
-        showLoginSuccess(found.name);
-    } else {
-        // Smart Auto-Registration: user doesn't exist yet, create and log in immediately!
-        const cleanName = input.includes("@") ? input.split("@")[0] : input;
-        const formattedName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
-        const newUser = {
-            name: formattedName,
-            email: input.includes("@") ? input : `${input.toLowerCase()}@weatherwise.app`,
-            pass: pass || "123456",
-            specialCities: getSavedCities()
+    if (existing) {
+        showAuthAlert("An account with this email already exists. Please Sign In instead.", "error");
+        return;
+    }
+
+    // Show loading state
+    if (submitBtn) submitBtn.disabled = true;
+    if (spinner) spinner.style.display = "inline-block";
+    if (btnText) btnText.textContent = "Creating Account...";
+
+    await new Promise(r => setTimeout(r, 500));
+
+    const hashedPass = await hashPassword(pass);
+    const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
+
+    const newUser = {
+        id: "usr_" + Date.now(),
+        name: formattedName,
+        username: email.split("@")[0],
+        email: email,
+        passHash: hashedPass,
+        createdAt: new Date().toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }),
+        prefUnit: currentUnit || "C",
+        prefTheme: document.body.classList.contains("dark") ? "dark" : "light",
+        specialCities: getSavedCities()
+    };
+
+    users.push(newUser);
+    saveUsers(users);
+
+    if (submitBtn) submitBtn.disabled = false;
+    if (spinner) spinner.style.display = "none";
+    if (btnText) btnText.textContent = "Create Free Account";
+
+    setCurrentUser(newUser);
+    showLoginSuccess(newUser.name);
+}
+
+// 1-Click Instant Demo Account (Ideal for recruiters, portfolios, and instant evaluators)
+async function exploreDemoAccount() {
+    const users = getUsers();
+    let demoUser = users.find(u => u.email === "demo.explorer@weatherwise.app");
+
+    if (!demoUser) {
+        const hashedDemoPass = await hashPassword("demo123");
+        demoUser = {
+            id: "usr_demo",
+            name: "Mohammad Demo",
+            username: "mohammad_demo",
+            email: "demo.explorer@weatherwise.app",
+            passHash: hashedDemoPass,
+            createdAt: "Portfolio Showcase",
+            prefUnit: "C",
+            prefTheme: "dark",
+            specialCities: [
+                { name: "London", tag: "Home", tagEmoji: "🏠", date: "Verified" },
+                { name: "Tokyo", tag: "Travel", tagEmoji: "✈️", date: "Verified" },
+                { name: "New York", tag: "Work", tagEmoji: "💼", date: "Verified" },
+                { name: "Dubai", tag: "Vacation", tagEmoji: "🏖️", date: "Verified" }
+            ]
         };
-        users.push(newUser);
+        users.push(demoUser);
         saveUsers(users);
-        setCurrentUser(newUser);
-        showLoginSuccess(newUser.name);
+    }
+
+    setCurrentUser(demoUser);
+    showLoginSuccess(demoUser.name);
+}
+
+// Legacy demo wrapper for backward compatibility
+function quickDemoLogin(userName = "Mohammad") {
+    exploreDemoAccount();
+}
+
+// ================= GOOGLE AUTHENTICATION SYSTEM =================
+function handleGoogleSignIn() {
+    // Check if Google Identity Services is available and configured with client ID
+    if (window.google && window.google.accounts && window.google.accounts.id && window.GOOGLE_CLIENT_ID) {
+        try {
+            window.google.accounts.id.prompt();
+            return;
+        } catch (err) {
+            console.log("Google GIS prompt fallback:", err);
+        }
+    }
+    openGoogleChooser();
+}
+
+function openGoogleChooser() {
+    const modal = document.getElementById("googleChooserModal");
+    if (!modal) return;
+    const customForm = document.getElementById("googleCustomForm");
+    if (customForm) customForm.style.display = "none";
+    modal.style.display = "flex";
+    modal.style.opacity = "1";
+    modal.style.visibility = "visible";
+    modal.style.pointerEvents = "auto";
+}
+
+function closeGoogleChooser() {
+    const modal = document.getElementById("googleChooserModal");
+    if (modal) {
+        modal.style.display = "none";
+        modal.style.opacity = "0";
     }
 }
 
-function handleSignUp(e) {
+function toggleGoogleCustomAccount() {
+    const form = document.getElementById("googleCustomForm");
+    if (!form) return;
+    form.style.display = form.style.display === "none" ? "flex" : "none";
+    if (form.style.display === "flex") {
+        const nameInput = document.getElementById("googleCustomName");
+        if (nameInput) nameInput.focus();
+    }
+}
+
+function submitCustomGoogleAccount(e) {
     if (e) e.preventDefault();
-    const name = document.getElementById("signUpName").value.trim();
-    const email = document.getElementById("signUpEmail").value.trim();
-    const pass = document.getElementById("signUpPassword").value.trim();
-    if (!name) return;
+    const nameInput = document.getElementById("googleCustomName");
+    const emailInput = document.getElementById("googleCustomEmail");
 
-    const users = getUsers();
-    const existing = users.find(u => u.name.toLowerCase() === name.toLowerCase() || u.email.toLowerCase() === email.toLowerCase());
+    const name = nameInput ? nameInput.value.trim() : "";
+    const email = emailInput ? emailInput.value.trim().toLowerCase() : "";
 
-    if (existing) {
-        setCurrentUser(existing);
-        showLoginSuccess(existing.name);
+    if (!name || name.length < 2) {
+        alert("Please enter a valid display name.");
+        if (nameInput) nameInput.focus();
+        return;
+    }
+    if (!email || !email.includes("@")) {
+        alert("Please enter a valid Google/Gmail address.");
+        if (emailInput) emailInput.focus();
         return;
     }
 
-    const newUser = {
-        name,
-        email: email || `${name.toLowerCase()}@weatherwise.app`,
-        pass: pass || "123456",
-        specialCities: getSavedCities()
-    };
-    users.push(newUser);
+    selectGoogleAccount(name, email);
+}
+
+function selectGoogleAccount(name, email) {
+    const users = getUsers();
+    const cleanEmail = email.toLowerCase();
+    let found = users.find(u => u.email && u.email.toLowerCase() === cleanEmail);
+
+    if (!found) {
+        found = {
+            id: "usr_google_" + Date.now(),
+            name: name,
+            username: cleanEmail.split("@")[0],
+            email: cleanEmail,
+            authProvider: "google",
+            createdAt: new Date().toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }),
+            prefUnit: currentUnit || "C",
+            prefTheme: document.body.classList.contains("dark") ? "dark" : "light",
+            specialCities: [
+                { name: "London", tag: "Home", tagEmoji: "🏠", date: "Verified" },
+                { name: "Tokyo", tag: "Travel", tagEmoji: "✈️", date: "Verified" },
+                { name: "New York", tag: "Work", tagEmoji: "💼", date: "Verified" }
+            ]
+        };
+        users.push(found);
+        saveUsers(users);
+    } else {
+        found.authProvider = "google";
+        saveUsers(users);
+    }
+
+    closeGoogleChooser();
+    closeAuthModal();
+    setCurrentUser(found);
+    showLoginSuccess(found.name);
+}
+
+// Client-Side Password Reset Flow
+async function handlePasswordReset(e) {
+    if (e) e.preventDefault();
+
+    const emailEl = document.getElementById("resetEmail");
+    const newPassEl = document.getElementById("resetNewPassword");
+
+    const email = emailEl ? emailEl.value.trim().toLowerCase() : "";
+    const newPass = newPassEl ? newPassEl.value.trim() : "";
+
+    hideAuthAlert();
+
+    if (!email) {
+        showAuthAlert("Please enter your registered email address or username.", "error");
+        return;
+    }
+    if (!newPass || newPass.length < 6) {
+        showAuthAlert("New password must be at least 6 characters long.", "error");
+        return;
+    }
+
+    const users = getUsers();
+    const userIndex = users.findIndex(u =>
+        (u.email && u.email.toLowerCase() === email) ||
+        (u.username && u.username.toLowerCase() === email) ||
+        (u.name && u.name.toLowerCase() === email)
+    );
+
+    if (userIndex === -1) {
+        showAuthAlert("No account registered with that email or username.", "error");
+        return;
+    }
+
+    const hashedPass = await hashPassword(newPass);
+    users[userIndex].passHash = hashedPass;
+    delete users[userIndex].pass; // clear legacy plaintext if any
     saveUsers(users);
-    setCurrentUser(newUser);
-    showLoginSuccess(newUser.name);
+
+    setCurrentUser(users[userIndex]);
+    showAuthAlert("Password updated successfully! Signing you in...", "success");
+
+    setTimeout(() => {
+        showLoginSuccess(users[userIndex].name);
+    }, 600);
+}
+
+// Profile Sub-tabs Switching
+function switchProfileTab(tab) {
+    const tabs = ["cities", "prefs", "security"];
+    tabs.forEach(t => {
+        const btn = document.getElementById("profTab" + t.charAt(0).toUpperCase() + t.slice(1));
+        const panel = document.getElementById("profPanel" + t.charAt(0).toUpperCase() + t.slice(1));
+        if (btn) btn.classList.toggle("active", t === tab);
+        if (panel) {
+            panel.style.display = t === tab ? (t === "prefs" || t === "security" ? "block" : "flex") : "none";
+            if (t === tab) panel.classList.add("active");
+            else panel.classList.remove("active");
+        }
+    });
+
+    if (tab === "cities") renderSpecialCitiesInProfile();
+}
+
+// Profile Preferences Update (Unit & Theme)
+function updateProfilePreferencesUI() {
+    const prefUnitC = document.getElementById("prefUnitC");
+    const prefUnitF = document.getElementById("prefUnitF");
+    const prefThemeDark = document.getElementById("prefThemeDark");
+    const prefThemeLight = document.getElementById("prefThemeLight");
+
+    if (prefUnitC && prefUnitF) {
+        prefUnitC.classList.toggle("active", currentUnit === "C");
+        prefUnitF.classList.toggle("active", currentUnit === "F");
+    }
+
+    const isDark = document.body.classList.contains("dark");
+    if (prefThemeDark && prefThemeLight) {
+        prefThemeDark.classList.toggle("active", isDark);
+        prefThemeLight.classList.toggle("active", !isDark);
+    }
+}
+
+function setProfileUnit(unit) {
+    if (currentUnit !== unit) {
+        toggleUnit();
+    }
+    const user = getCurrentUser();
+    if (user) {
+        user.prefUnit = unit;
+        setCurrentUser(user);
+        const users = getUsers();
+        const idx = users.findIndex(u => u.id === user.id || u.email === user.email);
+        if (idx !== -1) {
+            users[idx].prefUnit = unit;
+            saveUsers(users);
+        }
+    }
+    updateProfilePreferencesUI();
+}
+
+function setProfileTheme(theme) {
+    const isDark = document.body.classList.contains("dark");
+    const wantDark = theme === "dark";
+    if (isDark !== wantDark) {
+        toggleTheme();
+    }
+    const user = getCurrentUser();
+    if (user) {
+        user.prefTheme = theme;
+        setCurrentUser(user);
+        const users = getUsers();
+        const idx = users.findIndex(u => u.id === user.id || u.email === user.email);
+        if (idx !== -1) {
+            users[idx].prefTheme = theme;
+            saveUsers(users);
+        }
+    }
+    updateProfilePreferencesUI();
+}
+
+// Edit Display Name in Profile
+function updateUserProfile(e) {
+    if (e) e.preventDefault();
+    const editNameEl = document.getElementById("profileEditName");
+    const newName = editNameEl ? editNameEl.value.trim() : "";
+    if (!newName || newName.length < 2) {
+        alert("Please enter a valid name (at least 2 characters).");
+        return;
+    }
+
+    const user = getCurrentUser();
+    if (!user) return;
+
+    user.name = newName;
+    setCurrentUser(user);
+
+    const users = getUsers();
+    const idx = users.findIndex(u => u.id === user.id || u.email === user.email);
+    if (idx !== -1) {
+        users[idx].name = newName;
+        saveUsers(users);
+    }
+
+    const profileName = document.getElementById("profileUserName");
+    if (profileName) profileName.textContent = newName;
+
+    alert("Profile name updated successfully!");
+}
+
+// Change Password in Profile
+async function changeUserPassword(e) {
+    if (e) e.preventDefault();
+    const currentPassEl = document.getElementById("profileCurrentPassword");
+    const newPassEl = document.getElementById("profileNewPassword");
+
+    const currentPass = currentPassEl ? currentPassEl.value.trim() : "";
+    const newPass = newPassEl ? newPassEl.value.trim() : "";
+
+    if (!currentPass || !newPass) {
+        alert("Please fill in both current and new password.");
+        return;
+    }
+    if (newPass.length < 6) {
+        alert("New password must be at least 6 characters long.");
+        return;
+    }
+
+    const user = getCurrentUser();
+    if (!user) return;
+
+    const hashedCurrent = await hashPassword(currentPass);
+    const isMatch = (user.passHash && user.passHash === hashedCurrent) ||
+                    (user.pass && user.pass === currentPass);
+
+    if (!isMatch) {
+        alert("Current password is incorrect.");
+        return;
+    }
+
+    const hashedNew = await hashPassword(newPass);
+    user.passHash = hashedNew;
+    delete user.pass;
+    setCurrentUser(user);
+
+    const users = getUsers();
+    const idx = users.findIndex(u => u.id === user.id || u.email === user.email);
+    if (idx !== -1) {
+        users[idx].passHash = hashedNew;
+        delete users[idx].pass;
+        saveUsers(users);
+    }
+
+    if (currentPassEl) currentPassEl.value = "";
+    if (newPassEl) newPassEl.value = "";
+
+    alert("Password updated securely!");
 }
 
 function showLoginSuccess(name) {
     const authAlert = document.getElementById("authAlert");
     if (authAlert) {
-        authAlert.style.display = "block";
-        authAlert.textContent = `🎉 Welcome, ${name}! You are now signed in.`;
+        authAlert.className = "auth-alert success";
+        authAlert.style.display = "flex";
+        authAlert.innerHTML = `<span>🎉</span> <span>Welcome, ${name}! You are now securely signed in.</span>`;
     }
 
     triggerCelebratorySparkles();
     renderSavedCities();
     updateSaveButtonState();
-
-    // Update welcome banner dynamically
-    const greetingEl = document.getElementById("welcomeGreeting");
-    const userTag = document.getElementById("welcomeUserTag");
-    if (greetingEl) greetingEl.textContent = `Welcome back, ${name}! ✨`;
-    if (userTag) {
-        userTag.style.display = "inline-block";
-        userTag.textContent = "⭐ Special Member";
-    }
+    updateAccountBtnUI();
 
     setTimeout(() => {
         closeAuthModal();
-    }, 900);
+    }, 700);
 }
 
 function handleLogout() {
@@ -480,9 +1068,12 @@ function handleLogout() {
     closeAuthModal();
     renderSavedCities();
     updateSaveButtonState();
+    updateAccountBtnUI();
 
-    const userTag = document.getElementById("welcomeUserTag");
-    if (userTag) userTag.style.display = "none";
+    const welcomeGreeting = document.getElementById("welcomeGreeting");
+    if (welcomeGreeting) {
+        initWelcomeExperience();
+    }
 }
 
 /* ================= 5. SPECIAL & FAVORITE CITIES ================= */

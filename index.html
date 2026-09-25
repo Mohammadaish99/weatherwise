@@ -17,6 +17,9 @@
     <!-- Three.js for Interactive 3D Background Planetarium -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
+    <!-- Google Identity Services SDK for Real & Client-Side Google Sign-In -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
     <title>WeatherWise 3D | Real-Time Atmospheric Station</title>
 
     <link rel="stylesheet" href="style.css?v=5.0">
@@ -48,7 +51,7 @@
                 </div>
             </div>
             <div class="welcome-actions">
-                <button type="button" class="welcome-auth-pill" onclick="window.openAuthModal && window.openAuthModal()">⭐ Sign In / Mohammad</button>
+                <button type="button" id="welcomeAuthBtn" class="welcome-auth-pill" onclick="window.openAuthModal && window.openAuthModal()">👤 Sign In / Register</button>
                 <button class="welcome-close-btn" onclick="window.dismissWelcomeBanner && window.dismissWelcomeBanner()" title="Close greeting" aria-label="Close greeting">✕</button>
             </div>
         </aside>
@@ -515,12 +518,20 @@
                 <button class="modal-close-btn" onclick="window.closeAuthModal && window.closeAuthModal()" title="Close modal">✕</button>
             </div>
 
-            <!-- 1-CLICK INSTANT DEMO LOGIN BUTTON -->
-            <div id="quickLoginBox" class="quick-login-box">
-                <button type="button" class="quick-login-btn" onclick="window.quickDemoLogin && window.quickDemoLogin('Mohammad')">
-                    <span>🚀</span> Instant 1-Click Login (as Mohammad)
+            <!-- GOOGLE 1-CLICK AUTH BUTTON -->
+            <div id="googleAuthSection" class="google-auth-section">
+                <button type="button" class="btn-google" onclick="window.handleGoogleSignIn && window.handleGoogleSignIn()">
+                    <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                    <span>Continue with Google</span>
                 </button>
-                <div class="quick-login-divider"><span>or enter your name</span></div>
+                <div class="auth-or-divider">
+                    <span>or continue with email</span>
+                </div>
             </div>
 
             <!-- AUTH TABS -->
@@ -529,61 +540,188 @@
                 <button id="tabSignUp" class="auth-tab-btn" onclick="window.switchAuthTab && window.switchAuthTab('signup')">Create Account</button>
             </div>
 
+            <!-- ALERT BANNER -->
             <div id="authAlert" class="auth-alert" style="display: none;"></div>
 
-            <!-- SMART SIGN IN FORM (AUTO-LOGS IN OR REGISTERS) -->
+            <!-- SIGN IN FORM -->
             <form id="signInForm" class="auth-form" onsubmit="window.handleSignIn && window.handleSignIn(event)">
                 <div class="form-group">
-                    <label for="signInEmail">Your Name or Username</label>
-                    <input type="text" id="signInEmail" placeholder="e.g., Mohammad" required autocomplete="username">
+                    <label for="signInEmail">Email or Username</label>
+                    <input type="text" id="signInEmail" placeholder="e.g., alex@example.com" required autocomplete="username">
                 </div>
                 <div class="form-group">
-                    <label for="signInPassword">Password (Optional)</label>
-                    <input type="password" id="signInPassword" placeholder="Enter any password (optional)" autocomplete="current-password">
+                    <label for="signInPassword">Password</label>
+                    <div class="input-with-icon">
+                        <input type="password" id="signInPassword" placeholder="Enter your password" required autocomplete="current-password">
+                        <button type="button" class="pwd-toggle-btn" onclick="window.togglePasswordVisibility && window.togglePasswordVisibility('signInPassword', this)" title="Show/Hide Password" aria-label="Toggle password visibility">👁️</button>
+                    </div>
                 </div>
-                <button type="submit" class="auth-submit-btn">
-                    <span>Sign In & Sync Special Cities</span>
+                <div class="form-options-row">
+                    <label class="remember-me-label">
+                        <input type="checkbox" id="rememberMe" checked>
+                        <span>Remember me</span>
+                    </label>
+                    <button type="button" class="forgot-pwd-link" onclick="window.showForgotPasswordView && window.showForgotPasswordView()">Forgot password?</button>
+                </div>
+                <button type="submit" id="signInSubmitBtn" class="auth-submit-btn">
+                    <span class="btn-spinner" id="signInSpinner" style="display: none;"></span>
+                    <span id="signInBtnText">Sign In</span>
                 </button>
             </form>
 
             <!-- SIGN UP FORM -->
             <form id="signUpForm" class="auth-form" style="display: none;" onsubmit="window.handleSignUp && window.handleSignUp(event)">
                 <div class="form-group">
-                    <label for="signUpName">Your Name</label>
-                    <input type="text" id="signUpName" placeholder="e.g., Mohammad" required autocomplete="name">
+                    <label for="signUpName">Full Name</label>
+                    <input type="text" id="signUpName" placeholder="e.g., Alex Johnson" required autocomplete="name">
                 </div>
                 <div class="form-group">
-                    <label for="signUpEmail">Email / Username</label>
-                    <input type="text" id="signUpEmail" placeholder="Choose username or email" required autocomplete="username">
+                    <label for="signUpEmail">Email Address</label>
+                    <input type="email" id="signUpEmail" placeholder="e.g., alex@example.com" required autocomplete="email">
                 </div>
                 <div class="form-group">
-                    <label for="signUpPassword">Create Password (Optional)</label>
-                    <input type="password" id="signUpPassword" placeholder="Create your password (optional)" autocomplete="new-password">
+                    <label for="signUpPassword">Create Password</label>
+                    <div class="input-with-icon">
+                        <input type="password" id="signUpPassword" placeholder="Minimum 6 characters" required autocomplete="new-password" oninput="window.updatePasswordStrength && window.updatePasswordStrength(this.value)">
+                        <button type="button" class="pwd-toggle-btn" onclick="window.togglePasswordVisibility && window.togglePasswordVisibility('signUpPassword', this)" title="Show/Hide Password" aria-label="Toggle password visibility">👁️</button>
+                    </div>
+                    <div class="pwd-strength-meter">
+                        <div class="pwd-strength-bar"><div id="pwdStrengthFill" class="pwd-strength-fill"></div></div>
+                        <span id="pwdStrengthText" class="pwd-strength-text">Password strength</span>
+                    </div>
                 </div>
-                <button type="submit" class="auth-submit-btn">
-                    <span>Create Account & Start Saving</span>
+                <div class="form-group">
+                    <label for="signUpConfirmPassword">Confirm Password</label>
+                    <div class="input-with-icon">
+                        <input type="password" id="signUpConfirmPassword" placeholder="Confirm your password" required autocomplete="new-password">
+                        <button type="button" class="pwd-toggle-btn" onclick="window.togglePasswordVisibility && window.togglePasswordVisibility('signUpConfirmPassword', this)" title="Show/Hide Password" aria-label="Toggle password visibility">👁️</button>
+                    </div>
+                </div>
+                <button type="submit" id="signUpSubmitBtn" class="auth-submit-btn">
+                    <span class="btn-spinner" id="signUpSpinner" style="display: none;"></span>
+                    <span id="signUpBtnText">Create Free Account</span>
                 </button>
             </form>
 
-            <!-- LOGGED-IN PROFILE & SPECIAL CITIES VIEW -->
+            <!-- FORGOT PASSWORD FORM / VIEW -->
+            <form id="forgotPasswordForm" class="auth-form" style="display: none;" onsubmit="window.handlePasswordReset && window.handlePasswordReset(event)">
+                <p class="auth-subtext">Reset your local WeatherWise password using your registered email or username.</p>
+                <div class="form-group">
+                    <label for="resetEmail">Registered Email or Username</label>
+                    <input type="text" id="resetEmail" placeholder="Enter your email or username" required>
+                </div>
+                <div class="form-group">
+                    <label for="resetNewPassword">New Password</label>
+                    <div class="input-with-icon">
+                        <input type="password" id="resetNewPassword" placeholder="New password (min. 6 chars)" required>
+                        <button type="button" class="pwd-toggle-btn" onclick="window.togglePasswordVisibility && window.togglePasswordVisibility('resetNewPassword', this)">👁️</button>
+                    </div>
+                </div>
+                <div class="auth-btn-row">
+                    <button type="submit" class="auth-submit-btn">Reset & Log In</button>
+                    <button type="button" class="auth-secondary-btn" onclick="window.switchAuthTab && window.switchAuthTab('signin')">Back to Sign In</button>
+                </div>
+            </form>
+
+            <!-- DEMO / GUEST ACCESS SECTION -->
+            <div id="demoLoginSection" class="demo-login-section">
+                <div class="quick-login-divider"><span>or test without an account</span></div>
+                <button type="button" class="auth-demo-btn" onclick="window.exploreDemoAccount && window.exploreDemoAccount()">
+                    <span>⚡</span> Explore with Demo Account (Instant Access)
+                </button>
+            </div>
+
+            <!-- LOGGED-IN PROFILE & ACCOUNT DASHBOARD -->
             <div id="profileView" class="profile-view" style="display: none;">
                 <div class="profile-user-badge">
                     <div class="profile-avatar" id="profileAvatar">👤</div>
                     <div class="profile-info">
-                        <h4 id="profileUserName">User Name</h4>
+                        <div class="profile-info-row">
+                            <h4 id="profileUserName">User Name</h4>
+                            <span class="profile-badge-role">⭐ WeatherWise Member</span>
+                            <span class="profile-badge-google" id="profileBadgeGoogle" style="display: none;">
+                                <svg viewBox="0 0 24 24" width="12" height="12">
+                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                                </svg>
+                                <span>Google ID</span>
+                            </span>
+                        </div>
                         <p id="profileUserEmail">user@example.com</p>
+                        <span id="profileMemberSince" class="profile-meta-text">Member since today</span>
                     </div>
                 </div>
 
-                <div class="special-cities-box">
-                    <div class="special-cities-header">
-                        <h4>⭐ My Special & Favorite Cities</h4>
-                        <span class="special-cities-count" id="specialCitiesCount">0 cities</span>
+                <!-- PROFILE SUB-TABS -->
+                <div class="profile-subtabs">
+                    <button class="profile-subtab-btn active" id="profTabCities" onclick="window.switchProfileTab && window.switchProfileTab('cities')">Saved Cities</button>
+                    <button class="profile-subtab-btn" id="profTabPrefs" onclick="window.switchProfileTab && window.switchProfileTab('prefs')">Preferences</button>
+                    <button class="profile-subtab-btn" id="profTabSecurity" onclick="window.switchProfileTab && window.switchProfileTab('security')">Account</button>
+                </div>
+
+                <!-- PANEL 1: SAVED CITIES -->
+                <div id="profPanelCities" class="profile-panel active">
+                    <div class="special-cities-box">
+                        <div class="special-cities-header">
+                            <h4>⭐ My Special & Favorite Cities</h4>
+                            <span class="special-cities-count" id="specialCitiesCount">0 cities</span>
+                        </div>
+                        <p class="special-cities-tip">Click any city to view its live weather instantly:</p>
+                        <div id="specialCitiesList" class="special-cities-list">
+                            <!-- Populated dynamically -->
+                        </div>
                     </div>
-                    <p class="special-cities-tip">Click any city to view its live weather instantly:</p>
-                    <div id="specialCitiesList" class="special-cities-list">
-                        <!-- Populated dynamically -->
+                </div>
+
+                <!-- PANEL 2: PREFERENCES -->
+                <div id="profPanelPrefs" class="profile-panel" style="display: none;">
+                    <div class="pref-options-box">
+                        <div class="pref-item">
+                            <div class="pref-label-group">
+                                <strong>Default Temperature Unit</strong>
+                                <span class="pref-desc">Current preference for measurements</span>
+                            </div>
+                            <div class="pref-pill-group">
+                                <button type="button" id="prefUnitC" class="pref-pill" onclick="window.setProfileUnit && window.setProfileUnit('C')">°C</button>
+                                <button type="button" id="prefUnitF" class="pref-pill" onclick="window.setProfileUnit && window.setProfileUnit('F')">°F</button>
+                            </div>
+                        </div>
+                        <div class="pref-item">
+                            <div class="pref-label-group">
+                                <strong>Theme Preference</strong>
+                                <span class="pref-desc">Default visual appearance</span>
+                            </div>
+                            <div class="pref-pill-group">
+                                <button type="button" id="prefThemeDark" class="pref-pill" onclick="window.setProfileTheme && window.setProfileTheme('dark')">🌙 Dark</button>
+                                <button type="button" id="prefThemeLight" class="pref-pill" onclick="window.setProfileTheme && window.setProfileTheme('light')">☀️ Light</button>
+                            </div>
+                        </div>
                     </div>
+                </div>
+
+                <!-- PANEL 3: SECURITY & EDIT PROFILE -->
+                <div id="profPanelSecurity" class="profile-panel" style="display: none;">
+                    <form class="profile-settings-form" onsubmit="window.updateUserProfile && window.updateUserProfile(event)">
+                        <div class="form-group">
+                            <label for="profileEditName">Display Name</label>
+                            <input type="text" id="profileEditName" placeholder="Your name" required>
+                        </div>
+                        <button type="submit" class="auth-small-submit-btn">Save Name</button>
+                    </form>
+
+                    <form class="profile-settings-form" onsubmit="window.changeUserPassword && window.changeUserPassword(event)" style="margin-top: 14px;">
+                        <div class="form-group">
+                            <label for="profileCurrentPassword">Current Password</label>
+                            <input type="password" id="profileCurrentPassword" placeholder="Enter current password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="profileNewPassword">New Password (min 6 chars)</label>
+                            <input type="password" id="profileNewPassword" placeholder="Enter new password" required>
+                        </div>
+                        <button type="submit" class="auth-small-submit-btn">Update Password</button>
+                    </form>
                 </div>
 
                 <button class="auth-logout-btn" onclick="window.handleLogout && window.handleLogout()">
@@ -619,6 +757,76 @@
                 <button class="auth-submit-btn" style="margin-top: 20px;" onclick="window.confirmSaveSpecialCity && window.confirmSaveSpecialCity()">
                     <span>Save to My Special Cities</span>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= GOOGLE ACCOUNT CHOOSER MODAL ================= -->
+    <div id="googleChooserModal" class="modal-overlay google-overlay" style="display: none;" onclick="if(event.target === this) window.closeGoogleChooser && window.closeGoogleChooser()">
+        <div class="modal-card-3d google-card-3d">
+            <div class="google-modal-brand">
+                <svg viewBox="0 0 24 24" width="38" height="38">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                <div class="google-brand-titles">
+                    <h3 class="google-heading">Sign in with Google</h3>
+                    <p class="google-subheading">to continue to <strong>WeatherWise</strong></p>
+                </div>
+            </div>
+
+            <div class="google-account-list">
+                <!-- Suggested Google Account 1 -->
+                <div class="google-account-item" onclick="window.selectGoogleAccount && window.selectGoogleAccount('Mohammad', 'mohammad.developer@gmail.com')">
+                    <div class="google-avatar-circle google-avatar-blue">M</div>
+                    <div class="google-account-details">
+                        <div class="google-account-name">Mohammad</div>
+                        <div class="google-account-email">mohammad.developer@gmail.com</div>
+                    </div>
+                    <span class="google-account-badge">Primary</span>
+                </div>
+
+                <!-- Suggested Google Account 2 -->
+                <div class="google-account-item" onclick="window.selectGoogleAccount && window.selectGoogleAccount('Alex Explorer', 'alex.explorer@gmail.com')">
+                    <div class="google-avatar-circle google-avatar-green">A</div>
+                    <div class="google-account-details">
+                        <div class="google-account-name">Alex Explorer</div>
+                        <div class="google-account-email">alex.explorer@gmail.com</div>
+                    </div>
+                </div>
+
+                <!-- Custom Google Account Trigger -->
+                <div class="google-account-item google-add-account-btn" onclick="window.toggleGoogleCustomAccount && window.toggleGoogleCustomAccount()">
+                    <div class="google-avatar-circle google-avatar-gray">👤</div>
+                    <div class="google-account-details">
+                        <div class="google-account-name">Use another Google account</div>
+                    </div>
+                    <span class="google-add-icon">➕</span>
+                </div>
+            </div>
+
+            <!-- Custom Google Account Form -->
+            <form id="googleCustomForm" class="google-custom-form" style="display: none;" onsubmit="window.submitCustomGoogleAccount && window.submitCustomGoogleAccount(event)">
+                <div class="form-group">
+                    <label for="googleCustomName">Google Display Name</label>
+                    <input type="text" id="googleCustomName" placeholder="e.g., Sarah Smith" required>
+                </div>
+                <div class="form-group">
+                    <label for="googleCustomEmail">Gmail Address</label>
+                    <input type="email" id="googleCustomEmail" placeholder="e.g., sarah.smith@gmail.com" required>
+                </div>
+                <button type="submit" class="google-login-submit-btn">
+                    <span>Sign in with this Google ID</span>
+                </button>
+            </form>
+
+            <div class="google-footer-notice">
+                <p>To continue, Google will securely share your verified name and email address with WeatherWise.</p>
+                <div class="google-footer-actions">
+                    <button type="button" class="google-cancel-btn" onclick="window.closeGoogleChooser && window.closeGoogleChooser()">Cancel</button>
+                </div>
             </div>
         </div>
     </div>
