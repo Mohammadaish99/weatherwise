@@ -100,6 +100,9 @@ window.fetchWeatherByCity = fetchWeatherByCity;
 window.searchCurrentInput = searchCurrentInput;
 window.navigateToDetails = navigateToDetails;
 window.triggerExtremeCategory = triggerExtremeCategory;
+window.selectExtremeCity = selectExtremeCity;
+window.selectGeocodedCity = selectGeocodedCity;
+window.hideSearchSuggestions = hideSearchSuggestions;
 window.closeExtremeShowcase = closeExtremeShowcase;
 window.openAntiqueModal = openAntiqueModal;
 window.closeAntiqueModal = closeAntiqueModal;
@@ -2657,38 +2660,48 @@ function detectExtremeOrAntiqueQuery(rawQuery) {
     if (!rawQuery) return null;
     const q = rawQuery.trim().toLowerCase();
 
-    // Lowest Temperature / Polar records
-    if (/^(lowest\s*temp|lowest\s*temperature|coldest|min\s*temp|minimum\s*temp|coldest\s*city|coldest\s*place|coldest\s*country|extreme\s*cold|freezing\s*record)/i.test(q) ||
-        /\b(lowest\s*temp|coldest\s*place|coldest\s*city|coldest\s*in\s*the\s*world|lowest\s*temperature)\b/i.test(q)) {
+    // Lowest Temperature / Polar & Cold records (includes 'cold', 'lowest', 'min temp', 'freeze', 'ice', 'polar', 'sub zero')
+    if (/^(cold|coldest|colder|lowest|lowest\s*temp|lowest\s*temperature|min\s*temp|minimum\s*temp|coldest\s*city|coldest\s*place|coldest\s*country|extreme\s*cold|freezing\s*record|freeze|freezing|ice\s*record|sub\s*zero|low\s*temp)\b/i.test(q) ||
+        /\b(coldest|coldest\s*place|coldest\s*city|coldest\s*in\s*the\s*world|lowest\s*temp|lowest\s*temperature)\b/i.test(q)) {
         return { category: "lowest_temp", index: 0 };
     }
 
-    // Highest Temperature / Extreme heat records
-    if (/^(highest\s*temp|highest\s*temperature|hottest|max\s*temp|maximum\s*temp|hottest\s*city|hottest\s*place|hottest\s*country|extreme\s*heat|heat\s*record)/i.test(q) ||
+    // Highest Temperature / Extreme Heat records (includes 'hot', 'heat', 'warm', 'highest', 'max temp', 'furnace')
+    if (/^(hot|hottest|hotter|heat|heatwave|warm|warmest|highest|highest\s*temp|highest\s*temperature|max\s*temp|maximum\s*temp|hottest\s*city|hottest\s*place|hottest\s*country|extreme\s*heat|heat\s*record|high\s*temp|furnace)\b/i.test(q) ||
         /\b(highest\s*temp|hottest\s*place|hottest\s*city|hottest\s*in\s*the\s*world|highest\s*temperature)\b/i.test(q)) {
         return { category: "highest_temp", index: 0 };
     }
 
-    // Extreme Rain / Monsoon records
-    if (/^(rain|rainy|raining|rainfall|wettest|most\s*rain|heavy\s*rain|rain\s*record|extreme\s*rain|monsoon\s*record)/i.test(q) ||
+    // Typo 'hold' (commonly typed for hot or cold on keyboards)
+    if (/^(hold)\b/i.test(q)) {
+        return { category: "lowest_temp", index: 0 };
+    }
+
+    // General temperature keyword ('temp', 'temperature')
+    if (/^(temp|temperature)\b/i.test(q)) {
+        return { category: "lowest_temp", index: 0 };
+    }
+
+    // Extreme Rain / Monsoon records (includes 'rain', 'rainy', 'monsoon', 'wet', 'deluge', 'downpour')
+    if (/^(rain|rainy|raining|rainfall|wet|wettest|most\s*rain|heavy\s*rain|rain\s*record|extreme\s*rain|monsoon|monsoon\s*record|downpour)\b/i.test(q) ||
         /\b(wettest\s*place|wettest\s*city|most\s*rain|rain\s*record|highest\s*rain)\b/i.test(q)) {
         return { category: "rain", index: 0 };
     }
 
-    // Extreme Snow / Ice depth records
-    if (/^(snow|snowy|snowing|snowfall|snowiest|most\s*snow|heavy\s*snow|snow\s*record|extreme\s*snow|blizzard\s*record)/i.test(q) ||
+    // Extreme Snow / Blizzard records (includes 'snow', 'snowy', 'snowing', 'snowfall', 'blizzard')
+    if (/^(snow|snowy|snowing|snowfall|snowiest|most\s*snow|heavy\s*snow|snow\s*record|extreme\s*snow|blizzard|blizzard\s*record)\b/i.test(q) ||
         /\b(snowiest\s*place|snowiest\s*city|most\s*snow|snow\s*record|highest\s*snow)\b/i.test(q)) {
         return { category: "snow", index: 0 };
     }
 
-    // Extreme Wind / Gale records
-    if (/^(wind|windy|windiest|highest\s*wind|stormy\s*wind|wind\s*record|extreme\s*wind|gale\s*record|cyclone\s*record)/i.test(q) ||
+    // Extreme Wind / Gale records (includes 'wind', 'windy', 'windiest', 'gale', 'cyclone', 'storm')
+    if (/^(wind|windy|windiest|highest\s*wind|stormy\s*wind|wind\s*record|extreme\s*wind|gale|gale\s*record|cyclone|hurricane)\b/i.test(q) ||
         /\b(windiest\s*place|windiest\s*city|highest\s*wind|most\s*wind|windiest)\b/i.test(q)) {
         return { category: "wind", index: 0 };
     }
 
-    // Weather Alerts, Special Happenings & Antique Phenomena
-    if (/^(alert|alerts|warning|special|antique|antique\s*things|special\s*happening|special\s*weather|wonder|phenomenon|phenomena|rare\s*weather|miracle|catatumbo|aurora|blood\s*rain|morning\s*glory|sailing\s*stones)/i.test(q) ||
+    // Weather Alerts, Special Happenings & Antique Phenomena (opens modal popup)
+    if (/^(alert|alerts|warning|warnings|special|antique|antique\s*things|special\s*happening|special\s*weather|wonder|wonders|phenomenon|phenomena|rare\s*weather|miracle|catatumbo|aurora|blood\s*rain|morning\s*glory|sailing\s*stones)/i.test(q) ||
         /\b(alert|antique|special\s*happening|antique\s*things|rare\s*phenomenon|extreme\s*wonder|aurora\s*borealis)\b/i.test(q)) {
         return { category: "alert", index: 0 };
     }
@@ -2696,8 +2709,8 @@ function detectExtremeOrAntiqueQuery(rawQuery) {
     return null;
 }
 
-/* ================= 10.7 EXTREME CATEGORY TRIGGER & SHOWCASE ENGINE ================= */
-function triggerExtremeCategory(catKey, locIndex = 0) {
+/* ================= 10.7 EXTREME CATEGORY TRIGGER & TELEMETRY LOADER ================= */
+function triggerExtremeCategory(catKey, locIndex = 0, updateInput = false) {
     const cat = EXTREME_AND_ANTIQUE_DATA[catKey];
     if (!cat) return;
 
@@ -2710,10 +2723,10 @@ function triggerExtremeCategory(catKey, locIndex = 0) {
 
     const loc = cat.contenders[locIndex] || cat.contenders[0];
 
-    // For rain, temp, snow, wind: SHOW IN SEARCH BAR & LOAD WEATHER DIRECTLY INTO DASHBOARD (NO EXTRA DASHBOARD CLUTTER)
-    const input = document.getElementById("cityInput");
-    if (input) {
-        input.value = loc.city;
+    // DO NOT autotype in search bar during search execution! Only update if explicitly requested
+    if (updateInput) {
+        const input = document.getElementById("cityInput");
+        if (input) input.value = loc.city;
     }
 
     hideSearchSuggestions();
@@ -2725,6 +2738,46 @@ function triggerExtremeCategory(catKey, locIndex = 0) {
     loadWeatherCoordinates(loc.lat, loc.lon, loc.city);
 
     safeStorage.setItem("weatherwise_last_city", loc.city);
+    updateSaveButtonState();
+    updateOpenDetailsLink();
+}
+
+function selectExtremeCity(catKey, locIndex) {
+    const cat = EXTREME_AND_ANTIQUE_DATA[catKey];
+    if (!cat) return;
+    const loc = cat.contenders[locIndex] || cat.contenders[0];
+    hideSearchSuggestions();
+
+    if (catKey === "alert") {
+        openAntiqueModal();
+        return;
+    }
+
+    // Explicit user click on a suggestion: show selected city in search bar
+    const input = document.getElementById("cityInput");
+    if (input) input.value = loc.city;
+
+    currentCityLabel = loc.city;
+    currentLat = loc.lat;
+    currentLon = loc.lon;
+    loadWeatherCoordinates(loc.lat, loc.lon, loc.city);
+
+    safeStorage.setItem("weatherwise_last_city", loc.city);
+    updateSaveButtonState();
+    updateOpenDetailsLink();
+}
+
+function selectGeocodedCity(lat, lon, label) {
+    hideSearchSuggestions();
+    const input = document.getElementById("cityInput");
+    if (input) input.value = label;
+
+    currentCityLabel = label;
+    currentLat = lat;
+    currentLon = lon;
+    loadWeatherCoordinates(lat, lon, label);
+
+    safeStorage.setItem("weatherwise_last_city", label);
     updateSaveButtonState();
     updateOpenDetailsLink();
 }
@@ -2742,70 +2795,8 @@ function renderExtremeShowcase(catKey, locIndex = 0) {
         card.className = `extreme-showcase-card card-3d-interactive theme-${catKey}`;
     }
 
-    const extremeCatIcon = document.getElementById("extremeCatIcon");
-    if (extremeCatIcon) extremeCatIcon.textContent = cat.icon;
-
-    const extremeCategoryBadge = document.getElementById("extremeCategoryBadge");
-    if (extremeCategoryBadge) extremeCategoryBadge.textContent = cat.categoryBadge;
-
-    const extremeShowcaseTitle = document.getElementById("extremeShowcaseTitle");
-    if (extremeShowcaseTitle) extremeShowcaseTitle.textContent = cat.name;
-
-    const extremeShowcaseSubtitle = document.getElementById("extremeShowcaseSubtitle");
-    if (extremeShowcaseSubtitle) extremeShowcaseSubtitle.textContent = `Live Telemetry, Verified Scientific Limits & Historical Curiosities`;
-
-    // Contender buttons
-    const contendersRow = document.getElementById("extremeContendersRow");
-    if (contendersRow) {
-        contendersRow.innerHTML = cat.contenders.map((c, idx) => `
-            <button type="button" class="extreme-loc-btn ${idx === locIndex ? 'active' : ''}" onclick="window.triggerExtremeCategory && window.triggerExtremeCategory('${catKey}', ${idx})" title="${c.record}">
-                <span>📍 ${c.shortName}</span>
-            </button>
-        `).join("");
-    }
-
-    // Severe alert banner
-    const severeAlertLevel = document.getElementById("severeAlertLevel");
-    if (severeAlertLevel) severeAlertLevel.textContent = loc.alertLevel;
-
-    const severeAlertTargetCity = document.getElementById("severeAlertTargetCity");
-    if (severeAlertTargetCity) severeAlertTargetCity.textContent = loc.city;
-
-    const severeAlertHeading = document.getElementById("severeAlertHeading");
-    if (severeAlertHeading) severeAlertHeading.textContent = loc.alertHeading;
-
-    const severeAlertDescription = document.getElementById("severeAlertDescription");
-    if (severeAlertDescription) severeAlertDescription.textContent = loc.alertDesc;
-
-    // Antique phenomenon card
-    const antiquePhenomenonTitle = document.getElementById("antiquePhenomenonTitle");
-    if (antiquePhenomenonTitle) antiquePhenomenonTitle.textContent = loc.antiqueTitle;
-
-    const antiqueRecordDate = document.getElementById("antiqueRecordDate");
-    if (antiqueRecordDate) antiqueRecordDate.textContent = loc.antiqueDate;
-
-    const antiquePhenomenonStory = document.getElementById("antiquePhenomenonStory");
-    if (antiquePhenomenonStory) antiquePhenomenonStory.textContent = loc.antiqueStory;
-
-    const antiqueSpecRecord = document.getElementById("antiqueSpecRecord");
-    if (antiqueSpecRecord) antiqueSpecRecord.textContent = loc.record;
-
-    const antiqueSpecMechanism = document.getElementById("antiqueSpecMechanism");
-    if (antiqueSpecMechanism) antiqueSpecMechanism.textContent = loc.mechanism;
-
-    const antiqueSpecClassification = document.getElementById("antiqueSpecClassification");
-    if (antiqueSpecClassification) antiqueSpecClassification.textContent = loc.classification;
-
-    const extremeFooterCityName = document.getElementById("extremeFooterCityName");
-    if (extremeFooterCityName) extremeFooterCityName.textContent = loc.city;
-
     showcaseSec.style.display = "block";
     showcaseSec.classList.add("revealed");
-
-    // Smooth scroll to showcase
-    setTimeout(() => {
-        showcaseSec.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }, 100);
 }
 
 function closeExtremeShowcase() {
@@ -2816,12 +2807,16 @@ function closeExtremeShowcase() {
 }
 
 /* ================= 10.8 SMART SEARCH SUGGESTIONS DROPDOWN ================= */
+let geocodeDebounceTimer = null;
+let activeGeocodeAbortController = null;
+
 function initSearchSuggestions() {
     const input = document.getElementById("cityInput");
     const dropdown = document.getElementById("searchSuggestions");
     if (!input || !dropdown) return;
 
     input.addEventListener("input", (e) => {
+        // Zero autotype in search bar: only render dropdown suggestions
         renderSearchSuggestions(e.target.value);
     });
 
@@ -2842,97 +2837,233 @@ function initSearchSuggestions() {
     });
 }
 
+function escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function getAllExtremeContenders() {
+    const items = [];
+    Object.keys(EXTREME_AND_ANTIQUE_DATA).forEach(k => {
+        const cat = EXTREME_AND_ANTIQUE_DATA[k];
+        cat.contenders.forEach((loc, idx) => {
+            const kw = [
+                ...(cat.keywords || []),
+                loc.city.toLowerCase(),
+                loc.shortName.toLowerCase(),
+                loc.record.toLowerCase()
+            ];
+            if (k === "lowest_temp") {
+                kw.push("cold", "coldest", "lowest", "freeze", "freezing", "ice", "polar", "sub zero", "min temp", "hold", "temp", "lowest temp");
+            } else if (k === "highest_temp") {
+                kw.push("hot", "hottest", "heat", "warm", "highest", "max temp", "furnace", "hold", "temp", "highest temp");
+            } else if (k === "rain") {
+                kw.push("rain", "rainy", "raining", "rainfall", "wet", "wettest", "monsoon", "deluge", "downpour", "heavy rain");
+            } else if (k === "snow") {
+                kw.push("snow", "snowy", "snowing", "snowfall", "snowiest", "blizzard", "heavy snow");
+            } else if (k === "wind") {
+                kw.push("wind", "windy", "windiest", "gale", "cyclone", "storm", "hurricane", "highest wind");
+            } else if (k === "alert") {
+                kw.push("alert", "alerts", "warning", "antique", "antique things", "special", "special happening", "wonder", "phenomenon");
+            }
+
+            items.push({
+                type: "extreme",
+                catKey: k,
+                idx: idx,
+                icon: cat.icon,
+                city: loc.city,
+                shortName: loc.shortName,
+                record: loc.record,
+                badge: cat.categoryBadge,
+                keywords: kw,
+                lat: loc.lat,
+                lon: loc.lon
+            });
+        });
+    });
+    return items;
+}
+
 function renderSearchSuggestions(query = "") {
     const dropdown = document.getElementById("searchSuggestions");
     if (!dropdown) return;
 
     const q = query.trim().toLowerCase();
+    const allContenders = getAllExtremeContenders();
+    let matchedItems = [];
 
-    // Suggested items configuration
-    const suggestions = [
-        {
-            key: "lowest_temp",
-            icon: "❄️",
-            title: "Lowest Temp (Coldest Record on Earth)",
-            sub: "Oymyakon (-71.2°C), Yakutsk & Vostok Station",
-            badge: "-71.2°C Ice Record",
-            filterMatch: ["low", "lowest", "temp", "cold", "coldest", "min", "freez", "ice", "oymyakon", "yakutsk", "vostok"]
-        },
-        {
-            key: "highest_temp",
-            icon: "🔥",
-            title: "Highest Temp (Thermal Furnace Record)",
-            sub: "Furnace Creek (+56.7°C), Kuwait City & Dallol",
-            badge: "+56.7°C Heat Record",
-            filterMatch: ["high", "highest", "temp", "hot", "hottest", "heat", "warm", "max", "furnace", "death", "kuwait"]
-        },
-        {
-            key: "rain",
-            icon: "🌧️",
-            title: "Rain Record (Monsoon & Wettest Place)",
-            sub: "Mawsynram (11,872mm/yr), Cherrapunji & Tutunendo",
-            badge: "11,872mm Rain",
-            filterMatch: ["rain", "rainy", "wet", "wettest", "monsoon", "deluge", "water", "mawsynram", "cherrapunji"]
-        },
-        {
-            key: "snow",
-            icon: "🌨️",
-            title: "Extreme Snow (Snowiest City on Earth)",
-            sub: "Aomori City (8m Walls), Sapporo & Valdez",
-            badge: "8m Snow Wall",
-            filterMatch: ["snow", "snowy", "snowiest", "blizzard", "ice", "drift", "aomori", "sapporo", "valdez"]
-        },
-        {
-            key: "wind",
-            icon: "💨",
-            title: "Highest Wind (Windiest Place on Earth)",
-            sub: "Wellington (Gale City), Commonwealth Bay (320km/h)",
-            badge: "Gale Force",
-            filterMatch: ["wind", "windy", "windiest", "gale", "storm", "cyclone", "gust", "wellington"]
-        },
-        {
-            key: "alert",
-            icon: "⚡",
-            title: "Alerts & Antique Meteorological Wonders",
-            sub: "Catatumbo Lightning, Aurora Borealis, Blood Rain & Roll Cloud",
-            badge: "Antique Phenomena",
-            filterMatch: ["alert", "alerts", "special", "antique", "antique things", "special happening", "rare", "wonder", "phenomenon", "catatumbo", "aurora", "blood"]
+    if (!q) {
+        // Default: display world-record capitals with city and country names + Antique modal trigger
+        matchedItems = [
+            allContenders.find(c => c.catKey === "lowest_temp" && c.idx === 0),
+            allContenders.find(c => c.catKey === "highest_temp" && c.idx === 0),
+            allContenders.find(c => c.catKey === "rain" && c.idx === 0),
+            allContenders.find(c => c.catKey === "snow" && c.idx === 0),
+            allContenders.find(c => c.catKey === "wind" && c.idx === 0),
+            {
+                type: "antique_modal",
+                icon: "🏛️",
+                city: "Antique Wonders & Severe Alerts",
+                record: "Catatumbo Lightning, Aurora Borealis, Blood Rain & Roll Cloud",
+                badge: "Explore Modal"
+            }
+        ].filter(Boolean);
+    } else {
+        const extremeIntent = detectExtremeOrAntiqueQuery(q);
+        if (extremeIntent) {
+            if (q === "hold" || q === "temp" || q === "temperature") {
+                // Typo 'hold' or 'temp': show both lowest and highest temperature world records!
+                matchedItems = allContenders.filter(c => 
+                    (c.catKey === "lowest_temp" && (c.idx === 0 || c.idx === 1)) ||
+                    (c.catKey === "highest_temp" && (c.idx === 0 || c.idx === 1))
+                );
+            } else if (extremeIntent.category === "alert") {
+                matchedItems = allContenders.filter(c => c.catKey === "alert");
+                matchedItems.push({
+                    type: "antique_modal",
+                    icon: "🏛️",
+                    city: "Antique Wonders & Severe Alerts Modal",
+                    record: "Interactive Full-Screen Curiosities Explorer",
+                    badge: "Popup Modal"
+                });
+            } else {
+                matchedItems = allContenders.filter(c => c.catKey === extremeIntent.category);
+            }
+        } else {
+            // General query: match city, country, or specific keywords
+            matchedItems = allContenders.filter(item => {
+                return item.city.toLowerCase().includes(q) ||
+                       item.shortName.toLowerCase().includes(q) ||
+                       item.record.toLowerCase().includes(q) ||
+                       item.keywords.some(k => k === q || (q.length >= 3 && k.includes(q)));
+            });
         }
-    ];
-
-    let filtered = suggestions;
-    if (q) {
-        filtered = suggestions.filter(s => {
-            return s.filterMatch.some(m => q.includes(m) || m.includes(q)) ||
-                   s.title.toLowerCase().includes(q) ||
-                   s.sub.toLowerCase().includes(q);
-        });
     }
 
-    if (filtered.length === 0) {
+    // Render immediate local / extreme matches synchronously
+    buildDropdownHTML(matchedItems, []);
+
+    // Debounced live geocoding for any city or country query (e.g. Paris, London, Tokyo, Delhi, Mumbai, etc.)
+    if (q.length >= 2) {
+        debounceGeocode(q, matchedItems);
+    }
+}
+
+function debounceGeocode(q, existingMatches) {
+    if (geocodeDebounceTimer) clearTimeout(geocodeDebounceTimer);
+    if (activeGeocodeAbortController) {
+        activeGeocodeAbortController.abort();
+    }
+
+    geocodeDebounceTimer = setTimeout(async () => {
+        try {
+            activeGeocodeAbortController = new AbortController();
+            const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=5&language=en&format=json`;
+            const res = await fetch(url, { signal: activeGeocodeAbortController.signal });
+            if (!res.ok) return;
+            const data = await res.json();
+
+            // Verify current input still matches query
+            const input = document.getElementById("cityInput");
+            if (!input || input.value.trim().toLowerCase() !== q) return;
+
+            if (data && data.results && data.results.length > 0) {
+                const geoItems = data.results.map(loc => {
+                    const label = `${loc.name}${loc.admin1 ? ", " + loc.admin1 : ""}, ${loc.country || ""}`;
+                    return {
+                        type: "geocoded",
+                        lat: loc.latitude,
+                        lon: loc.longitude,
+                        label: label,
+                        sub: `Lat: ${loc.latitude.toFixed(2)}°, Lon: ${loc.longitude.toFixed(2)}° • ${loc.timezone || "Station"}`,
+                        badge: loc.country_code || "City"
+                    };
+                }).filter(geo => !existingMatches.some(m => m.city && m.city.toLowerCase().includes(geo.label.toLowerCase())));
+
+                buildDropdownHTML(existingMatches, geoItems);
+            }
+        } catch (err) {
+            if (err.name !== "AbortError") {
+                console.warn("Geocoding suggestion fetch error:", err);
+            }
+        }
+    }, 220);
+}
+
+function buildDropdownHTML(extremeItems, geoItems) {
+    const dropdown = document.getElementById("searchSuggestions");
+    if (!dropdown) return;
+
+    const total = (extremeItems || []).length + (geoItems || []).length;
+    if (total === 0) {
         dropdown.style.display = "none";
         return;
     }
 
-    dropdown.innerHTML = filtered.map(item => `
-        <div class="suggestion-item" onclick="window.triggerExtremeCategory && window.triggerExtremeCategory('${item.key}', 0)">
-            <div class="suggestion-item-left">
-                <span class="suggestion-icon">${item.icon}</span>
-                <div class="suggestion-info">
-                    <span class="suggestion-title">${item.title}</span>
-                    <span class="suggestion-sub">${item.sub}</span>
-                </div>
-            </div>
-            <span class="suggestion-badge">${item.badge}</span>
-        </div>
-    `).join("");
+    let html = "";
 
+    // 1. Extreme & World Record City suggestions
+    (extremeItems || []).forEach(item => {
+        if (item.type === "antique_modal") {
+            html += `
+                <div class="suggestion-item" onclick="window.hideSearchSuggestions && window.hideSearchSuggestions(); window.openAntiqueModal && window.openAntiqueModal();">
+                    <div class="suggestion-item-left">
+                        <span class="suggestion-icon">${item.icon}</span>
+                        <div class="suggestion-info">
+                            <span class="suggestion-title">${escapeHtml(item.city)}</span>
+                            <span class="suggestion-sub">${escapeHtml(item.record)}</span>
+                        </div>
+                    </div>
+                    <span class="suggestion-badge">${escapeHtml(item.badge)}</span>
+                </div>
+            `;
+        } else {
+            html += `
+                <div class="suggestion-item" onclick="window.selectExtremeCity && window.selectExtremeCity('${item.catKey}', ${item.idx})">
+                    <div class="suggestion-item-left">
+                        <span class="suggestion-icon">${item.icon}</span>
+                        <div class="suggestion-info">
+                            <span class="suggestion-title">${escapeHtml(item.city)}</span>
+                            <span class="suggestion-sub">${escapeHtml(item.record)}</span>
+                        </div>
+                    </div>
+                    <span class="suggestion-badge">${escapeHtml(item.badge)}</span>
+                </div>
+            `;
+        }
+    });
+
+    // 2. Live Geocoded City and Country suggestions
+    (geoItems || []).forEach(geo => {
+        html += `
+            <div class="suggestion-item" onclick="window.selectGeocodedCity && window.selectGeocodedCity(${geo.lat}, ${geo.lon}, '${escapeHtml(geo.label)}')">
+                <div class="suggestion-item-left">
+                    <span class="suggestion-icon">📍</span>
+                    <div class="suggestion-info">
+                        <span class="suggestion-title">${escapeHtml(geo.label)}</span>
+                        <span class="suggestion-sub">${escapeHtml(geo.sub)}</span>
+                    </div>
+                </div>
+                <span class="suggestion-badge">${escapeHtml(geo.badge)}</span>
+            </div>
+        `;
+    });
+
+    dropdown.innerHTML = html;
     dropdown.style.display = "flex";
 }
 
 function hideSearchSuggestions() {
     const dropdown = document.getElementById("searchSuggestions");
     if (dropdown) dropdown.style.display = "none";
+    if (geocodeDebounceTimer) clearTimeout(geocodeDebounceTimer);
+    if (activeGeocodeAbortController) activeGeocodeAbortController.abort();
 }
 
 /* ================= 10.9 ANTIQUE METEOROLOGICAL WONDERS MODAL ================= */
@@ -3018,7 +3149,7 @@ function searchCurrentInput() {
     if (!input) return;
     const rawVal = input.value.trim();
     if (!rawVal) {
-        showError("Please enter a city name, or try 'lowest temp', 'highest temp', 'rain', 'snow', 'wind', 'alert'.");
+        showError("Please enter a city or country, or try 'cold', 'hot', 'rain', 'snow', 'wind', 'alert'...");
         return;
     }
 
@@ -3026,7 +3157,8 @@ function searchCurrentInput() {
     const extremeMatch = detectExtremeOrAntiqueQuery(rawVal);
     if (extremeMatch) {
         hideSearchSuggestions();
-        triggerExtremeCategory(extremeMatch.category, extremeMatch.index);
+        // NEVER autotype in search bar: keep input exactly as typed
+        triggerExtremeCategory(extremeMatch.category, extremeMatch.index, false);
         return;
     }
 
