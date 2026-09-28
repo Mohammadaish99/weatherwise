@@ -1816,6 +1816,28 @@ function navigateToDetails(e) {
 }
 
 /* ================= 10. LUXURY UNIVERSE 3D COSMOS & SCROLLING ENGINE ================= */
+function createStarTexture() {
+    const canvas = document.createElement("canvas");
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext("2d");
+
+    // Radiant starlight core with gentle astronomical glow halo
+    const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grad.addColorStop(0, "rgba(255, 255, 255, 1.0)");
+    grad.addColorStop(0.18, "rgba(255, 255, 255, 0.95)");
+    grad.addColorStop(0.40, "rgba(255, 255, 255, 0.50)");
+    grad.addColorStop(0.70, "rgba(255, 255, 255, 0.15)");
+    grad.addColorStop(1, "rgba(255, 255, 255, 0.0)");
+
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 64, 64);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+}
+
 function initHighImpactThreeJS() {
     try {
         const canvas = document.getElementById("threeCanvas");
@@ -1830,6 +1852,7 @@ function initHighImpactThreeJS() {
         threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 
         const isDark = document.body.classList.contains("dark");
+        const starTexture = createStarTexture();
 
         // 1. DEEP UNIVERSE MULTI-DEPTH STARFIELD (1,200 stars along Z axis: -260 to +60)
         const starCount = 1200;
@@ -1843,24 +1866,45 @@ function initHighImpactThreeJS() {
             starPositions[i + 2] = -240 + Math.random() * 300;
 
             if (isDark) {
+                // VIBRANT ASTRONOMICAL DEEP COSMOS SPECTRUM
                 const pick = Math.random();
-                if (pick < 0.45) {
-                    starColors[i] = 0.22; starColors[i + 1] = 0.74; starColors[i + 2] = 0.97; // Sirius Cyan
+                if (pick < 0.28) {
+                    // Sirius Brilliant Diamond Cyan
+                    starColors[i] = 0.20; starColors[i + 1] = 0.88; starColors[i + 2] = 1.00;
+                } else if (pick < 0.50) {
+                    // Betelgeuse & Capella Radiant Solar Amber / Gold
+                    starColors[i] = 1.00; starColors[i + 1] = 0.82; starColors[i + 2] = 0.32;
                 } else if (pick < 0.70) {
-                    starColors[i] = 0.65; starColors[i + 1] = 0.55; starColors[i + 2] = 0.98; // Nebula Violet
-                } else if (pick < 0.88) {
-                    starColors[i] = 0.98; starColors[i + 1] = 0.98; starColors[i + 2] = 1.0;  // Vega Diamond
+                    // Pleiades Cosmic Amethyst & Violet Starlight
+                    starColors[i] = 0.80; starColors[i + 1] = 0.48; starColors[i + 2] = 1.00;
+                } else if (pick < 0.85) {
+                    // Rigel Deep Sapphire Starlight
+                    starColors[i] = 0.40; starColors[i + 1] = 0.65; starColors[i + 2] = 1.00;
+                } else if (pick < 0.93) {
+                    // Aurora Emerald Stardust
+                    starColors[i] = 0.35; starColors[i + 1] = 0.96; starColors[i + 2] = 0.78;
                 } else {
-                    starColors[i] = 0.96; starColors[i + 1] = 0.70; starColors[i + 2] = 0.25; // Solar Gold
+                    // Vega Pure Diamond White
+                    starColors[i] = 1.00; starColors[i + 1] = 1.00; starColors[i + 2] = 1.00;
                 }
             } else {
+                // RADIANT CELESTIAL DAYTIME SUNLIGHT DUST & GLINTS
                 const pick = Math.random();
-                if (pick < 0.45) {
-                    starColors[i] = 0.98; starColors[i + 1] = 0.84; starColors[i + 2] = 0.42; // Warm solar gold
-                } else if (pick < 0.75) {
-                    starColors[i] = 0.45; starColors[i + 1] = 0.78; starColors[i + 2] = 0.98; // Sky diamond glint
+                if (pick < 0.32) {
+                    // Radiant Solar Gold Sunbeam
+                    starColors[i] = 1.00; starColors[i + 1] = 0.78; starColors[i + 2] = 0.20;
+                } else if (pick < 0.58) {
+                    // Crystalline Sky Azure / Glint Cyan
+                    starColors[i] = 0.15; starColors[i + 1] = 0.72; starColors[i + 2] = 1.00;
+                } else if (pick < 0.78) {
+                    // Warm Champagne Pearl
+                    starColors[i] = 1.00; starColors[i + 1] = 0.92; starColors[i + 2] = 0.60;
+                } else if (pick < 0.90) {
+                    // Sunrise Coral Sparkle
+                    starColors[i] = 1.00; starColors[i + 1] = 0.55; starColors[i + 2] = 0.38;
                 } else {
-                    starColors[i] = 1.0; starColors[i + 1] = 1.0; starColors[i + 2] = 1.0;  // Pearlescent stardust
+                    // Pure Crystal Stardust
+                    starColors[i] = 1.00; starColors[i + 1] = 1.00; starColors[i + 2] = 1.00;
                 }
             }
         }
@@ -1869,11 +1913,13 @@ function initHighImpactThreeJS() {
         starGeo.setAttribute("color", new THREE.BufferAttribute(starColors, 3));
 
         const starMat = new THREE.PointsMaterial({
-            size: isDark ? 1.8 : 1.5,
+            size: isDark ? 2.8 : 2.4,
+            map: starTexture,
             vertexColors: true,
             transparent: true,
-            opacity: isDark ? 0.85 : 0.35,
-            blending: THREE.AdditiveBlending
+            opacity: isDark ? 0.92 : 0.55,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
         });
 
         cosmicStarfield = new THREE.Points(starGeo, starMat);
@@ -1891,13 +1937,24 @@ function initHighImpactThreeJS() {
             nebulaPos[i + 2] = -180 + Math.random() * 200;
 
             if (isDark) {
-                nebulaColors[i] = 0.38 + Math.random() * 0.2;
-                nebulaColors[i + 1] = 0.30 + Math.random() * 0.25;
-                nebulaColors[i + 2] = 0.85 + Math.random() * 0.15;
+                const pick = Math.random();
+                if (pick < 0.45) {
+                    // Deep cosmic violet
+                    nebulaColors[i] = 0.55; nebulaColors[i + 1] = 0.28; nebulaColors[i + 2] = 0.95;
+                } else if (pick < 0.80) {
+                    // Luminous cyan nebula
+                    nebulaColors[i] = 0.15; nebulaColors[i + 1] = 0.75; nebulaColors[i + 2] = 0.95;
+                } else {
+                    // Starlight magenta
+                    nebulaColors[i] = 0.85; nebulaColors[i + 1] = 0.30; nebulaColors[i + 2] = 0.75;
+                }
             } else {
-                nebulaColors[i] = 0.92;
-                nebulaColors[i + 1] = 0.95;
-                nebulaColors[i + 2] = 1.0;
+                const pick = Math.random();
+                if (pick < 0.5) {
+                    nebulaColors[i] = 0.98; nebulaColors[i + 1] = 0.85; nebulaColors[i + 2] = 0.50; // soft daylight gold dust
+                } else {
+                    nebulaColors[i] = 0.40; nebulaColors[i + 1] = 0.80; nebulaColors[i + 2] = 1.00; // soft morning azure
+                }
             }
         }
 
@@ -1905,11 +1962,13 @@ function initHighImpactThreeJS() {
         nebulaGeo.setAttribute("color", new THREE.BufferAttribute(nebulaColors, 3));
 
         const nebulaMat = new THREE.PointsMaterial({
-            size: isDark ? 3.0 : 2.2,
+            size: isDark ? 5.8 : 4.2,
+            map: starTexture,
             vertexColors: true,
             transparent: true,
-            opacity: isDark ? 0.38 : 0.15,
-            blending: THREE.AdditiveBlending
+            opacity: isDark ? 0.42 : 0.22,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
         });
 
         cosmicNebula = new THREE.Points(nebulaGeo, nebulaMat);
@@ -1966,9 +2025,10 @@ function initHighImpactThreeJS() {
                 cosmicMoonMesh.rotation.y += 0.0012;
             }
 
-            // Gentle galactic drift of deep universe starfield
+            // Gentle galactic drift & subtle starlight twinkle pulse
             if (cosmicStarfield) {
                 cosmicStarfield.rotation.y = universeClock * 0.015;
+                cosmicStarfield.rotation.x = Math.sin(universeClock * 0.25) * 0.012;
             }
 
             // Ethereal nebula breathing
@@ -2007,35 +2067,47 @@ function updateThreeJSPalette() {
         for (let i = 0; i < count * 3; i += 3) {
             if (isDark) {
                 const pick = Math.random();
-                if (pick < 0.45) {
-                    colors[i] = 0.22; colors[i + 1] = 0.74; colors[i + 2] = 0.97;
+                if (pick < 0.28) {
+                    colors[i] = 0.20; colors[i + 1] = 0.88; colors[i + 2] = 1.00;
+                } else if (pick < 0.50) {
+                    colors[i] = 1.00; colors[i + 1] = 0.82; colors[i + 2] = 0.32;
                 } else if (pick < 0.70) {
-                    colors[i] = 0.65; colors[i + 1] = 0.55; colors[i + 2] = 0.98;
-                } else if (pick < 0.88) {
-                    colors[i] = 0.98; colors[i + 1] = 0.98; colors[i + 2] = 1.0;
+                    colors[i] = 0.80; colors[i + 1] = 0.48; colors[i + 2] = 1.00;
+                } else if (pick < 0.85) {
+                    colors[i] = 0.40; colors[i + 1] = 0.65; colors[i + 2] = 1.00;
+                } else if (pick < 0.93) {
+                    colors[i] = 0.35; colors[i + 1] = 0.96; colors[i + 2] = 0.78;
                 } else {
-                    colors[i] = 0.96; colors[i + 1] = 0.70; colors[i + 2] = 0.25;
+                    colors[i] = 1.00; colors[i + 1] = 1.00; colors[i + 2] = 1.00;
                 }
             } else {
                 const pick = Math.random();
-                if (pick < 0.45) {
-                    colors[i] = 0.98; colors[i + 1] = 0.84; colors[i + 2] = 0.42;
-                } else if (pick < 0.75) {
-                    colors[i] = 0.45; colors[i + 1] = 0.78; colors[i + 2] = 0.98;
+                if (pick < 0.32) {
+                    colors[i] = 1.00; colors[i + 1] = 0.78; colors[i + 2] = 0.20;
+                } else if (pick < 0.58) {
+                    colors[i] = 0.15; colors[i + 1] = 0.72; colors[i + 2] = 1.00;
+                } else if (pick < 0.78) {
+                    colors[i] = 1.00; colors[i + 1] = 0.92; colors[i + 2] = 0.60;
+                } else if (pick < 0.90) {
+                    colors[i] = 1.00; colors[i + 1] = 0.55; colors[i + 2] = 0.38;
                 } else {
-                    colors[i] = 1.0; colors[i + 1] = 1.0; colors[i + 2] = 1.0;
+                    colors[i] = 1.00; colors[i + 1] = 1.00; colors[i + 2] = 1.00;
                 }
             }
         }
         cosmicStarfield.geometry.attributes.color.needsUpdate = true;
         if (cosmicStarfield.material) {
-            cosmicStarfield.material.opacity = isDark ? 0.85 : 0.35;
+            cosmicStarfield.material.size = isDark ? 2.8 : 2.4;
+            cosmicStarfield.material.opacity = isDark ? 0.92 : 0.55;
             cosmicStarfield.material.blending = THREE.AdditiveBlending;
+            cosmicStarfield.material.depthWrite = false;
         }
     }
 
     if (cosmicNebula && cosmicNebula.material) {
-        cosmicNebula.material.opacity = isDark ? 0.38 : 0.15;
+        cosmicNebula.material.size = isDark ? 5.8 : 4.2;
+        cosmicNebula.material.opacity = isDark ? 0.42 : 0.22;
+        cosmicNebula.material.depthWrite = false;
     }
 
     if (cosmicMoonMesh && cosmicMoonMesh.material) {
