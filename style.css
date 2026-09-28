@@ -10,81 +10,81 @@
     
     /* SOPHISTICATED & LUXURIOUS DAY PALETTE */
     --bg-base: #f8fafc;
-    --bg-ambient: radial-gradient(circle at 18% 12%, #e0f2fe 0%, #f0fdf4 38%, #f8fafc 80%);
+    --bg-ambient: radial-gradient(ellipse at 50% -10%, #dbeafe 0%, #eff6ff 40%, #f8fafc 100%);
     
-    --card-glass: rgba(255, 255, 255, 0.82);
-    --card-glass-hover: rgba(255, 255, 255, 0.94);
-    --card-inner: rgba(241, 245, 249, 0.65);
-    --card-border: rgba(226, 232, 240, 0.85);
-    --card-border-glow: rgba(2, 132, 199, 0.3);
+    --card-glass: rgba(255, 255, 255, 0.85);
+    --card-glass-hover: rgba(255, 255, 255, 0.96);
+    --card-inner: rgba(241, 245, 249, 0.75);
+    --card-border: rgba(226, 232, 240, 0.95);
+    --card-border-glow: rgba(14, 165, 233, 0.4);
     
-    --text: #0f172a;
-    --text-heading: #020617;
-    --text-muted: #64748b;
-    --text-subtle: #94a3b8;
+    --text: #1e293b;
+    --text-heading: #0f172a;
+    --text-muted: #475569;
+    --text-subtle: #64748b;
     
     --primary: #0284c7;
     --primary-hover: #0369a1;
-    --primary-glow: rgba(2, 132, 199, 0.16);
+    --primary-glow: rgba(2, 132, 199, 0.22);
     --accent-cyan: #0891b2;
     --accent-gold: #d97706;
     --accent-emerald: #059669;
     --accent-purple: #7c3aed;
     
-    --shadow-main: 0 4px 20px -2px rgba(15, 23, 42, 0.05),
-                   0 2px 6px -1px rgba(15, 23, 42, 0.04),
-                   0 0 0 1px rgba(15, 23, 42, 0.04);
-    --shadow-hover: 0 12px 32px -4px rgba(15, 23, 42, 0.08),
-                    0 4px 12px -2px rgba(15, 23, 42, 0.04),
-                    0 0 0 1px rgba(2, 132, 199, 0.22);
+    --shadow-main: 0 4px 20px -2px rgba(15, 23, 42, 0.06),
+                   0 1px 4px -1px rgba(15, 23, 42, 0.04),
+                   0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+    --shadow-hover: 0 14px 34px -4px rgba(15, 23, 42, 0.1),
+                    0 4px 12px -2px rgba(15, 23, 42, 0.05),
+                    0 0 0 1px rgba(2, 132, 199, 0.28);
     
-    --pill-bg: rgba(255, 255, 255, 0.88);
-    --pill-border: rgba(226, 232, 240, 0.95);
+    --pill-bg: rgba(255, 255, 255, 0.92);
+    --pill-border: rgba(226, 232, 240, 0.98);
     --pill-hover: #ffffff;
     
-    --compass-dial: radial-gradient(circle at 35% 35%, #ffffff, #f1f5f9 70%, #e2e8f0);
-    --compass-bezel: linear-gradient(135deg, #f8fafc, #e2e8f0 50%, #cbd5e1);
-    --dome-gradient: radial-gradient(circle at 50% 100%, rgba(2, 132, 199, 0.14) 0%, rgba(245, 158, 11, 0.06) 55%, transparent 85%);
+    --compass-dial: radial-gradient(circle at 35% 35%, #ffffff, #f8fafc 70%, #e2e8f0);
+    --compass-bezel: linear-gradient(135deg, #ffffff, #e2e8f0 50%, #cbd5e1);
+    --dome-gradient: radial-gradient(circle at 50% 100%, rgba(2, 132, 199, 0.16) 0%, rgba(245, 158, 11, 0.08) 55%, transparent 85%);
 }
 
 body.dark {
     /* BESPOKE LUXURY DEEP COSMOS & UNIVERSE NIGHT PALETTE */
     --bg-base: #030712;
-    --bg-ambient: radial-gradient(ellipse at 50% -10%, #0d172e 0%, #050914 55%, #020409 100%);
+    --bg-ambient: radial-gradient(ellipse at 50% -20%, #1e1b4b 0%, #0f172a 35%, #030712 75%, #020408 100%);
     
-    --card-glass: rgba(11, 18, 33, 0.72);
-    --card-glass-hover: rgba(18, 28, 50, 0.84);
-    --card-inner: rgba(15, 23, 42, 0.65);
-    --card-border: rgba(147, 197, 253, 0.12);
-    --card-border-glow: rgba(56, 189, 248, 0.35);
+    --card-glass: rgba(15, 23, 42, 0.78);
+    --card-glass-hover: rgba(30, 41, 59, 0.88);
+    --card-inner: rgba(15, 23, 42, 0.85);
+    --card-border: rgba(147, 197, 253, 0.16);
+    --card-border-glow: rgba(56, 189, 248, 0.45);
     
-    --text: #f1f5f9;
+    --text: #f8fafc;
     --text-heading: #ffffff;
-    --text-muted: #94a3b8;
-    --text-subtle: #64748b;
+    --text-muted: #cbd5e1;
+    --text-subtle: #94a3b8;
     
     --primary: #38bdf8;
     --primary-hover: #0ea5e9;
-    --primary-glow: rgba(56, 189, 248, 0.22);
+    --primary-glow: rgba(56, 189, 248, 0.3);
     --accent-cyan: #22d3ee;
     --accent-gold: #fbbf24;
     --accent-emerald: #34d399;
-    --accent-purple: #a855f7;
+    --accent-purple: #c084fc;
     
-    --shadow-main: 0 10px 32px -4px rgba(0, 0, 0, 0.45),
-                   0 2px 8px -2px rgba(0, 0, 0, 0.3),
-                   0 0 0 1px rgba(255, 255, 255, 0.07);
-    --shadow-hover: 0 18px 48px -6px rgba(0, 0, 0, 0.65),
-                    0 4px 16px -2px rgba(56, 189, 248, 0.16),
-                    0 0 0 1px rgba(56, 189, 248, 0.3);
+    --shadow-main: 0 10px 32px -4px rgba(0, 0, 0, 0.55),
+                   0 2px 8px -2px rgba(0, 0, 0, 0.35),
+                   0 1px 0 rgba(255, 255, 255, 0.08) inset;
+    --shadow-hover: 0 18px 48px -6px rgba(0, 0, 0, 0.75),
+                    0 4px 16px -2px rgba(56, 189, 248, 0.25),
+                    0 0 0 1px rgba(56, 189, 248, 0.4);
     
-    --pill-bg: rgba(20, 30, 48, 0.75);
-    --pill-border: rgba(255, 255, 255, 0.1);
-    --pill-hover: rgba(30, 44, 70, 0.95);
+    --pill-bg: rgba(20, 30, 48, 0.85);
+    --pill-border: rgba(255, 255, 255, 0.14);
+    --pill-hover: rgba(30, 44, 70, 0.98);
     
     --compass-dial: radial-gradient(circle at 35% 35%, #152035, #0d1525 70%, #070c16);
     --compass-bezel: linear-gradient(135deg, #22324f, #111a2d 50%, #293d61);
-    --dome-gradient: radial-gradient(circle at 50% 100%, rgba(56, 189, 248, 0.18) 0%, rgba(129, 140, 248, 0.1) 50%, transparent 88%);
+    --dome-gradient: radial-gradient(circle at 50% 100%, rgba(56, 189, 248, 0.22) 0%, rgba(192, 132, 252, 0.12) 50%, transparent 88%);
 }
 
 /* ================= SCROLL PROGRESS BAR ================= */
@@ -129,7 +129,7 @@ body {
     height: 100vh;
     pointer-events: none;
     z-index: 0;
-    opacity: 0.65;
+    opacity: 0.45;
     transition: opacity 0.5s ease;
 }
 
@@ -144,6 +144,7 @@ body.dark #threeCanvas {
     max-width: 1180px;
     margin: 0 auto;
     padding: 20px 20px 60px;
+    box-sizing: border-box;
 }
 
 /* ================= SCROLL REVEAL STYLES ================= */
@@ -3071,31 +3072,38 @@ body.dark .btn-google {
 
 @media (max-width: 768px) {
     .app {
-        padding: 16px 14px 40px;
-    }
-
-    .hero-title {
-        font-size: 34px;
-        letter-spacing: -1px;
+        padding: 14px 14px 40px;
+        max-width: 100vw;
+        overflow-x: clip;
     }
 
     .header {
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
-        gap: 12px;
+        flex-wrap: wrap;
+        gap: 10px;
     }
 
     .logo {
-        font-size: 22px;
+        font-size: 20px;
     }
 
     .logo-icon-3d {
-        font-size: 26px;
+        font-size: 24px;
     }
 
     .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
         order: 2;
+    }
+
+    .action-btn-3d {
+        height: 38px;
+        min-width: 38px;
+        padding: 0 10px;
     }
 
     .location-clock-card {
@@ -3103,56 +3111,33 @@ body.dark .btn-google {
         width: 100%;
         justify-content: center;
         margin-top: 4px;
+        padding: 7px 14px;
+        border-radius: 16px;
+        gap: 8px;
     }
 
-    .weather-card-3d {
-        padding: 24px 20px;
-        border-radius: 26px;
+    .location-clock-card .clock-icon {
+        font-size: 18px;
     }
 
-    .city-heading-3d {
-        font-size: 28px;
+    .location-clock-card .clock-time {
+        font-size: 15px;
     }
 
-    .temp-digits {
-        font-size: 76px;
-        letter-spacing: -3px;
-    }
-
-    .weather-icon-3d {
-        font-size: 64px;
-    }
-
-    .celestial-dome-card-3d {
-        padding: 22px 18px 20px;
-        border-radius: 26px;
-    }
-
-    .horizon-dome-stage {
-        height: 190px;
-    }
-
-    .celestial-sphere-3d {
-        width: 44px;
-        height: 44px;
-        font-size: 22px;
-    }
-
-    .dome-horizon-ground {
-        padding: 10px 12px;
-    }
-
-    .horizon-gate strong {
-        font-size: 13px;
-    }
-
-    .apex-pill {
+    .location-clock-card .clock-date {
         font-size: 11px;
-        padding: 3px 10px;
     }
 
     .welcome-banner-3d {
-        padding: 14px 16px;
+        padding: 12px 14px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .welcome-content {
+        gap: 10px;
+        width: 100%;
     }
 
     .welcome-icon-box {
@@ -3166,39 +3151,340 @@ body.dark .btn-google {
     .welcome-vibe {
         font-size: 12px;
     }
-}
 
-@media (max-width: 480px) {
+    .welcome-actions {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
     .hero-title {
-        font-size: 28px;
+        font-size: 30px;
+        letter-spacing: -0.8px;
+        line-height: 1.2;
     }
 
     .hero-subtitle {
         font-size: 14px;
     }
 
+    .monitor-live-bar {
+        padding: 6px 14px;
+        gap: 10px;
+        font-size: 12px;
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .weather-card-3d {
+        padding: 24px 18px;
+        border-radius: 24px;
+        margin-bottom: 24px;
+    }
+
+    .city-heading-3d {
+        font-size: 26px;
+    }
+
     .temp-digits {
-        font-size: 60px;
+        font-size: 72px;
+        letter-spacing: -2px;
+    }
+
+    .weather-icon-3d {
+        font-size: 64px;
+    }
+
+    .weather-moon-badge {
+        max-width: 100%;
+        white-space: normal;
+    }
+
+    .monitoring-card-3d {
+        padding: 20px 16px;
+        min-height: auto;
+        border-radius: 22px;
+    }
+
+    .celestial-dome-card-3d {
+        padding: 20px 16px;
+        border-radius: 22px;
+    }
+
+    .horizon-dome-stage {
+        height: 180px;
+    }
+
+    .celestial-sphere-3d {
+        width: 42px;
+        height: 42px;
+        font-size: 20px;
+    }
+
+    .dome-horizon-ground {
+        padding: 8px 12px;
+    }
+
+    .horizon-gate strong {
+        font-size: 13px;
+    }
+
+    .apex-pill {
+        font-size: 11px;
+        padding: 3px 10px;
+    }
+
+    .lunar-telemetry-strip {
+        padding: 12px 16px;
+        gap: 12px;
+    }
+
+    .lunar-large-icon {
+        font-size: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .app {
+        padding: 12px 10px 36px;
+    }
+
+    .header {
+        padding: 8px 6px;
+        gap: 8px;
+    }
+
+    .logo {
+        font-size: 18px;
+    }
+
+    .logo-icon-3d {
+        font-size: 22px;
+    }
+
+    .account-btn-text {
+        display: none;
+    }
+
+    .action-btn-3d {
+        height: 36px;
+        min-width: 36px;
+        padding: 0 8px;
+        font-size: 12px;
+    }
+
+    .location-clock-card {
+        padding: 5px 10px;
+        border-radius: 12px;
+    }
+
+    .location-clock-card .clock-icon {
+        font-size: 16px;
+    }
+
+    .location-clock-card .clock-time {
+        font-size: 13px;
+    }
+
+    .location-clock-card .clock-date {
+        font-size: 10px;
+    }
+
+    .hero {
+        margin-bottom: 20px;
+    }
+
+    .hero-title {
+        font-size: 24px;
+        letter-spacing: -0.5px;
+        margin-bottom: 8px;
+    }
+
+    .hero-subtitle {
+        font-size: 13px;
+        line-height: 1.45;
+    }
+
+    .monitor-live-bar {
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+    }
+
+    .monitor-pulse {
+        font-size: 11px;
+    }
+
+    .manual-refresh-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 5px 10px;
+        font-size: 11px;
+    }
+
+    .search-section {
+        margin-bottom: 22px;
+    }
+
+    .search-box-3d {
+        padding: 5px 6px 5px 12px;
+        border-radius: 18px;
+        gap: 8px;
+    }
+
+    .search-icon {
+        font-size: 16px;
+    }
+
+    .search-box-3d input {
+        font-size: 13px;
+        padding: 7px 2px;
+    }
+
+    .search-btn-3d {
+        padding: 8px 14px;
+        font-size: 12px;
+        border-radius: 12px;
+    }
+
+    .search-actions-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .control-btn-3d {
+        width: 100%;
+        justify-content: center;
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .quick-cities {
+        gap: 5px;
+        margin-top: 12px;
+    }
+
+    .quick-label {
+        width: 100%;
+        text-align: center;
+        font-size: 11px;
+        margin-bottom: 2px;
+    }
+
+    .city-pill-3d {
+        padding: 4px 10px;
+        font-size: 11px;
+    }
+
+    .weather-card-3d {
+        padding: 18px 14px;
+        border-radius: 20px;
+        margin-bottom: 20px;
+    }
+
+    .weather-top {
+        align-items: center;
+        gap: 10px;
+    }
+
+    .city-heading-3d {
+        font-size: 22px;
+        word-break: break-word;
+    }
+
+    .timezone-tag {
+        font-size: 12px;
+    }
+
+    .weather-icon-3d {
+        font-size: 52px;
+    }
+
+    .temperature-section {
+        margin-top: 12px;
+        gap: 10px;
+        align-items: baseline;
+    }
+
+    .temp-digits {
+        font-size: 58px;
         letter-spacing: -2px;
     }
 
     .degree-3d {
-        font-size: 26px;
+        font-size: 22px;
+        margin-top: 4px;
     }
 
     .high-low-badge-3d {
-        font-size: 12px;
-        padding: 6px 14px;
+        padding: 5px 10px;
+        font-size: 11px;
+        border-radius: 10px;
     }
 
-    .search-btn-3d {
-        padding: 10px 18px;
-        font-size: 13px;
+    .condition-badge-wrap {
+        margin-top: 10px;
+        margin-bottom: 12px;
     }
 
-    .control-btn-3d {
-        font-size: 12px;
-        padding: 6px 14px;
+    .condition-text {
+        font-size: 18px;
+    }
+
+    .weather-moon-badge {
+        display: flex;
+        max-width: 100%;
+        flex-wrap: wrap;
+        padding: 5px 10px;
+        font-size: 11px;
+        border-radius: 12px;
+        gap: 6px;
+    }
+
+    .moon-badge-emoji {
+        font-size: 16px;
+    }
+
+    .moon-badge-text {
+        font-size: 11px;
+        word-break: break-word;
+    }
+
+    .monitoring-section {
+        margin-bottom: 28px;
+    }
+
+    .section-title {
+        margin-bottom: 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .section-title h2 {
+        font-size: 18px;
+    }
+
+    .refresh-badge-3d {
+        padding: 4px 10px;
+        font-size: 11px;
+    }
+
+    .monitoring-card-3d {
+        padding: 16px 12px;
+        border-radius: 18px;
+        min-height: auto;
+    }
+
+    .monitor-card-header {
+        margin-bottom: 12px;
+        gap: 8px;
+    }
+
+    .monitor-card-header h4 {
+        font-size: 14px;
     }
 
     .compass-stage {
@@ -3206,48 +3492,327 @@ body.dark .btn-google {
     }
 
     .compass-rose-3d {
-        width: 125px;
-        height: 125px;
+        width: 120px;
+        height: 120px;
     }
 
     .compass-needle {
-        height: 90px;
+        height: 84px;
     }
 
     .needle-north {
-        border-bottom: 40px solid #ef4444;
+        border-bottom: 38px solid #ef4444;
     }
 
     .needle-south {
-        border-top: 40px solid #3b82f6;
+        border-top: 38px solid #3b82f6;
+    }
+
+    .compass-readout {
+        gap: 4px;
+        padding-top: 8px;
+    }
+
+    .readout-label {
+        font-size: 9px;
+    }
+
+    .compass-val strong {
+        font-size: 11px;
+    }
+
+    .gauge-dial {
+        width: 115px;
+        height: 115px;
+        margin-bottom: 8px;
     }
 
     .big-pressure {
-        font-size: 36px;
+        font-size: 32px;
     }
 
-    .hourly-card-3d {
-        flex: 0 0 102px;
-        min-height: 155px;
-        padding: 12px 8px;
+    .pressure-unit {
+        font-size: 13px;
     }
 
-    .hour-icon {
-        font-size: 26px;
+    .trend-pill {
+        font-size: 10px;
+        padding: 3px 10px;
     }
 
-    .modal-card-3d {
-        padding: 22px 18px;
+    .scale-labels {
+        font-size: 9px;
     }
 
-    .account-btn-text {
-        display: inline-block;
+    .gauge-footer-stats {
+        gap: 6px;
+        padding-top: 8px;
+    }
+
+    .gauge-stat p {
+        font-size: 10px;
+    }
+
+    .gauge-stat strong {
+        font-size: 11px;
+    }
+
+    .metric-row {
+        padding: 8px 10px;
         font-size: 12px;
     }
 
-    .action-btn-3d {
-        height: 40px;
-        min-width: 40px;
-        padding: 0 12px;
+    .metric-row strong {
+        font-size: 12px;
+    }
+
+    .celestial-section-below {
+        margin-bottom: 28px;
+    }
+
+    .celestial-dome-card-3d {
+        padding: 16px 12px;
+        border-radius: 18px;
+    }
+
+    .dome-meta-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .dome-info h3 {
+        font-size: 14px;
+    }
+
+    .dome-info p {
+        font-size: 11px;
+    }
+
+    .simulation-controls {
+        width: 100%;
+        display: flex;
+        gap: 6px;
+    }
+
+    .sim-play-btn, .sim-reset-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+
+    .lunar-telemetry-strip {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 10px 12px;
+        margin: 10px 0 14px;
+        border-radius: 14px;
+    }
+
+    .lunar-large-icon {
+        font-size: 26px;
+    }
+
+    .lunar-primary-line {
+        gap: 6px;
+    }
+
+    .lunar-label-prefix {
+        font-size: 11px;
+    }
+
+    .lunar-primary-line strong {
+        font-size: 13px;
+    }
+
+    .lunar-cat-badge {
+        font-size: 9px;
+        padding: 2px 6px;
+    }
+
+    .lunar-subtext {
+        font-size: 10px;
+    }
+
+    .lunar-countdown-pill {
+        width: 100%;
+        justify-content: center;
+        font-size: 10px;
+        padding: 5px 8px;
+    }
+
+    .horizon-dome-stage {
+        height: 150px;
+        border-radius: 14px;
+    }
+
+    .celestial-sphere-3d {
+        width: 34px;
+        height: 34px;
+        font-size: 17px;
+    }
+
+    .dome-horizon-ground {
+        padding: 6px 8px;
+    }
+
+    .gate-icon {
+        font-size: 13px;
+    }
+
+    .gate-name {
+        font-size: 9px;
+    }
+
+    .horizon-gate strong {
+        font-size: 11px;
+    }
+
+    .apex-pill {
+        font-size: 9px;
+        padding: 2px 6px;
+    }
+
+    .scrubber-bar-wrap {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 5px;
+        margin-top: 8px;
+    }
+
+    .scrub-label {
+        font-size: 10px;
+    }
+
+    .hourly-section {
+        margin-bottom: 28px;
+    }
+
+    .day-toggle-group {
+        width: 100%;
+        display: flex;
+    }
+
+    .day-toggle-btn {
+        flex: 1;
+        text-align: center;
+        padding: 7px 10px;
+        font-size: 12px;
+    }
+
+    .open-new-page-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .hourly-subtitle {
+        font-size: 11px;
+    }
+
+    .open-page-link {
+        width: 100%;
+        justify-content: center;
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .hourly-container-3d {
+        padding: 8px 4px 14px;
+        gap: 8px;
+    }
+
+    .hourly-card-3d {
+        flex: 0 0 92px;
+        min-height: 140px;
+        padding: 10px 6px;
+        border-radius: 16px;
+    }
+
+    .hourly-card-time {
+        font-size: 11px;
+        margin-bottom: 6px;
+    }
+
+    .hour-icon {
+        font-size: 22px;
+        margin-bottom: 4px;
+    }
+
+    .hourly-card-temp {
+        font-size: 16px;
+        margin-bottom: 4px;
+    }
+
+    .hourly-card-rain {
+        font-size: 10px;
+    }
+
+    .hourly-card-wind {
+        font-size: 9px;
+    }
+
+    .modal-card-3d {
+        width: 95%;
+        padding: 18px 14px;
+        border-radius: 20px;
+    }
+
+    .modal-header h3 {
+        font-size: 17px;
+    }
+
+    .auth-tabs {
+        margin-bottom: 14px;
+    }
+
+    .auth-tab-btn {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .tag-selector-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+    }
+
+    .tag-pill {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 360px) {
+    .city-heading-3d {
+        font-size: 20px;
+    }
+
+    .temp-digits {
+        font-size: 52px;
+    }
+
+    .weather-icon-3d {
+        font-size: 46px;
+    }
+
+    .compass-rose-3d {
+        width: 110px;
+        height: 110px;
+    }
+
+    .gauge-dial {
+        width: 105px;
+        height: 105px;
+    }
+
+    .big-pressure {
+        font-size: 28px;
+    }
+
+    .horizon-dome-stage {
+        height: 140px;
     }
 }

@@ -1855,12 +1855,12 @@ function initHighImpactThreeJS() {
                 }
             } else {
                 const pick = Math.random();
-                if (pick < 0.55) {
-                    starColors[i] = 0.02; starColors[i + 1] = 0.52; starColors[i + 2] = 0.78;
-                } else if (pick < 0.8) {
-                    starColors[i] = 0.96; starColors[i + 1] = 0.65; starColors[i + 2] = 0.15;
+                if (pick < 0.45) {
+                    starColors[i] = 0.98; starColors[i + 1] = 0.84; starColors[i + 2] = 0.42; // Warm solar gold
+                } else if (pick < 0.75) {
+                    starColors[i] = 0.45; starColors[i + 1] = 0.78; starColors[i + 2] = 0.98; // Sky diamond glint
                 } else {
-                    starColors[i] = 0.65; starColors[i + 1] = 0.82; starColors[i + 2] = 0.95;
+                    starColors[i] = 1.0; starColors[i + 1] = 1.0; starColors[i + 2] = 1.0;  // Pearlescent stardust
                 }
             }
         }
@@ -1869,11 +1869,11 @@ function initHighImpactThreeJS() {
         starGeo.setAttribute("color", new THREE.BufferAttribute(starColors, 3));
 
         const starMat = new THREE.PointsMaterial({
-            size: isDark ? 1.8 : 1.4,
+            size: isDark ? 1.8 : 1.5,
             vertexColors: true,
             transparent: true,
-            opacity: isDark ? 0.85 : 0.45,
-            blending: isDark ? THREE.AdditiveBlending : THREE.NormalBlending
+            opacity: isDark ? 0.85 : 0.35,
+            blending: THREE.AdditiveBlending
         });
 
         cosmicStarfield = new THREE.Points(starGeo, starMat);
@@ -1895,9 +1895,9 @@ function initHighImpactThreeJS() {
                 nebulaColors[i + 1] = 0.30 + Math.random() * 0.25;
                 nebulaColors[i + 2] = 0.85 + Math.random() * 0.15;
             } else {
-                nebulaColors[i] = 0.80;
-                nebulaColors[i + 1] = 0.88;
-                nebulaColors[i + 2] = 0.98;
+                nebulaColors[i] = 0.92;
+                nebulaColors[i + 1] = 0.95;
+                nebulaColors[i + 2] = 1.0;
             }
         }
 
@@ -1908,7 +1908,7 @@ function initHighImpactThreeJS() {
             size: isDark ? 3.0 : 2.2,
             vertexColors: true,
             transparent: true,
-            opacity: isDark ? 0.38 : 0.20,
+            opacity: isDark ? 0.38 : 0.15,
             blending: THREE.AdditiveBlending
         });
 
@@ -2018,24 +2018,24 @@ function updateThreeJSPalette() {
                 }
             } else {
                 const pick = Math.random();
-                if (pick < 0.55) {
-                    colors[i] = 0.02; colors[i + 1] = 0.52; colors[i + 2] = 0.78;
-                } else if (pick < 0.8) {
-                    colors[i] = 0.96; colors[i + 1] = 0.65; colors[i + 2] = 0.15;
+                if (pick < 0.45) {
+                    colors[i] = 0.98; colors[i + 1] = 0.84; colors[i + 2] = 0.42;
+                } else if (pick < 0.75) {
+                    colors[i] = 0.45; colors[i + 1] = 0.78; colors[i + 2] = 0.98;
                 } else {
-                    colors[i] = 0.65; colors[i + 1] = 0.82; colors[i + 2] = 0.95;
+                    colors[i] = 1.0; colors[i + 1] = 1.0; colors[i + 2] = 1.0;
                 }
             }
         }
         cosmicStarfield.geometry.attributes.color.needsUpdate = true;
         if (cosmicStarfield.material) {
-            cosmicStarfield.material.opacity = isDark ? 0.85 : 0.45;
-            cosmicStarfield.material.blending = isDark ? THREE.AdditiveBlending : THREE.NormalBlending;
+            cosmicStarfield.material.opacity = isDark ? 0.85 : 0.35;
+            cosmicStarfield.material.blending = THREE.AdditiveBlending;
         }
     }
 
     if (cosmicNebula && cosmicNebula.material) {
-        cosmicNebula.material.opacity = isDark ? 0.38 : 0.20;
+        cosmicNebula.material.opacity = isDark ? 0.38 : 0.15;
     }
 
     if (cosmicMoonMesh && cosmicMoonMesh.material) {
