@@ -99,6 +99,11 @@ window.fetchWeatherByLocation = fetchWeatherByLocation;
 window.fetchWeatherByCity = fetchWeatherByCity;
 window.searchCurrentInput = searchCurrentInput;
 window.navigateToDetails = navigateToDetails;
+window.triggerExtremeCategory = triggerExtremeCategory;
+window.closeExtremeShowcase = closeExtremeShowcase;
+window.openAntiqueModal = openAntiqueModal;
+window.closeAntiqueModal = closeAntiqueModal;
+window.filterAntiqueModalGrid = filterAntiqueModalGrid;
 
 /* ================= 1. THEME CONTROLLER ================= */
 function initTheme() {
@@ -2218,13 +2223,810 @@ function initScrollDynamics() {
     }
 }
 
+/* ================= 10.5 EXTREME & ANTIQUE WEATHER TELEMETRY SYSTEM ================= */
+const EXTREME_AND_ANTIQUE_DATA = {
+    lowest_temp: {
+        id: "lowest_temp",
+        name: "Lowest Temperature on Planet Earth (Polar Cryosphere)",
+        icon: "❄️",
+        categoryBadge: "Global Coldest Record",
+        keywords: ["lowest temp", "lowest temperature", "lowest", "coldest", "min temp", "minimum temp", "coldest city", "coldest place", "coldest country", "freezing record", "extreme cold", "sub zero"],
+        defaultIndex: 0,
+        contenders: [
+            {
+                city: "Oymyakon, Sakha, Russia",
+                shortName: "Oymyakon (-71.2°C)",
+                lat: 63.4641,
+                lon: 142.7737,
+                record: "-71.2°C (-96.2°F)",
+                alertLevel: "POLAR HYPOTHERMIA & INSTANT CRYO-HAZARD",
+                alertHeading: "Extreme Sub-Zero Frostbite Advisory",
+                alertDesc: "Exposed human flesh freezes in under 90 to 120 seconds. Metallic objects are hazardous to touch. Eyelashes freeze instantly upon blinking.",
+                antiqueTitle: "\"The Whisper of the Stars\" & 10,000-Year Permafrost",
+                antiqueDate: "Recorded Feb 6, 1933",
+                antiqueStory: "In sub -60°C conditions, human breath freezes instantly mid-air, creating microscopic falling ice needles that collide with a distinct rustling chime locals call 'the whisper of the stars'. The ground beneath has remained frozen permafrost since the last Ice Age.",
+                mechanism: "Siberian High Pressure Ring & Intermontane Basin Thermal Inversion",
+                classification: "Hyperborean Continental Cryosphere"
+            },
+            {
+                city: "Yakutsk, Sakha Republic, Russia",
+                shortName: "Yakutsk (-64.4°C)",
+                lat: 62.0355,
+                lon: 129.6755,
+                record: "-64.4°C (-83.9°F)",
+                alertLevel: "CONTINUOUS URBAN PERMAFROST ADVISORY",
+                alertHeading: "Deep Winter Ice Fog Warning",
+                alertDesc: "Coldest major city on Earth. Car engines must run 24 hours a day to prevent motor oil crystallization; buildings rest on 6-meter concrete stilts above shifting permafrost.",
+                antiqueTitle: "Subterranean Mammoth Ice Vaults",
+                antiqueDate: "Settled in 1632",
+                antiqueStory: "Subterranean permafrost tunnels beneath Yakutsk stay naturally frozen at -10°C year-round, preserving prehistoric Woolly Mammoth carcasses and ancient biological fossils intact from the Pleistocene epoch.",
+                mechanism: "Subpolar Continental High with Lena River Basin Inversion",
+                classification: "Continuous Urban Permafrost Metropolis"
+            },
+            {
+                city: "Vostok Station, Antarctica",
+                shortName: "Vostok Station (-89.2°C)",
+                lat: -78.4642,
+                lon: 106.8373,
+                record: "-89.2°C (-128.6°F) Absolute Earth Record",
+                alertLevel: "PLANETARY SURFACE MINIMUM WARNING",
+                alertHeading: "Absolute Terrestrial Cold Warning",
+                alertDesc: "Coldest temperature ever measured on Earth's surface by meteorological instruments. Breathing without thermal pre-heaters causes acute lung hemorrhaging.",
+                antiqueTitle: "Subglacial Lake Vostok (Sealed for 15 Million Years)",
+                antiqueDate: "Ground Record July 21, 1983",
+                antiqueStory: "Beneath 4 kilometers of ice under Vostok Station lies a massive liquid freshwater lake sealed away from Earth's atmosphere for over 15 million years, harboring isolated primordial microbes.",
+                mechanism: "3,488m Polar Ice Plateau Elevation & Katabatic Solar Deficit",
+                classification: "Antarctic Polar Plateau Interior"
+            },
+            {
+                city: "Eureka, Nunavut, Canada",
+                shortName: "Eureka (-55.3°C)",
+                lat: 79.9889,
+                lon: -85.9408,
+                record: "-55.3°C (-67.5°F)",
+                alertLevel: "HIGH ARCTIC POLAR NIGHT ADVISORY",
+                alertHeading: "Zero-Sunlight Deep Freeze Warning",
+                alertDesc: "Northernmost inhabited research settlement in North America, experiencing complete perpetual darkness from October to late February each year.",
+                antiqueTitle: "Antique High Arctic Mummified Forests",
+                antiqueDate: "Settlement Established 1947",
+                antiqueStory: "Despite current brutal polar cold, Ellesmere Island houses ancient mummified redwood and dawn redwood forests from 50 million years ago when the Arctic was a warm subtropical swamp.",
+                mechanism: "Circumpolar Vortex & Slanted High-Latitude Insolation",
+                classification: "High Arctic Tundra Research Post"
+            }
+        ]
+    },
+
+    highest_temp: {
+        id: "highest_temp",
+        name: "Highest Temperature on Planet Earth (Thermal Furnace)",
+        icon: "🔥",
+        categoryBadge: "Global Maximum Heat Record",
+        keywords: ["highest temp", "highest temperature", "highest", "hottest", "max temp", "maximum temp", "hottest city", "hottest place", "hottest country", "heat record", "extreme heat", "death valley"],
+        defaultIndex: 0,
+        contenders: [
+            {
+                city: "Furnace Creek, Death Valley, California, USA",
+                shortName: "Death Valley (+56.7°C)",
+                lat: 36.4614,
+                lon: -116.8656,
+                record: "56.7°C (134°F) / Ground 93.9°C (201°F)",
+                alertLevel: "DANGEROUS HYPERTHERMIA & THERMAL RADIATION ALERT",
+                alertHeading: "Extreme Atmospheric Furnace & Dehydration Warning",
+                alertDesc: "Highest officially recognized ambient air temperature in history. Ground surface reaches 93.9°C (201°F); severe dehydration occurs in under an hour without shade and water.",
+                antiqueTitle: "The Mystery of the Sailing Stones (Racetrack Playa)",
+                antiqueDate: "World Record July 10, 1913",
+                antiqueStory: "Ancient dolomite boulders weighing up to 700 lbs glide across the dry playa floor leaving long serpentine trails. Scientists discovered this is propelled by ultra-rare micro-ice sheets and desert gales on freezing winter nights.",
+                mechanism: "Sub-Sea-Level Topographic Basin Trapping & Adiabatic Compression",
+                classification: "Hyper-Arid Sub-Sea-Level Grabens"
+            },
+            {
+                city: "Kuwait City, Kuwait",
+                shortName: "Kuwait City (+53.5°C)",
+                lat: 29.3759,
+                lon: 47.9774,
+                record: "53.5°C (128.3°F)",
+                alertLevel: "SEVERE URBAN HEAT DOME ALERT",
+                alertHeading: "Metropolitan Super-Heat Warning",
+                alertDesc: "Hottest capital city on planet Earth. Traffic lights melt under concentrated sunlight, and outdoor labor is legally suspended during summer afternoons.",
+                antiqueTitle: "Antique Arabian Gulf Windcatchers (Barjeel)",
+                antiqueDate: "Recorded 2016 / 2021",
+                antiqueStory: "For centuries before electricity, traditional Kuwaiti architects engineered antique windcatchers (barjeel) that funneled ambient desert breeze through courtyard fountains to naturally cool palatial quarters.",
+                mechanism: "Subtropical High Pressure Ridge & Arabian Desert Shammal Winds",
+                classification: "Hyper-Thermal Coastal Desert Metropolis"
+            },
+            {
+                city: "Dallol, Danakil Depression, Ethiopia",
+                shortName: "Dallol (+48°C Mean)",
+                lat: 14.2417,
+                lon: 40.2989,
+                record: "Highest Year-Round Average Temperature on Earth",
+                alertLevel: "GEOTHERMAL ACID & SULPHUR VOLCANIC ALERT",
+                alertHeading: "Alien Toxic Hydrothermal Environment Warning",
+                alertDesc: "The lowest subaerial volcano on Earth (-130 meters below sea level). Searing ambient heat is combined with boiling acidic brine pools.",
+                antiqueTitle: "Antique Neon Hydrothermal Springs & Ancient Salt Caravans",
+                antiqueDate: "Recorded 1960–1966",
+                antiqueStory: "Dallol features surreal neon green, yellow, and orange acid terraces formed by subterranean magma heating super-saline groundwater. Afar salt miners still harvest salt slabs using antique camel caravans.",
+                mechanism: "Triple Plate Tectonic Rift & Geothermal Magma Uplift",
+                classification: "Extraterrestrial-Analog Hydrothermal Crater"
+            },
+            {
+                city: "Ahvaz, Khuzestan, Iran",
+                shortName: "Ahvaz (+54.0°C)",
+                lat: 31.3183,
+                lon: 48.6706,
+                record: "54.0°C (129.2°F)",
+                alertLevel: "EXTREME HEAT & DUST SQUALL ADVISORY",
+                alertHeading: "Khuzestan Thermal Inversion Warning",
+                alertDesc: "Suffocating heat dome combined with heavy particulate dust. Temperatures consistently hover above 50°C for weeks in midsummer.",
+                antiqueTitle: "Antique 2,500-Year Shushtar Hydraulic Water Works",
+                antiqueDate: "Recorded June 29, 2017",
+                antiqueStory: "Ahvaz lies along the ancient Karun River basin, proximate to the 2,500-year-old Shushtar Historical Hydraulic System—a UNESCO masterpiece of antique milling and water diversion.",
+                mechanism: "Zagros Mountain Leeward Compressional Heating",
+                classification: "Continental Arid Lowland River Basin"
+            }
+        ]
+    },
+
+    rain: {
+        id: "rain",
+        name: "World Rain Record Capital (Extreme Monsoon & Torrential Deluge)",
+        icon: "🌧️",
+        categoryBadge: "World Rainfall Capital",
+        keywords: ["rain", "rainy", "raining", "rainfall", "wettest", "most rain", "heavy rain", "monsoon", "downpour", "extreme rain", "mawsynram", "cherrapunji"],
+        defaultIndex: 0,
+        contenders: [
+            {
+                city: "Mawsynram, Meghalaya, India",
+                shortName: "Mawsynram (11,872mm/yr)",
+                lat: 25.2975,
+                lon: 91.5826,
+                record: "11,872 mm (467.4 inches) Annual Rainfall",
+                alertLevel: "TORRENTIAL CLOUDBURST & LANDSLIP ADVISORY",
+                alertHeading: "Extreme Monsoon Precipitation Warning",
+                alertDesc: "Guinness World Record for the wettest place on Earth. In 1985, Mawsynram received 26,000 mm of rain—enough to submerge a two-story building.",
+                antiqueTitle: "500-Year-Old Living Root Bridges (Jingkieng Jri)",
+                antiqueDate: "Annual Guinness Record",
+                antiqueStory: "To cross torrential monsoon rivers that rotted wooden planks and rusted iron chains, indigenous Khasi elders guided the aerial roots of Ficus elastica trees across canyons for over 500 years, growing living bridges that become stronger with age.",
+                mechanism: "Bay of Bengal Monsoon Funneling into Khasi Gorge Orographic Lift",
+                classification: "Subtropical Highland Extreme Monsoonal Apex"
+            },
+            {
+                city: "Cherrapunji (Sohra), Meghalaya, India",
+                shortName: "Cherrapunji (Twin Rain Capital)",
+                lat: 25.2702,
+                lon: 91.7323,
+                record: "Holds World 48-Hour Rainfall Record (2,493 mm)",
+                alertLevel: "FLASH FLOOD & MIST OVERFLOW ADVISORY",
+                alertHeading: "Catastrophic Rainfall Inundation Warning",
+                alertDesc: "Holds world records for the most rain in a single calendar month (9,300 mm) and single year (26,470 mm in 1860-1861).",
+                antiqueTitle: "The Seven Sisters Waterfalls & Antique Khasi Monoliths",
+                antiqueDate: "Historical Records since 1851",
+                antiqueStory: "Perched 1,400 meters high, Cherrapunji's precipice overlooks the plains of Bangladesh. Antique standing megaliths erected centuries ago commemorate tribal ancestors along misty waterfalls.",
+                mechanism: "Double Monsoonal Air Mass Squeeze against Southern Plateau Cliffs",
+                classification: "Orographic Wet Valley Precipice"
+            },
+            {
+                city: "Tutunendo, Chocó, Colombia",
+                shortName: "Tutunendo (300 Rain Days)",
+                lat: 5.7500,
+                lon: -76.5333,
+                record: "11,770 mm (463.4 inches) / Rain 300+ Days/Year",
+                alertLevel: "PERPETUAL EQUATORIAL RAIN ADVISORY",
+                alertHeading: "Continuous Tropical Cloudburst Alert",
+                alertDesc: "One of the rainiest rainforest settlements on Earth. It experiences rain nearly every single day, with two distinct daily torrential peaks.",
+                antiqueTitle: "Antique Chocó Gold Rivers & Bio-Diverse Rainforest Canopies",
+                antiqueDate: "Continuous Meteorological Log",
+                antiqueStory: "Tutunendo's rivers have yielded alluvial gold for pre-Columbian indigenous tribes for thousands of years. The permanent rain fosters the highest plant diversity on planet Earth.",
+                mechanism: "Pacific Intertropical Convergence Zone (ITCZ) Moisture Lock",
+                classification: "Equatorial Rainforest Lowland Inundation"
+            },
+            {
+                city: "Mount Waiʻaleʻale, Kauai, Hawaii",
+                shortName: "Mt. Waiʻaleʻale (11,430mm)",
+                lat: 22.0700,
+                lon: -159.5000,
+                record: "11,430 mm (450 inches) / 335 Rain Days/Year",
+                alertLevel: "ALPINE RAIN CLOUD SHIELD WARNING",
+                alertHeading: "Perpetual Cloud Cap Orographic Warning",
+                alertDesc: "Waiʻaleʻale means 'rippling water' in Hawaiian. The 1,569-meter volcanic summit is perpetually enveloped in dense cumulus rain clouds.",
+                antiqueTitle: "Ancient Hawaiian Mountain Heiau (Sacred Shrines)",
+                antiqueDate: "Recorded 1912 to Present",
+                antiqueStory: "Ancient Native Hawaiians built high-elevation stone Heiau (shrines) near the caldera to honor Kāne, god of water and rain, hiking through sheer cliffs where 80 cascades drop into the Blue Room.",
+                mechanism: "Northeast Trade Winds Striking 1,500m Sheer Shield Caldera",
+                classification: "Shield Volcano Orographic Cloud Core"
+            }
+        ]
+    },
+
+    snow: {
+        id: "snow",
+        name: "World Snowfall Capital (Extreme Snow Accumulation & Ice)",
+        icon: "🌨️",
+        categoryBadge: "World Snowfall Capital",
+        keywords: ["snow", "snowy", "snowing", "snowfall", "snowiest", "most snow", "heavy snow", "blizzard", "snow record", "extreme snow", "aomori", "sapporo"],
+        defaultIndex: 0,
+        contenders: [
+            {
+                city: "Aomori City, Tōhoku, Japan",
+                shortName: "Aomori (8-Meter Snow Walls)",
+                lat: 40.8244,
+                lon: 140.7400,
+                record: "7.9 to 8.2 Meters (26 to 28 Feet) Annual Snowfall",
+                alertLevel: "MASSIVE BLIZZARD & SNOW DRIFT WARNING",
+                alertHeading: "Giant Snow Wall & Ocean Blizzard Advisory",
+                alertDesc: "Officially the snowiest major city in the world. Colossal 20-meter (65-foot) snow walls line the Hakkoda Pass road, cleared daily by rotary snowplows.",
+                antiqueTitle: "The Antique 'Snow Monsters' (Juhyo) of Hakkōda",
+                antiqueDate: "Winter Meteorological Log",
+                antiqueStory: "Sub-zero sea winds supercool moisture droplets as they slam into ancient Maries' fir trees on Mount Hakkōda, coating them layer upon layer into giant frozen ice creatures known since samurai times as 'Juhyo' (Snow Monsters).",
+                mechanism: "Sea-Effect Snow: Freezing Siberian Winds Absorbing Sea of Japan Vapor",
+                classification: "Coastal Mountainous Maritime Blizzard Convergence"
+            },
+            {
+                city: "Sapporo, Hokkaido, Japan",
+                shortName: "Sapporo (6-Meter Snow)",
+                lat: 43.0618,
+                lon: 141.3545,
+                record: "5.97 Meters (20 Feet) Snowfall in a 2M Pop. Metropolis",
+                alertLevel: "URBAN HEAVY SNOWFALL ADVISORY",
+                alertHeading: "Metropolitan Whiteout & Sub-Zero Freeze Alert",
+                alertDesc: "The only major metropolis of 2 million people on Earth operating smoothly with over 600 cm of annual snow, utilizing heated sidewalks and underground highway tunnels.",
+                antiqueTitle: "Sapporo Historic Snow Festival & Antique Ainu Snow Lore",
+                antiqueDate: "Snow Festival Founded 1950",
+                antiqueStory: "Originated when high school students carved six ice statues in Odori Park in 1950, now evolving into towering 15-meter palace replicas celebrated alongside centuries of indigenous Ainu winter traditions.",
+                mechanism: "Ishikari Bay Sea-Effect Convergence Stream",
+                classification: "High-Latitude Coastal Megalopolis"
+            },
+            {
+                city: "Valdez, Alaska, USA",
+                shortName: "Valdez (8.3m Snowfall)",
+                lat: 61.1308,
+                lon: -146.3483,
+                record: "8.26 Meters (325 Inches) Annual Snowfall",
+                alertLevel: "GULF OF ALASKA AVALANCHE ADVISORY",
+                alertHeading: "Extreme Coastal Maritime Snow Warning",
+                alertDesc: "Snowiest sea-level town in North America. Thompson Pass holds the Alaskan single-season record of 24.75 meters (81.2 feet!) of snow.",
+                antiqueTitle: "Antique 1898 Klondike Gold Trail & Thompson Glacier",
+                antiqueDate: "Established 1898",
+                antiqueStory: "During the 1898 Klondike Gold Rush, gold stampeders attempted the hazardous Valdez Glacier route in brutal blizzards, carving staircase steps directly into sheer ice walls.",
+                mechanism: "Aleutian Low Systems Crashing into the Chugach Mountain Range",
+                classification: "Subarctic Fjord-Mountain Barrier"
+            },
+            {
+                city: "Mount Washington, New Hampshire, USA",
+                shortName: "Mt Washington (Extreme Rime)",
+                lat: 44.2706,
+                lon: -71.3033,
+                record: "7.14 Meters Snowfall + Rime Ice Feathers",
+                alertLevel: "HIGH-ALTITUDE HURRICANE BLIZZARD WARNING",
+                alertHeading: "Extreme Wind-Driven Blizzard Advisory",
+                alertDesc: "Known as 'Home of the World's Worst Weather'. Temperatures plunge to -44°C (-47°F) with hurricane-force blizzard gusts causing windchills of -78°C (-108°F).",
+                antiqueTitle: "Antique 1932 Mountain Observatory & Feather Rime",
+                antiqueDate: "Observatory Built 1932",
+                antiqueStory: "Perpetual cloud immersion and supersonic gale winds grow bizarre horizontal rime ice 'feathers' up to 6 feet long pointing directly into the oncoming wind.",
+                mechanism: "Convergence of 3 Major Continental Storm Tracks (Atlantic, Gulf, Pacific)",
+                classification: "Alpine Summit High-Velocity Cryo-Core"
+            }
+        ]
+    },
+
+    wind: {
+        id: "wind",
+        name: "World Wind Record Capital (Extreme Velocity & Jetstream Force)",
+        icon: "💨",
+        categoryBadge: "World Windiest Capital",
+        keywords: ["wind", "windy", "windiest", "highest wind", "stormy wind", "gale", "cyclone", "hurricane", "wind record", "extreme wind", "wellington"],
+        defaultIndex: 0,
+        contenders: [
+            {
+                city: "Wellington, Greater Wellington, New Zealand",
+                shortName: "Wellington (Gale City)",
+                lat: -41.2865,
+                lon: 174.7762,
+                record: "Winds Exceed Gale Force (63+ km/h) Over 173 Days/Year",
+                alertLevel: "SEVERE GALE FORCE & WIND TUNNEL ADVISORY",
+                alertHeading: "Cook Strait Aerodynamic Funnel Warning",
+                alertDesc: "Known worldwide as 'Windy Welly', situated in the Cook Strait wind funnel. Gusts regularly exceed 140 km/h (87 mph), testing building aerodynamics and flight arrivals.",
+                antiqueTitle: "The Roaring Forties & Historic Tall Ship Navigators",
+                antiqueDate: "Recorded Since 1840",
+                antiqueStory: "Wellington lies squarely in the 40th parallel south (the Roaring Forties), where 18th-century clipper ships ran before howling uninterrupted circumpolar winds on their antique voyages around the globe.",
+                mechanism: "Venturi Aerodynamic Squeeze Between North & South Islands",
+                classification: "Maritime Chokepoint Wind Jet"
+            },
+            {
+                city: "Commonwealth Bay, George V Coast, Antarctica",
+                shortName: "Commonwealth Bay (320km/h)",
+                lat: -67.0000,
+                lon: 142.6667,
+                record: "Average Annual Wind 80 km/h (50 mph) / Gusts to 320 km/h (200 mph)",
+                alertLevel: "SUPER-KATABATIC POLAR GALE ALERT",
+                alertHeading: "Guinness Record Windiest Place on Earth",
+                alertDesc: "Listed in Guinness Book of Records and National Geographic Atlas as the windiest place on planet Earth due to relentless cold air avalanching down polar ice sheets.",
+                antiqueTitle: "Sir Douglas Mawson’s 1912 'Home of the Blizzard' Expedition",
+                antiqueDate: "Expedition 1911–1914",
+                antiqueStory: "Australian explorer Sir Douglas Mawson based his team in wooden huts here in 1912. The gale was so relentless that men had to lean into the wind at 45-degree angles wearing antique crampons just to avoid being blown out to sea.",
+                mechanism: "Dense Katabatic Gravitational Drainage from Antarctic Polar Plateau",
+                classification: "Coastal Polar Super-Katabatic Fall-Wind"
+            },
+            {
+                city: "Mount Washington Observatory, USA",
+                shortName: "Mt Washington (372 km/h Record)",
+                lat: 44.2706,
+                lon: -71.3033,
+                record: "372 km/h (231 mph) Historic Surface Wind Record",
+                alertLevel: "SUPER-VELOCITY TROPOSPHERIC GALE ALERT",
+                alertHeading: "Extreme Atmospheric Jet Stream Blast",
+                alertDesc: "Held the world record for highest wind speed ever directly measured on Earth's surface from 1934 until 1996.",
+                antiqueTitle: "The Historic Great Gale of April 12, 1934",
+                antiqueDate: "April 12, 1934 Record",
+                antiqueStory: "Meteorologists Salvatore Pagliuca and Wendell Poole used heated anemometers to record the historic 231 mph gust. The building had to be bolted directly into the bedrock with massive railroad ties.",
+                mechanism: "Bernoulli Effect Compressing Jet Stream Over Presidential Range",
+                classification: "Orographic Tropospheric Venturi Funnel"
+            },
+            {
+                city: "Cape Blanco, Oregon, USA",
+                shortName: "Cape Blanco (Ocean Gale)",
+                lat: 42.8364,
+                lon: -124.5658,
+                record: "Frequent Winter Pacific Gusts Over 160 km/h (100 mph)",
+                alertLevel: "PACIFIC MARITIME STORM SURGE WARNING",
+                alertHeading: "Northwest Headland Hurricane Force Gale",
+                alertDesc: "Westernmost point of Oregon, jutting out 1.5 miles into the open Pacific. Winter bomb-cyclone gales cause stunted spruce trees to grow sideways.",
+                antiqueTitle: "Antique 1870 Cape Blanco Lighthouse",
+                antiqueDate: "Lit in 1870",
+                antiqueStory: "Oregon's oldest standing lighthouse has survived 150+ years of violent ocean gales. Keepers historically reported sea spume and gravel crashing against the lantern room 250 feet above sea level.",
+                mechanism: "Pacific Mid-Latitude Cyclonic Fetch Striking Rocky Headland",
+                classification: "Pacific Maritime Coastal Promontory"
+            }
+        ]
+    },
+
+    alert: {
+        id: "alert",
+        name: "Antique Atmospheric Wonders & Special Severe Phenomena",
+        icon: "⚡",
+        categoryBadge: "Rare Antique Curiosities",
+        keywords: ["alert", "alerts", "special", "antique", "antique things", "special happening", "special weather", "wonder", "phenomenon", "phenomena", "rare weather", "miracle", "catatumbo", "aurora", "blood rain", "morning glory", "sailing stones"],
+        defaultIndex: 0,
+        contenders: [
+            {
+                city: "Lake Maracaibo (Catatumbo Lightning), Venezuela",
+                shortName: "Catatumbo (Everlasting Lightning)",
+                lat: 9.3400,
+                lon: -71.6000,
+                record: "1.2 Million Lightning Strikes/Year (28 Strikes/Minute)",
+                alertLevel: "HIGH-VOLTAGE ATMOSPHERIC ELECTRICAL HAZARD",
+                alertHeading: "Relámpago del Catatumbo Flash Warning",
+                alertDesc: "Guinness Record: The lightning capital of the globe. Generates continuous silent electrical storms up to 260 nights a year, acting as Earth's largest single generator of tropospheric ozone.",
+                antiqueTitle: "The 16th-Century 'Antique Beacon of Maracaibo'",
+                antiqueDate: "Recorded 1595 by Sir Francis Drake",
+                antiqueStory: "Used by 16th-century Spanish colonial caravels as a natural lighthouse visible 400 km away. In 1595, the mysterious lightning illuminated Sir Francis Drake’s surprise fleet, foiling his attack on the city.",
+                mechanism: "Swamp Methane Updrafts + Caribbean Sea Breeze Trapped in Andean Horseshoe",
+                classification: "Perpetual Tropical Electrical Crucible"
+            },
+            {
+                city: "Tromsø, Northern Norway",
+                shortName: "Tromsø (Aurora Borealis)",
+                lat: 69.6492,
+                lon: 18.9553,
+                record: "Prime Geomagnetic Auroral Oval Apex",
+                alertLevel: "GEOMAGNETIC SOLAR STORM & AURORA ALERT",
+                alertHeading: "Solar Flare Ionospheric Activity Advisory",
+                alertDesc: "Solar wind particles colliding with oxygen and nitrogen atoms in Earth's magnetosphere produce glowing neon green, violet, and crimson ribbons dancing across the polar sky.",
+                antiqueTitle: "Antique Norse Lore of the Valkyries' Armor",
+                antiqueDate: "Centuries of Nordic Observation",
+                antiqueStory: "Ancient Norse Vikings believed the shimmering green lights were the reflections from the shields and armor of the Valkyries guiding fallen warriors to Valhalla. Sami folklore held that whistling would summon the auroral spirits.",
+                mechanism: "Coronal Mass Ejections Trapped in Terrestrial Van Allen Belts",
+                classification: "High-Latitude Ionospheric Magneto-Optic Spectacle"
+            },
+            {
+                city: "Burketown, Gulf of Carpentaria, Australia",
+                shortName: "Morning Glory Cloud (1,000km)",
+                lat: -17.7408,
+                lon: 139.5492,
+                record: "World's Only Predictable 1,000 km Long Roll Cloud",
+                alertLevel: "MESOSCALE ATMOSPHERIC SOLITON WAVE ADVISORY",
+                alertHeading: "Giant Rolling Tube Cloud & Wind Shear Alert",
+                alertDesc: "A colossal cylindrical roll cloud up to 1,000 km (620 miles) long and 2 km high, rolling across the dawn sky at 60 km/h with turbulent updrafts beneath.",
+                antiqueTitle: "Antique Garrawa Aboriginal 'Kangólgi' Cloud Stories",
+                antiqueDate: "Spring Phenomena (Sept–Nov)",
+                antiqueStory: "Local Garrawa and Waanyi Aboriginal peoples called this atmospheric giant 'Kangólgi' and considered it an antique herald of abundant bird life and shifting coastal winds, gliding like a mammoth serpent across the heavens.",
+                mechanism: "Collision of Sea Breezes Across Cape York Peninsula Creating Solitary Undular Bores",
+                classification: "Mesoscale Atmospheric Solitary Wave (Soliton)"
+            },
+            {
+                city: "Kerala, South India",
+                shortName: "Kerala (Blood Rain Phenomenon)",
+                lat: 9.9312,
+                lon: 76.2673,
+                record: "Historic Coloured Rain of 2001 & 2012",
+                alertLevel: "ANOMALOUS ATMOSPHERIC SPORE INUNDATION ADVISORY",
+                alertHeading: "Rare Red Precipitation Curiosity",
+                alertDesc: "Torrential downpours stained crimson red fallen over southern India, coloring clothes and water reservoirs. Scientific analysis revealed billions of microscopic aerial algal spores.",
+                antiqueTitle: "Antique Meteorological Chronicles of 'Blood Rain'",
+                antiqueDate: "Recorded July 25, 2001",
+                antiqueStory: "Historical chronicles by Roman historian Livy and medieval British monks recorded mysterious 'rains of blood'. In Kerala, modern aerobiologists proved heavy stratosphere drafts lifted microscopic micro-algae into monsoon clouds.",
+                mechanism: "Trentepohlia Algal Aerial Spore Convergence in Monsoonal Stratus",
+                classification: "Biological-Meteorological Spore Precipitation"
+            }
+        ]
+    }
+};
+
+/* ================= 10.6 QUERY INTENT DETECTION ENGINE ================= */
+function detectExtremeOrAntiqueQuery(rawQuery) {
+    if (!rawQuery) return null;
+    const q = rawQuery.trim().toLowerCase();
+
+    // Lowest Temperature / Polar records
+    if (/^(lowest\s*temp|lowest\s*temperature|coldest|min\s*temp|minimum\s*temp|coldest\s*city|coldest\s*place|coldest\s*country|extreme\s*cold|freezing\s*record)/i.test(q) ||
+        /\b(lowest\s*temp|coldest\s*place|coldest\s*city|coldest\s*in\s*the\s*world|lowest\s*temperature)\b/i.test(q)) {
+        return { category: "lowest_temp", index: 0 };
+    }
+
+    // Highest Temperature / Extreme heat records
+    if (/^(highest\s*temp|highest\s*temperature|hottest|max\s*temp|maximum\s*temp|hottest\s*city|hottest\s*place|hottest\s*country|extreme\s*heat|heat\s*record)/i.test(q) ||
+        /\b(highest\s*temp|hottest\s*place|hottest\s*city|hottest\s*in\s*the\s*world|highest\s*temperature)\b/i.test(q)) {
+        return { category: "highest_temp", index: 0 };
+    }
+
+    // Extreme Rain / Monsoon records
+    if (/^(rain|rainy|raining|rainfall|wettest|most\s*rain|heavy\s*rain|rain\s*record|extreme\s*rain|monsoon\s*record)/i.test(q) ||
+        /\b(wettest\s*place|wettest\s*city|most\s*rain|rain\s*record|highest\s*rain)\b/i.test(q)) {
+        return { category: "rain", index: 0 };
+    }
+
+    // Extreme Snow / Ice depth records
+    if (/^(snow|snowy|snowing|snowfall|snowiest|most\s*snow|heavy\s*snow|snow\s*record|extreme\s*snow|blizzard\s*record)/i.test(q) ||
+        /\b(snowiest\s*place|snowiest\s*city|most\s*snow|snow\s*record|highest\s*snow)\b/i.test(q)) {
+        return { category: "snow", index: 0 };
+    }
+
+    // Extreme Wind / Gale records
+    if (/^(wind|windy|windiest|highest\s*wind|stormy\s*wind|wind\s*record|extreme\s*wind|gale\s*record|cyclone\s*record)/i.test(q) ||
+        /\b(windiest\s*place|windiest\s*city|highest\s*wind|most\s*wind|windiest)\b/i.test(q)) {
+        return { category: "wind", index: 0 };
+    }
+
+    // Weather Alerts, Special Happenings & Antique Phenomena
+    if (/^(alert|alerts|warning|special|antique|antique\s*things|special\s*happening|special\s*weather|wonder|phenomenon|phenomena|rare\s*weather|miracle|catatumbo|aurora|blood\s*rain|morning\s*glory|sailing\s*stones)/i.test(q) ||
+        /\b(alert|antique|special\s*happening|antique\s*things|rare\s*phenomenon|extreme\s*wonder|aurora\s*borealis)\b/i.test(q)) {
+        return { category: "alert", index: 0 };
+    }
+
+    return null;
+}
+
+/* ================= 10.7 EXTREME CATEGORY TRIGGER & SHOWCASE ENGINE ================= */
+function triggerExtremeCategory(catKey, locIndex = 0) {
+    const cat = EXTREME_AND_ANTIQUE_DATA[catKey];
+    if (!cat) return;
+    const loc = cat.contenders[locIndex] || cat.contenders[0];
+
+    // Update search box input
+    const input = document.getElementById("cityInput");
+    if (input) {
+        input.value = `${cat.icon} ${cat.categoryBadge}: ${loc.city}`;
+    }
+
+    hideSearchSuggestions();
+
+    // Render showcase card
+    renderExtremeShowcase(catKey, locIndex);
+
+    // Fetch real-time live satellite Open-Meteo weather
+    currentCityLabel = loc.city;
+    currentLat = loc.lat;
+    currentLon = loc.lon;
+    loadWeatherCoordinates(loc.lat, loc.lon, loc.city);
+
+    safeStorage.setItem("weatherwise_last_city", loc.city);
+    updateSaveButtonState();
+    updateOpenDetailsLink();
+}
+
+function renderExtremeShowcase(catKey, locIndex = 0) {
+    const showcaseSec = document.getElementById("extremeShowcaseSection");
+    if (!showcaseSec) return;
+
+    const cat = EXTREME_AND_ANTIQUE_DATA[catKey];
+    if (!cat) return;
+    const loc = cat.contenders[locIndex] || cat.contenders[0];
+
+    const card = document.getElementById("extremeShowcaseCard");
+    if (card) {
+        card.className = `extreme-showcase-card card-3d-interactive theme-${catKey}`;
+    }
+
+    const extremeCatIcon = document.getElementById("extremeCatIcon");
+    if (extremeCatIcon) extremeCatIcon.textContent = cat.icon;
+
+    const extremeCategoryBadge = document.getElementById("extremeCategoryBadge");
+    if (extremeCategoryBadge) extremeCategoryBadge.textContent = cat.categoryBadge;
+
+    const extremeShowcaseTitle = document.getElementById("extremeShowcaseTitle");
+    if (extremeShowcaseTitle) extremeShowcaseTitle.textContent = cat.name;
+
+    const extremeShowcaseSubtitle = document.getElementById("extremeShowcaseSubtitle");
+    if (extremeShowcaseSubtitle) extremeShowcaseSubtitle.textContent = `Live Telemetry, Verified Scientific Limits & Historical Curiosities`;
+
+    // Contender buttons
+    const contendersRow = document.getElementById("extremeContendersRow");
+    if (contendersRow) {
+        contendersRow.innerHTML = cat.contenders.map((c, idx) => `
+            <button type="button" class="extreme-loc-btn ${idx === locIndex ? 'active' : ''}" onclick="window.triggerExtremeCategory && window.triggerExtremeCategory('${catKey}', ${idx})" title="${c.record}">
+                <span>📍 ${c.shortName}</span>
+            </button>
+        `).join("");
+    }
+
+    // Severe alert banner
+    const severeAlertLevel = document.getElementById("severeAlertLevel");
+    if (severeAlertLevel) severeAlertLevel.textContent = loc.alertLevel;
+
+    const severeAlertTargetCity = document.getElementById("severeAlertTargetCity");
+    if (severeAlertTargetCity) severeAlertTargetCity.textContent = loc.city;
+
+    const severeAlertHeading = document.getElementById("severeAlertHeading");
+    if (severeAlertHeading) severeAlertHeading.textContent = loc.alertHeading;
+
+    const severeAlertDescription = document.getElementById("severeAlertDescription");
+    if (severeAlertDescription) severeAlertDescription.textContent = loc.alertDesc;
+
+    // Antique phenomenon card
+    const antiquePhenomenonTitle = document.getElementById("antiquePhenomenonTitle");
+    if (antiquePhenomenonTitle) antiquePhenomenonTitle.textContent = loc.antiqueTitle;
+
+    const antiqueRecordDate = document.getElementById("antiqueRecordDate");
+    if (antiqueRecordDate) antiqueRecordDate.textContent = loc.antiqueDate;
+
+    const antiquePhenomenonStory = document.getElementById("antiquePhenomenonStory");
+    if (antiquePhenomenonStory) antiquePhenomenonStory.textContent = loc.antiqueStory;
+
+    const antiqueSpecRecord = document.getElementById("antiqueSpecRecord");
+    if (antiqueSpecRecord) antiqueSpecRecord.textContent = loc.record;
+
+    const antiqueSpecMechanism = document.getElementById("antiqueSpecMechanism");
+    if (antiqueSpecMechanism) antiqueSpecMechanism.textContent = loc.mechanism;
+
+    const antiqueSpecClassification = document.getElementById("antiqueSpecClassification");
+    if (antiqueSpecClassification) antiqueSpecClassification.textContent = loc.classification;
+
+    const extremeFooterCityName = document.getElementById("extremeFooterCityName");
+    if (extremeFooterCityName) extremeFooterCityName.textContent = loc.city;
+
+    showcaseSec.style.display = "block";
+    showcaseSec.classList.add("revealed");
+
+    // Smooth scroll to showcase
+    setTimeout(() => {
+        showcaseSec.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }, 100);
+}
+
+function closeExtremeShowcase() {
+    const showcaseSec = document.getElementById("extremeShowcaseSection");
+    if (showcaseSec) {
+        showcaseSec.style.display = "none";
+    }
+}
+
+/* ================= 10.8 SMART SEARCH SUGGESTIONS DROPDOWN ================= */
+function initSearchSuggestions() {
+    const input = document.getElementById("cityInput");
+    const dropdown = document.getElementById("searchSuggestions");
+    if (!input || !dropdown) return;
+
+    input.addEventListener("input", (e) => {
+        renderSearchSuggestions(e.target.value);
+    });
+
+    input.addEventListener("focus", (e) => {
+        renderSearchSuggestions(e.target.value);
+    });
+
+    document.addEventListener("click", (e) => {
+        if (!e.target.closest(".search-box-wrapper")) {
+            hideSearchSuggestions();
+        }
+    });
+
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            hideSearchSuggestions();
+        }
+    });
+}
+
+function renderSearchSuggestions(query = "") {
+    const dropdown = document.getElementById("searchSuggestions");
+    if (!dropdown) return;
+
+    const q = query.trim().toLowerCase();
+
+    // Suggested items configuration
+    const suggestions = [
+        {
+            key: "lowest_temp",
+            icon: "❄️",
+            title: "Lowest Temp (Coldest Record on Earth)",
+            sub: "Oymyakon (-71.2°C), Yakutsk & Vostok Station",
+            badge: "-71.2°C Ice Record",
+            filterMatch: ["low", "lowest", "temp", "cold", "coldest", "min", "freez", "ice", "oymyakon", "yakutsk", "vostok"]
+        },
+        {
+            key: "highest_temp",
+            icon: "🔥",
+            title: "Highest Temp (Thermal Furnace Record)",
+            sub: "Furnace Creek (+56.7°C), Kuwait City & Dallol",
+            badge: "+56.7°C Heat Record",
+            filterMatch: ["high", "highest", "temp", "hot", "hottest", "heat", "warm", "max", "furnace", "death", "kuwait"]
+        },
+        {
+            key: "rain",
+            icon: "🌧️",
+            title: "Rain Record (Monsoon & Wettest Place)",
+            sub: "Mawsynram (11,872mm/yr), Cherrapunji & Tutunendo",
+            badge: "11,872mm Rain",
+            filterMatch: ["rain", "rainy", "wet", "wettest", "monsoon", "deluge", "water", "mawsynram", "cherrapunji"]
+        },
+        {
+            key: "snow",
+            icon: "🌨️",
+            title: "Extreme Snow (Snowiest City on Earth)",
+            sub: "Aomori City (8m Walls), Sapporo & Valdez",
+            badge: "8m Snow Wall",
+            filterMatch: ["snow", "snowy", "snowiest", "blizzard", "ice", "drift", "aomori", "sapporo", "valdez"]
+        },
+        {
+            key: "wind",
+            icon: "💨",
+            title: "Highest Wind (Windiest Place on Earth)",
+            sub: "Wellington (Gale City), Commonwealth Bay (320km/h)",
+            badge: "Gale Force",
+            filterMatch: ["wind", "windy", "windiest", "gale", "storm", "cyclone", "gust", "wellington"]
+        },
+        {
+            key: "alert",
+            icon: "⚡",
+            title: "Alerts & Antique Meteorological Wonders",
+            sub: "Catatumbo Lightning, Aurora Borealis, Blood Rain & Roll Cloud",
+            badge: "Antique Phenomena",
+            filterMatch: ["alert", "alerts", "special", "antique", "antique things", "special happening", "rare", "wonder", "phenomenon", "catatumbo", "aurora", "blood"]
+        }
+    ];
+
+    let filtered = suggestions;
+    if (q) {
+        filtered = suggestions.filter(s => {
+            return s.filterMatch.some(m => q.includes(m) || m.includes(q)) ||
+                   s.title.toLowerCase().includes(q) ||
+                   s.sub.toLowerCase().includes(q);
+        });
+    }
+
+    if (filtered.length === 0) {
+        dropdown.style.display = "none";
+        return;
+    }
+
+    dropdown.innerHTML = filtered.map(item => `
+        <div class="suggestion-item" onclick="window.triggerExtremeCategory && window.triggerExtremeCategory('${item.key}', 0)">
+            <div class="suggestion-item-left">
+                <span class="suggestion-icon">${item.icon}</span>
+                <div class="suggestion-info">
+                    <span class="suggestion-title">${item.title}</span>
+                    <span class="suggestion-sub">${item.sub}</span>
+                </div>
+            </div>
+            <span class="suggestion-badge">${item.badge}</span>
+        </div>
+    `).join("");
+
+    dropdown.style.display = "flex";
+}
+
+function hideSearchSuggestions() {
+    const dropdown = document.getElementById("searchSuggestions");
+    if (dropdown) dropdown.style.display = "none";
+}
+
+/* ================= 10.9 ANTIQUE METEOROLOGICAL WONDERS MODAL ================= */
+function openAntiqueModal() {
+    const modal = document.getElementById("antiqueModal");
+    if (!modal) return;
+    modal.style.display = "flex";
+    renderAntiqueModalCards("all");
+}
+
+function closeAntiqueModal() {
+    const modal = document.getElementById("antiqueModal");
+    if (modal) modal.style.display = "none";
+}
+
+function filterAntiqueModalGrid(catKey, btn) {
+    const tabs = document.querySelectorAll(".antique-tab-btn");
+    tabs.forEach(t => t.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+    renderAntiqueModalCards(catKey);
+}
+
+function renderAntiqueModalCards(filterCat = "all") {
+    const grid = document.getElementById("antiqueWondersGrid");
+    if (!grid) return;
+
+    let items = [];
+
+    Object.keys(EXTREME_AND_ANTIQUE_DATA).forEach(k => {
+        if (filterCat !== "all" && filterCat !== k) return;
+        const cat = EXTREME_AND_ANTIQUE_DATA[k];
+        cat.contenders.forEach((loc, idx) => {
+            items.push({
+                catKey: k,
+                idx: idx,
+                icon: cat.icon,
+                tag: cat.categoryBadge,
+                city: loc.city,
+                shortName: loc.shortName,
+                record: loc.record,
+                title: loc.antiqueTitle,
+                date: loc.antiqueDate,
+                story: loc.antiqueStory,
+                mechanism: loc.mechanism,
+                alertLevel: loc.alertLevel
+            });
+        });
+    });
+
+    grid.innerHTML = items.map(item => `
+        <div class="antique-wonder-card">
+            <div>
+                <div class="antique-wonder-top">
+                    <div class="wonder-card-icon">${item.icon}</div>
+                    <div class="wonder-card-title-group">
+                        <span class="wonder-card-tag">${item.tag}</span>
+                        <h4 class="wonder-card-title">${item.title}</h4>
+                        <span class="wonder-card-city">📍 ${item.city}</span>
+                    </div>
+                </div>
+                <p class="wonder-card-story" style="margin-top: 10px;">${item.story}</p>
+                <div class="wonder-card-specs" style="margin-top: 12px;">
+                    <div class="wonder-spec-row">
+                        <span>Record / Spec:</span>
+                        <strong>${item.record}</strong>
+                    </div>
+                    <div class="wonder-spec-row">
+                        <span>Chronicle:</span>
+                        <strong>${item.date}</strong>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="wonder-card-action-btn" onclick="window.closeAntiqueModal && window.closeAntiqueModal(); window.triggerExtremeCategory && window.triggerExtremeCategory('${item.catKey}', ${item.idx})">
+                <span>🛰️</span> View Live Telemetry & Station Dials ↗
+            </button>
+        </div>
+    `).join("");
+}
+
 /* ================= 11. WEATHER DATA RETRIEVAL ================= */
 function searchCurrentInput() {
     const input = document.getElementById("cityInput");
     if (!input) return;
-    const city = input.value.trim();
-    if (city) fetchWeatherByCity(city);
-    else showError("Please enter a city name.");
+    const rawVal = input.value.trim();
+    if (!rawVal) {
+        showError("Please enter a city name, or try 'lowest temp', 'highest temp', 'rain', 'snow', 'wind', 'alert'.");
+        return;
+    }
+
+    // Check if query is an extreme or antique weather query
+    const extremeMatch = detectExtremeOrAntiqueQuery(rawVal);
+    if (extremeMatch) {
+        hideSearchSuggestions();
+        triggerExtremeCategory(extremeMatch.category, extremeMatch.index);
+        return;
+    }
+
+    hideSearchSuggestions();
+    fetchWeatherByCity(rawVal);
 }
 
 async function fetchWeatherByCity(city) {
@@ -2493,6 +3295,7 @@ function initApp() {
     initHighImpactThreeJS();
     initCard3DTilt();
     initScrollDynamics();
+    initSearchSuggestions();
 
     const savedCity = safeStorage.getItem("weatherwise_last_city");
     if (savedCity) {

@@ -22,7 +22,7 @@
 
     <title>WeatherWise 3D | Real-Time Atmospheric Station</title>
 
-    <link rel="stylesheet" href="style.css?v=6.0">
+    <link rel="stylesheet" href="style.css?v=7.0">
 </head>
 
 <body>
@@ -122,18 +122,23 @@
 
             <!-- SEARCH & SPECIAL CITY SECTION -->
             <section class="search-section scroll-reveal">
-                <div class="search-box-3d" id="searchBox3D">
-                    <span class="search-icon">🔍</span>
-                    <input
-                        type="text"
-                        id="cityInput"
-                        placeholder="Search any global city (e.g., Tokyo, London, New York, Lucknow)..."
-                        autocomplete="off"
-                        onkeydown="if(event.key==='Enter') window.searchCurrentInput && window.searchCurrentInput()"
-                    >
-                    <button id="searchBtn" class="search-btn-3d" onclick="window.searchCurrentInput && window.searchCurrentInput()">
-                        <span>Search</span>
-                    </button>
+                <div class="search-box-wrapper" style="position: relative;">
+                    <div class="search-box-3d" id="searchBox3D">
+                        <span class="search-icon">🔍</span>
+                        <input
+                            type="text"
+                            id="cityInput"
+                            placeholder="Search any city or try 'lowest temp', 'highest temp', 'rain', 'snow', 'wind', 'alert', 'antique'..."
+                            autocomplete="off"
+                            onkeydown="if(event.key==='Enter') window.searchCurrentInput && window.searchCurrentInput()"
+                        >
+                        <button id="searchBtn" class="search-btn-3d" onclick="window.searchCurrentInput && window.searchCurrentInput()">
+                            <span>Search</span>
+                        </button>
+                    </div>
+
+                    <!-- SMART EXTREME & ANTIQUE SEARCH SUGGESTIONS DROPDOWN -->
+                    <div id="searchSuggestions" class="search-suggestions-dropdown" style="display: none;"></div>
                 </div>
 
                 <div class="search-actions-row">
@@ -155,6 +160,39 @@
                     <button class="city-pill-3d" data-city="Paris" onclick="window.fetchWeatherByCity && window.fetchWeatherByCity('Paris')">Paris</button>
                     <button class="city-pill-3d" data-city="Dubai" onclick="window.fetchWeatherByCity && window.fetchWeatherByCity('Dubai')">Dubai</button>
                     <button class="city-pill-3d" data-city="Lucknow" onclick="window.fetchWeatherByCity && window.fetchWeatherByCity('Lucknow')">Lucknow</button>
+                </div>
+
+                <!-- EXTREME WEATHER & ANTIQUE QUICK DISCOVERY PILLS -->
+                <div class="extreme-discovery-bar">
+                    <div class="extreme-discovery-header">
+                        <div class="extreme-header-left">
+                            <span class="extreme-badge-sparkle">⚡ DISCOVERY RADAR:</span>
+                            <span class="extreme-badge-hint">Instant Extremes & Antique Curiosities</span>
+                        </div>
+                        <button type="button" class="antique-explorer-link-btn" onclick="window.openAntiqueModal && window.openAntiqueModal()">
+                            <span>🏛️</span> View Antique Wonders & Alerts ↗
+                        </button>
+                    </div>
+                    <div class="extreme-pills-row">
+                        <button type="button" class="extreme-pill-3d pill-cold" onclick="window.triggerExtremeCategory && window.triggerExtremeCategory('lowest_temp', 0)" title="Explore Coldest Inhabited Place on Earth">
+                            <span class="pill-ico">❄️</span> Lowest Temp <span class="pill-tag">-71°C</span>
+                        </button>
+                        <button type="button" class="extreme-pill-3d pill-heat" onclick="window.triggerExtremeCategory && window.triggerExtremeCategory('highest_temp', 0)" title="Explore Hottest Place on Earth">
+                            <span class="pill-ico">🔥</span> Highest Temp <span class="pill-tag">+57°C</span>
+                        </button>
+                        <button type="button" class="extreme-pill-3d pill-rain" onclick="window.triggerExtremeCategory && window.triggerExtremeCategory('rain', 0)" title="Explore Wettest Place on Earth">
+                            <span class="pill-ico">🌧️</span> Rain Record <span class="pill-tag">11,872mm</span>
+                        </button>
+                        <button type="button" class="extreme-pill-3d pill-snow" onclick="window.triggerExtremeCategory && window.triggerExtremeCategory('snow', 0)" title="Explore Snowiest City on Earth">
+                            <span class="pill-ico">🌨️</span> Extreme Snow <span class="pill-tag">8m Drift</span>
+                        </button>
+                        <button type="button" class="extreme-pill-3d pill-wind" onclick="window.triggerExtremeCategory && window.triggerExtremeCategory('wind', 0)" title="Explore Windiest City on Earth">
+                            <span class="pill-ico">💨</span> Highest Wind <span class="pill-tag">Gale</span>
+                        </button>
+                        <button type="button" class="extreme-pill-3d pill-antique" onclick="window.triggerExtremeCategory && window.triggerExtremeCategory('alert', 0)" title="Explore Antique Meteorological Wonders & Severe Alerts">
+                            <span class="pill-ico">⚡</span> Alerts & Antique Wonders <span class="pill-tag">Rare</span>
+                        </button>
+                    </div>
                 </div>
             </section>
 
@@ -181,6 +219,93 @@
                 <div class="spinner-3d"></div>
                 <p id="loadingMsg">Synchronizing with live atmospheric satellites...</p>
             </div>
+
+
+            <!-- ================= EXTREME METEOROLOGICAL & ANTIQUE WONDERS SHOWCASE ================= -->
+            <section id="extremeShowcaseSection" class="extreme-showcase-section" style="display: none;" aria-live="polite">
+                <div id="extremeShowcaseCard" class="extreme-showcase-card card-3d-interactive">
+                    <div class="card-glare"></div>
+                    <div class="extreme-header-bar">
+                        <div class="extreme-title-cluster">
+                            <span id="extremeCatIcon" class="extreme-cat-icon">❄️</span>
+                            <div class="extreme-title-texts">
+                                <div class="extreme-badge-row">
+                                    <span id="extremeCategoryBadge" class="extreme-category-pill">GLOBAL RECORD EXPEDITION</span>
+                                    <span id="extremeLiveStatusPill" class="extreme-live-pill"><span class="live-ping"></span> Live Satellite Feed</span>
+                                </div>
+                                <h2 id="extremeShowcaseTitle" class="extreme-headline">Lowest Temperature on Planet Earth</h2>
+                                <p id="extremeShowcaseSubtitle" class="extreme-subhead">Official Meteorological Ground Extremes & Historical Curiosities</p>
+                            </div>
+                        </div>
+                        <button type="button" class="extreme-close-btn" onclick="window.closeExtremeShowcase && window.closeExtremeShowcase()" title="Dismiss Extreme Showcase" aria-label="Close Extreme Showcase">✕</button>
+                    </div>
+
+                    <!-- CONTENDER LOCATION SELECTOR PILLS -->
+                    <div class="extreme-contenders-wrap">
+                        <span class="contenders-label">Top Record Contenders & Cities:</span>
+                        <div id="extremeContendersRow" class="extreme-contenders-row">
+                            <!-- Populated dynamically via JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- SEVERE WEATHER ALERT & ADVISORY BANNER -->
+                    <div id="severeAlertBanner" class="severe-alert-banner">
+                        <div class="alert-icon-box">
+                            <span id="severeAlertIcon" class="alert-symbol">🚨</span>
+                        </div>
+                        <div class="alert-details-box">
+                            <div class="alert-top-line">
+                                <span id="severeAlertLevel" class="alert-level-tag">EXTREME ATMOSPHERIC ADVISORY</span>
+                                <span id="severeAlertTargetCity" class="alert-target-city">Oymyakon, Sakha, Russia</span>
+                            </div>
+                            <h4 id="severeAlertHeading" class="alert-heading">Polar Frostbite & Instant Crystallization Alert</h4>
+                            <p id="severeAlertDescription" class="alert-desc">Exposed human skin freezes in under 120 seconds. Ambient moisture crystallizes into needle ice upon exhalation.</p>
+                        </div>
+                    </div>
+
+                    <!-- ANTIQUE HISTORICAL CURIOSITY & PHENOMENON CARD -->
+                    <div class="antique-showcase-row">
+                        <div class="antique-trivia-card">
+                            <div class="antique-card-header">
+                                <div class="antique-title-group">
+                                    <span class="antique-seal-badge">🏛️ ANTIQUE PHENOMENON & TRIVIA</span>
+                                    <h4 id="antiquePhenomenonTitle">"The Whisper of the Stars" & 10,000-Year Permafrost</h4>
+                                </div>
+                                <span id="antiqueRecordDate" class="antique-date-badge">Recorded 1924 / 1933</span>
+                            </div>
+                            <p id="antiquePhenomenonStory" class="antique-story-text">
+                                In sub -60°C conditions, human breath freezes instantly, colliding with itself and falling as micro ice crystals with a crisp whispering sound locals call the "whisper of the stars".
+                            </p>
+                            <div class="antique-specs-grid">
+                                <div class="antique-spec-item">
+                                    <span class="spec-label">Ground Extremum Record</span>
+                                    <strong id="antiqueSpecRecord">-71.2°C (-96.2°F)</strong>
+                                </div>
+                                <div class="antique-spec-item">
+                                    <span class="spec-label">Physical Mechanism</span>
+                                    <strong id="antiqueSpecMechanism">Continental Siberian High & Valley Cold Air Pooling</strong>
+                                </div>
+                                <div class="antique-spec-item">
+                                    <span class="spec-label">Atmospheric Classification</span>
+                                    <strong id="antiqueSpecClassification">Hyperborean Cryosphere</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FOOTER ACTIONS -->
+                    <div class="extreme-card-footer">
+                        <div class="extreme-footer-info">
+                            <span>🛰️ Real-time telemetry for <strong id="extremeFooterCityName">Oymyakon, Russia</strong> is rendered in the station dials below.</span>
+                        </div>
+                        <div class="extreme-footer-btns">
+                            <button type="button" class="btn-open-antique-modal" onclick="window.openAntiqueModal && window.openAntiqueModal()">
+                                <span>📜</span> Browse All Antique Wonders & Records
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
 
             <!-- ================= MAIN WEATHER CARD ================= -->
@@ -856,8 +981,42 @@
         </div>
     </div>
 
+    <!-- ================= ANTIQUE METEOROLOGICAL WONDERS & GLOBAL ALERTS MODAL ================= -->
+    <div id="antiqueModal" class="modal-overlay" style="display: none;" onclick="if(event.target === this) window.closeAntiqueModal && window.closeAntiqueModal()">
+        <div class="modal-card-3d antique-modal-card">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <span class="modal-icon">🏛️</span>
+                    <div>
+                        <h3 id="antiqueModalTitle">Antique Meteorological Wonders & Extreme Telemetry</h3>
+                        <p class="modal-subtitle">Earth's most extraordinary atmospheric spectacles, historic curiosities, and verified ground records</p>
+                    </div>
+                </div>
+                <button class="modal-close-btn" onclick="window.closeAntiqueModal && window.closeAntiqueModal()" title="Close modal" aria-label="Close modal">✕</button>
+            </div>
+
+            <div class="antique-modal-body">
+                <!-- Filter tabs in modal -->
+                <div class="antique-modal-tabs">
+                    <button type="button" class="antique-tab-btn active" data-cat="all" onclick="window.filterAntiqueModalGrid && window.filterAntiqueModalGrid('all', this)">All Wonders & Extremes</button>
+                    <button type="button" class="antique-tab-btn" data-cat="lowest_temp" onclick="window.filterAntiqueModalGrid && window.filterAntiqueModalGrid('lowest_temp', this)">❄️ Coldest Records</button>
+                    <button type="button" class="antique-tab-btn" data-cat="highest_temp" onclick="window.filterAntiqueModalGrid && window.filterAntiqueModalGrid('highest_temp', this)">🔥 Heat Records</button>
+                    <button type="button" class="antique-tab-btn" data-cat="rain" onclick="window.filterAntiqueModalGrid && window.filterAntiqueModalGrid('rain', this)">🌧️ Rain & Monsoons</button>
+                    <button type="button" class="antique-tab-btn" data-cat="snow" onclick="window.filterAntiqueModalGrid && window.filterAntiqueModalGrid('snow', this)">🌨️ Snow & Ice</button>
+                    <button type="button" class="antique-tab-btn" data-cat="wind" onclick="window.filterAntiqueModalGrid && window.filterAntiqueModalGrid('wind', this)">💨 Gale & Wind</button>
+                    <button type="button" class="antique-tab-btn" data-cat="alert" onclick="window.filterAntiqueModalGrid && window.filterAntiqueModalGrid('alert', this)">⚡ Antique Miracles</button>
+                </div>
+
+                <!-- Grid of Cards -->
+                <div id="antiqueWondersGrid" class="antique-wonders-grid">
+                    <!-- Populated dynamically via JavaScript with all categories and curiosities -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MAIN JAVASCRIPT WITH CACHE BUSTING -->
-    <script src="script.js?v=6.0"></script>
+    <script src="script.js?v=7.0"></script>
 </body>
 
 </html>
