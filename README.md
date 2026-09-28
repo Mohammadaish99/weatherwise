@@ -1,28 +1,31 @@
-# 🌦️ WeatherWise — Real-Time Weather Web App
+# 🌦️ WeatherWise 3D — Real-Time Atmospheric Station & Celestial Planetarium
 
-A modern, responsive, real-time weather web application providing accurate forecasts, 7-day outlooks, UV Index, precipitation chance, sunrise & sunset times, and instant GPS location detection for any city on Earth.
+A luxury, real-time weather web application and astronomical observatory providing high-fidelity meteorological telemetry, precision rotating wind compass, barometric pressure gauge, astronomical moon phase tracking, 24-hour continuous timeline, and an interactive 3D Universe Cosmos background with depth-travel scrolling.
 
-Built with pure **HTML5, CSS3, and modern JavaScript (Vanilla)** — zero build tools or complicated setups needed. Data powered by the free, open **Open-Meteo API**.
+🔗 **Live Deployment**: [https://mohammadaish99.github.io/weatherwise/](https://mohammadaish99.github.io/weatherwise/)
 
 ---
 
 ## ✨ Features
 
-- 🌍 **Global City Search**: Instant search for any city, state, or country worldwide.
-- 📍 **GPS Geolocation**: 1-click "Use My Current Location" with automatic reverse-geocoding.
-- 📅 **Live 7-Day Outlook**: Dynamic daily forecast with condition icons, high/low temperatures, and rain probability.
-- 🌡️ **°C / °F Unit Toggle**: Seamless switching between Metric (°C, km/h) and Imperial (°F, mph) with local storage memory.
-- ☀️ **Rich Weather Metrics**:
-  - Feels Like Temperature
-  - Humidity Percentage
-  - Wind Speed
-  - UV Index with health classification (Low, Moderate, High, etc.)
-  - Precipitation probability
-  - Sunrise & Sunset schedule
-  - Surface Air Pressure
-  - Automatic Timezone detection
-- 🌙 **Dark & Light Mode**: Built-in glassmorphism theme with automatic system preference detection and persistent preference.
-- 📱 **Mobile & PWA Ready**: Installable on Android, iPhone, Windows, and macOS homescreens.
+- 🌕 **Astronomical Moon Phase Engine**:
+  - Precision synodic cycle calculation (29.53-day orbit) for today and tomorrow.
+  - Plain-English lunar classifications: **Full Moon**, **Half Moon** (First/Last Quarter), **No Moon** (New Moon), **Waxing/Waning Gibbous**, and **Crescent Moon**.
+  - Displays illumination percentage, moon age, and countdown to the next major phase.
+  - Interactive 3D Moon celestial orbiter in the Horizon Dome stage.
+- 🌌 **3D Universe Cosmos & Depth-Travel Scrolling**:
+  - Multi-depth starfield with realistic circular glowing halos (`createStarTexture()`) and astronomical color spectrum (Sirius Diamond Cyan, Betelgeuse Amber/Gold, Pleiades Violet, Rigel Sapphire, Vega White).
+  - Floating cosmic nebula dust clouds and axial lunar orbit rotation.
+  - Smooth universe-travel scrolling: as you scroll down the page, the camera navigates forward into deep space.
+- 🧭 **3D Rotating Wind Compass**: Smooth directional needle pointing to true wind bearing with live gusts and wind speed telemetry.
+- 📊 **Precision Barometric Pressure Gauge**: Live atmospheric pressure (hPa), standard ATM elevation, and trend analysis.
+- ⏳ **24-Hour Continuous Timeline**: Hour-by-hour forecast breakdown for **Today** and **Tomorrow** with horizontal carousel and detailed telemetry table.
+- 🎨 **Award-Winning Day & Night Palettes**:
+  - **Day Mode**: Crystalline morning sky gradient, ultra-clean frosted glass with sky-blue accents, and sparkling solar gold sunbeams.
+  - **Night Mode**: Deep space nebula void, obsidian starlight glass, and electric cyan/violet highlights.
+- 📱 **Flawless Mobile Phone Responsiveness**: 100% optimized for iPhone, Android, and tablets down to 360px screens with zero horizontal overflow.
+- 👤 **Account & Special Cities Drawer**: Client-side Google Sign-In and local account manager to favorite Home, Work, and Vacation cities.
+- 🌍 **Global City Search & GPS**: Instant city search + 1-click "Use My Current Location" with automatic reverse geocoding.
 
 ---
 
