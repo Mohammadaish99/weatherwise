@@ -866,6 +866,78 @@ body.dark .city-heading-3d {
     white-space: nowrap;
 }
 
+.suggestion-live-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 3px;
+    margin-bottom: 2px;
+    flex-wrap: wrap;
+}
+
+.suggestion-live-temp {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--primary);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.suggestion-live-temp.temp-cold {
+    background: rgba(59, 130, 246, 0.18);
+    color: #60a5fa;
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+.suggestion-live-temp.temp-hot {
+    background: rgba(239, 68, 68, 0.18);
+    color: #f87171;
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+.suggestion-live-temp.temp-normal {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border-color: rgba(16, 185, 129, 0.35);
+}
+
+.suggestion-live-wind {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.suggestion-live-desc {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.suggestion-record-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.live-extreme-badge {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(239, 68, 68, 0.22)) !important;
+    color: #f59e0b !important;
+    border-color: rgba(245, 158, 11, 0.5) !important;
+    font-weight: 800 !important;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.35);
+    animation: liveExtremePulse 2.2s ease-in-out infinite alternate;
+}
+
+@keyframes liveExtremePulse {
+    0% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.3)); }
+    100% { transform: scale(1.05); filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.7)); }
+}
+
 /* ================= EXTREME DISCOVERY BAR ================= */
 .extreme-discovery-bar {
     margin-top: 18px;
@@ -1559,6 +1631,266 @@ body.dark .city-heading-3d {
 .wonder-card-action-btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 14px var(--primary-glow);
+}
+
+/* ================= SEARCHED LOCATION ALERT STRIP (ON MAIN CARD) ================= */
+.searched-alert-strip {
+    margin-top: 16px;
+    padding: 12px 16px;
+    border-radius: 16px;
+    background: var(--card-glass);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-align: left;
+    width: 100%;
+}
+
+.searched-alert-strip:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--card-glow);
+}
+
+.alert-strip-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    flex: 1;
+}
+
+.alert-strip-icon-circle {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.alert-strip-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.alert-strip-level-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.alert-strip-level {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #f59e0b;
+}
+
+.alert-strip-heading {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-heading);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 380px;
+}
+
+.alert-strip-antique-teaser {
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 440px;
+}
+
+.alert-strip-view-btn {
+    flex-shrink: 0;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: var(--primary);
+    border-radius: 9999px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    font-family: inherit;
+}
+
+.alert-strip-view-btn:hover {
+    background: var(--primary);
+    color: #ffffff;
+    box-shadow: 0 4px 12px var(--primary-glow);
+}
+
+/* ================= SEARCHED LOCATION MODAL VIEW & HERO CARDS ================= */
+.searched-location-modal-view {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+}
+
+.modal-section-hero {
+    background: var(--card-inner);
+    border: 1.5px solid var(--card-border);
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.25s ease;
+}
+
+.modal-section-hero:hover {
+    border-color: var(--card-border-glow);
+    box-shadow: var(--shadow-hover);
+}
+
+.modal-section-hero.hero-alert {
+    border-left: 5px solid #f59e0b;
+}
+
+.modal-section-hero.hero-antique {
+    border-left: 5px solid #8b5cf6;
+}
+
+.hero-header-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.hero-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+    background: var(--card-glass);
+    border: 1px solid var(--card-border);
+}
+
+.hero-titles {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+}
+
+.hero-badge-tag {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #f59e0b;
+}
+
+.hero-badge-antique {
+    color: #a855f7;
+}
+
+.hero-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text-heading);
+    margin: 0;
+}
+
+.hero-city-tag {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.hero-desc {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text);
+    margin: 0;
+}
+
+.hero-spec-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.hero-spec-card {
+    background: var(--card-glass);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.hero-spec-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.hero-spec-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-heading);
+}
+
+.global-records-toggle-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--card-border);
+}
+
+.global-records-toggle-btn {
+    background: var(--pill-bg);
+    border: 1px solid var(--pill-border);
+    color: var(--text-muted);
+    border-radius: 9999px;
+    padding: 8px 18px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+}
+
+.global-records-toggle-btn:hover {
+    color: var(--text);
+    border-color: var(--primary);
+    background: rgba(56, 189, 248, 0.08);
 }
 
 /* ================= SAVED / SPECIAL CITIES DRAWER ================= */

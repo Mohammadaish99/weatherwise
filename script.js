@@ -2852,6 +2852,84 @@ function escapeHtml(str) {
         .replace(/'/g, "&#039;");
 }
 
+/* ================= 10.8 LIVE CONTENDER WEATHER TELEMETRY CACHE ================= */
+let contendersLiveCache = {};
+let contendersLiveCacheTimestamp = 0;
+let isPrefetchingContenders = false;
+
+// Attempt to restore contenders cache from localStorage on startup for zero-latency live suggestions
+try {
+    const rawLocal = localStorage.getItem("weatherwise_contenders_live");
+    if (rawLocal) {
+        const parsed = JSON.parse(rawLocal);
+        if (parsed && parsed.data && (Date.now() - (parsed.timestamp || 0) < 900000)) {
+            contendersLiveCache = parsed.data;
+            contendersLiveCacheTimestamp = parsed.timestamp;
+        }
+    }
+} catch (e) {}
+
+async function prefetchContenderLiveWeather() {
+    const now = Date.now();
+    if (contendersLiveCacheTimestamp && (now - contendersLiveCacheTimestamp < 900000) && Object.keys(contendersLiveCache).length > 0) {
+        return contendersLiveCache;
+    }
+    if (isPrefetchingContenders) return contendersLiveCache;
+    isPrefetchingContenders = true;
+
+    try {
+        const all = getAllExtremeContenders();
+        const lats = all.map(c => c.lat).join(',');
+        const lons = all.map(c => c.lon).join(',');
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&timezone=auto`;
+        const res = await fetch(url);
+        if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                data.forEach((d, idx) => {
+                    const c = all[idx];
+                    if (c && d.current) {
+                        const key = `${Number(c.lat).toFixed(4)},${Number(c.lon).toFixed(4)}`;
+                        contendersLiveCache[key] = {
+                            temp: d.current.temperature_2m,
+                            apparent: d.current.apparent_temperature,
+                            humidity: d.current.relative_humidity_2m,
+                            wind: d.current.wind_speed_10m,
+                            code: d.current.weather_code,
+                            precip: d.current.precipitation
+                        };
+                    }
+                });
+                contendersLiveCacheTimestamp = Date.now();
+                try {
+                    localStorage.setItem("weatherwise_contenders_live", JSON.stringify({
+                        timestamp: contendersLiveCacheTimestamp,
+                        data: contendersLiveCache
+                    }));
+                } catch(e) {}
+
+                // If suggestions dropdown is currently open and focused, re-render it with real-time live temperatures
+                const input = document.getElementById("cityInput");
+                const dropdown = document.getElementById("searchSuggestions");
+                if (dropdown && dropdown.style.display !== "none" && input) {
+                    renderSearchSuggestions(input.value);
+                }
+            }
+        }
+    } catch(err) {
+        console.warn("Contender live batch fetch warning:", err);
+    } finally {
+        isPrefetchingContenders = false;
+    }
+    return contendersLiveCache;
+}
+
+function getContenderLiveInfo(lat, lon) {
+    if (lat === undefined || lon === undefined) return null;
+    const key = `${Number(lat).toFixed(4)},${Number(lon).toFixed(4)}`;
+    return contendersLiveCache[key] || null;
+}
+
 function getAllExtremeContenders() {
     const items = [];
     Object.keys(EXTREME_AND_ANTIQUE_DATA).forEach(k => {
@@ -2899,43 +2977,120 @@ function renderSearchSuggestions(query = "") {
     const dropdown = document.getElementById("searchSuggestions");
     if (!dropdown) return;
 
+    // Trigger asynchronous prefetch if not yet cached
+    if (!contendersLiveCacheTimestamp) {
+        prefetchContenderLiveWeather();
+    }
+
     const q = query.trim().toLowerCase();
     const allContenders = getAllExtremeContenders();
+
+    // Attach live telemetry to each contender item
+    allContenders.forEach(c => {
+        c.live = getContenderLiveInfo(c.lat, c.lon);
+    });
+
     let matchedItems = [];
 
     if (!q) {
-        // Default: display world-record capitals with city and country names + Antique modal trigger
+        // Default: display live world-record capitals with real-time conditions
+        const coldGroup = allContenders.filter(c => c.catKey === "lowest_temp");
+        coldGroup.sort((a, b) => ((a.live?.temp ?? 999) - (b.live?.temp ?? 999)));
+        const topCold = coldGroup[0] || allContenders.find(c => c.catKey === "lowest_temp" && c.idx === 0);
+        if (topCold && topCold.live) {
+            topCold.customLiveBadge = `❄️ Earth's Coldest: ${formatTemp(topCold.live.temp)}°${currentUnit}`;
+            topCold.isTopLive = true;
+        }
+
+        const heatGroup = allContenders.filter(c => c.catKey === "highest_temp");
+        heatGroup.sort((a, b) => ((b.live?.temp ?? -999) - (a.live?.temp ?? -999)));
+        const topHeat = heatGroup[0] || allContenders.find(c => c.catKey === "highest_temp" && c.idx === 0);
+        if (topHeat && topHeat.live) {
+            topHeat.customLiveBadge = `🔥 Peak Heat: ${formatTemp(topHeat.live.temp)}°${currentUnit}`;
+            topHeat.isTopLive = true;
+        }
+
+        const windGroup = allContenders.filter(c => c.catKey === "wind");
+        windGroup.sort((a, b) => ((b.live?.wind ?? -999) - (a.live?.wind ?? -999)));
+        const topWind = windGroup[0] || allContenders.find(c => c.catKey === "wind" && c.idx === 0);
+        if (topWind && topWind.live) {
+            topWind.customLiveBadge = `💨 Windiest Now: ${Math.round(topWind.live.wind)} km/h`;
+            topWind.isTopLive = true;
+        }
+
+        const topRain = allContenders.find(c => c.catKey === "rain" && c.idx === 0);
+        const topSnow = allContenders.find(c => c.catKey === "snow" && c.idx === 0);
+
         matchedItems = [
-            allContenders.find(c => c.catKey === "lowest_temp" && c.idx === 0),
-            allContenders.find(c => c.catKey === "highest_temp" && c.idx === 0),
-            allContenders.find(c => c.catKey === "rain" && c.idx === 0),
-            allContenders.find(c => c.catKey === "snow" && c.idx === 0),
-            allContenders.find(c => c.catKey === "wind" && c.idx === 0),
+            topCold,
+            topHeat,
+            topWind,
+            topRain,
+            topSnow,
             {
                 type: "antique_modal",
                 icon: "🏛️",
-                city: "Antique Wonders & Severe Alerts",
-                record: "Catatumbo Lightning, Aurora Borealis, Blood Rain & Roll Cloud",
-                badge: "Explore Modal"
+                city: currentCityLabel ? `🚨 Severe Alerts & 🏛️ Antique Wonders for ${currentCityLabel}` : "Antique Wonders & Severe Alerts",
+                record: "Active atmospheric advisory & authentic historical chronicles strictly for current location",
+                badge: "Searched Location"
             }
         ].filter(Boolean);
     } else {
         const extremeIntent = detectExtremeOrAntiqueQuery(q);
         if (extremeIntent) {
             if (q === "hold" || q === "temp" || q === "temperature" || (/\b(hot|heat)\b/i.test(q) && /\b(cold|freeze|ice)\b/i.test(q))) {
-                // Typo 'hold', 'temp', or combined 'hot and cold': show both lowest and highest temperature world records!
-                matchedItems = allContenders.filter(c => 
-                    (c.catKey === "lowest_temp" && (c.idx === 0 || c.idx === 1)) ||
-                    (c.catKey === "highest_temp" && (c.idx === 0 || c.idx === 1))
-                );
+                // Show ALL 8 temperature contenders (both coldest 4 and hottest 4)
+                const colds = allContenders.filter(c => c.catKey === "lowest_temp");
+                colds.sort((a, b) => ((a.live?.temp ?? 999) - (b.live?.temp ?? 999)));
+                if (colds[0] && colds[0].live) {
+                    colds[0].customLiveBadge = `❄️ Earth's Coldest Now`;
+                    colds[0].isTopLive = true;
+                }
+
+                const hots = allContenders.filter(c => c.catKey === "highest_temp");
+                hots.sort((a, b) => ((b.live?.temp ?? -999) - (a.live?.temp ?? -999)));
+                if (hots[0] && hots[0].live) {
+                    hots[0].customLiveBadge = `🔥 Earth's Peak Heat Now`;
+                    hots[0].isTopLive = true;
+                }
+
+                matchedItems = [...colds, ...hots];
+            } else if (extremeIntent.category === "lowest_temp") {
+                // Sort all 4 cold contenders by live temperature ASCENDING (coldest first)
+                matchedItems = allContenders.filter(c => c.catKey === "lowest_temp");
+                matchedItems.sort((a, b) => ((a.live?.temp ?? 999) - (b.live?.temp ?? 999)));
+                if (matchedItems[0] && matchedItems[0].live) {
+                    matchedItems[0].customLiveBadge = `❄️ Coldest on Earth: ${formatTemp(matchedItems[0].live.temp)}°${currentUnit}`;
+                    matchedItems[0].isTopLive = true;
+                }
+            } else if (extremeIntent.category === "highest_temp") {
+                // Sort all 4 heat contenders by live temperature DESCENDING (hottest first)
+                matchedItems = allContenders.filter(c => c.catKey === "highest_temp");
+                matchedItems.sort((a, b) => ((b.live?.temp ?? -999) - (a.live?.temp ?? -999)));
+                if (matchedItems[0] && matchedItems[0].live) {
+                    matchedItems[0].customLiveBadge = `🔥 Peak Heat on Earth: ${formatTemp(matchedItems[0].live.temp)}°${currentUnit}`;
+                    matchedItems[0].isTopLive = true;
+                }
+            } else if (extremeIntent.category === "wind") {
+                // Sort all 4 wind contenders by live wind speed DESCENDING (windiest first)
+                matchedItems = allContenders.filter(c => c.catKey === "wind");
+                matchedItems.sort((a, b) => ((b.live?.wind ?? -999) - (a.live?.wind ?? -999)));
+                if (matchedItems[0] && matchedItems[0].live) {
+                    matchedItems[0].customLiveBadge = `💨 Windiest on Earth: ${Math.round(matchedItems[0].live.wind)} km/h`;
+                    matchedItems[0].isTopLive = true;
+                }
+            } else if (extremeIntent.category === "rain") {
+                matchedItems = allContenders.filter(c => c.catKey === "rain");
+            } else if (extremeIntent.category === "snow") {
+                matchedItems = allContenders.filter(c => c.catKey === "snow");
             } else if (extremeIntent.category === "alert") {
                 matchedItems = allContenders.filter(c => c.catKey === "alert");
                 matchedItems.push({
                     type: "antique_modal",
                     icon: "🏛️",
-                    city: "Antique Wonders & Severe Alerts Modal",
-                    record: "Interactive Full-Screen Curiosities Explorer",
-                    badge: "Popup Modal"
+                    city: currentCityLabel ? `🚨 Severe Alerts & 🏛️ Antique Wonders for ${currentCityLabel}` : "Antique Wonders & Severe Alerts Modal",
+                    record: "Active atmospheric advisory & authentic historical chronicles strictly for current location",
+                    badge: "Explore Modal"
                 });
             } else {
                 matchedItems = allContenders.filter(c => c.catKey === extremeIntent.category);
@@ -2951,12 +3106,11 @@ function renderSearchSuggestions(query = "") {
         }
     }
 
-    // Render immediate local / extreme matches synchronously
+    // Render immediate local / extreme matches synchronously with live weather
     buildDropdownHTML(matchedItems, []);
 
     // Debounced live geocoding ONLY for regular cities/countries (e.g. Paris, London, Tokyo, Delhi, Mumbai, etc.)
     // CRITICAL: NEVER geocode weather queries (rain, snow, cold, hot, hold, wind, alert)
-    // because Open-Meteo geocoding has towns named "Rain" in Germany and "Snow" in Oklahoma!
     if (q.length >= 2 && !detectExtremeOrAntiqueQuery(q)) {
         debounceGeocode(q, matchedItems);
     }
@@ -3020,7 +3174,7 @@ function buildDropdownHTML(extremeItems, geoItems) {
 
     let html = "";
 
-    // 1. Extreme & World Record City suggestions
+    // 1. Extreme & World Record City suggestions with Live Weather
     (extremeItems || []).forEach(item => {
         if (item.type === "antique_modal") {
             html += `
@@ -3036,16 +3190,34 @@ function buildDropdownHTML(extremeItems, geoItems) {
                 </div>
             `;
         } else {
+            const live = item.live || getContenderLiveInfo(item.lat, item.lon);
+            let liveRowHtml = "";
+            let displayBadge = item.customLiveBadge || item.badge;
+
+            if (live) {
+                const formattedTemp = formatTemp(live.temp);
+                const tempClass = live.temp <= 0 ? "temp-cold" : (live.temp >= 30 ? "temp-hot" : "temp-normal");
+                const cond = getWeatherInfo(live.code, 1);
+                liveRowHtml = `
+                    <div class="suggestion-live-row">
+                        <span class="suggestion-live-temp ${tempClass}">🌡️ Live: ${formattedTemp}°${currentUnit}</span>
+                        <span class="suggestion-live-wind">💨 ${Math.round(live.wind)} km/h</span>
+                        <span class="suggestion-live-desc">${cond.icon} ${cond.description}</span>
+                    </div>
+                `;
+            }
+
             html += `
                 <div class="suggestion-item" onclick="window.selectExtremeCity && window.selectExtremeCity('${item.catKey}', ${item.idx})">
                     <div class="suggestion-item-left">
                         <span class="suggestion-icon">${item.icon}</span>
                         <div class="suggestion-info">
                             <span class="suggestion-title">${escapeHtml(item.city)}</span>
-                            <span class="suggestion-sub">${escapeHtml(item.record)}</span>
+                            ${liveRowHtml}
+                            <span class="suggestion-record-sub">Record: ${escapeHtml(item.record)}</span>
                         </div>
                     </div>
-                    <span class="suggestion-badge">${escapeHtml(item.badge)}</span>
+                    <span class="suggestion-badge ${item.isTopLive ? 'live-extreme-badge' : ''}">${escapeHtml(displayBadge)}</span>
                 </div>
             `;
         }
@@ -3078,17 +3250,310 @@ function hideSearchSuggestions() {
     if (activeGeocodeAbortController) activeGeocodeAbortController.abort();
 }
 
-/* ================= 10.9 ANTIQUE METEOROLOGICAL WONDERS MODAL ================= */
+/* ================= 10.9 LOCATION-SPECIFIC ALERT & ANTIQUE METEOROLOGICAL ENGINE ================= */
+const HISTORICAL_CITY_CHRONICLES = {
+    "london": {
+        title: "The Great Frost Fairs & The 1952 Smog Inversion",
+        date: "Historic Chronicles (1608–1814 & 1952)",
+        story: "During the Little Ice Age, the River Thames froze solid enough to host festive 'Frost Fairs' upon thick ice sheets, complete with printing presses and ox-roasts. In December 1952, an impenetrable thermal ceiling trapped smoke across London for 5 days, establishing the world's first modern clean air legislative framework.",
+        classification: "Maritime Temperate Basin Thermal Inversion"
+    },
+    "new york": {
+        title: "The Great White Hurricane of 1888",
+        date: "Recorded March 11–14, 1888",
+        story: "One of the most legendary blizzards in North American history dumped 50+ inches of snow with 40-foot drifts, paralyzing Manhattan's elevated railways and directly prompting the construction of America's first underground subway system.",
+        classification: "Mid-Atlantic Nor'easter Cyclone Convergence"
+    },
+    "tokyo": {
+        title: "Edo Period Imperial Sakura Phenology & Kantō Inversions",
+        date: "Continuous Records Since 1603",
+        story: "Tokyo retains the world's longest unbroken meteorological phenology log. For over four centuries since the Edo Shogunate, imperial court astronomers documented the precise blooming day of cherry blossoms to track century-scale climatic cycles.",
+        classification: "East Asian Humid Subtropical Island Megacity"
+    },
+    "paris": {
+        title: "The 100-Year Great Seine River Inundation",
+        date: "Recorded January 1910",
+        story: "In January 1910, following months of saturated soils and torrential rains, the Seine River rose 8.62 meters above normal. Parisians navigated boulevards in antique rowboats and raised wooden boardwalks for weeks without a single electrical catastrophe.",
+        classification: "Western European Riverine Sedimentary Basin"
+    },
+    "delhi": {
+        title: "Ancient Yamuna Inundations & Stepwell Hydraulics",
+        date: "Recorded Since 14th Century Sultanate",
+        story: "Delhi's climate oscillates between blistering summer Loo winds and torrential monsoons. Medieval engineers constructed subterranean Baolis (stepwells) like Agrasen ki Baoli to capture monsoon rainwater and maintain underground temperatures 10°C cooler than the searing air.",
+        classification: "Subtropical Semi-Arid Monsoonal Inversion"
+    },
+    "dubai": {
+        title: "Ancient Arabian Coastal Fog & Traditional Barjeel Aerodynamics",
+        date: "Historical Gulf Maritime Chronicles",
+        story: "Dense marine advection fog blankets the Persian Gulf coastline at dawn when arid desert heat meets humid sea breeze. Traditional Emirati settlements engineered towering open-topped Barjeel wind towers to channel and circulate cooling maritime breezes.",
+        classification: "Subtropical Hyper-Arid Coastal Promontory"
+    },
+    "cairo": {
+        title: "The Nilometer & Millennia-Old Inundation Records",
+        date: "Recorded on Roda Island Since 861 AD",
+        story: "On Roda Island in Cairo stands the antique Nilometer, an octagonal marble column used by ancient astronomers and caliphs for over 1,160 years to measure the annual Nile flood depth and predict famine or agricultural prosperity.",
+        classification: "Lower Nile Desert River Oasis"
+    },
+    "sydney": {
+        title: "The Southerly Buster Meteorological Phenomenon",
+        date: "Logged by Captain James Cook (1770)",
+        story: "Sydney is famed for the 'Southerly Buster'—an intense shallow cold front that sweeps up the coast in spring and summer, dropping ambient temperatures by up to 15°C within 15 minutes, accompanied by dramatic rolling shelf clouds.",
+        classification: "Tasman Sea Maritime Coastal Barrier"
+    }
+};
+
+function getSearchedLocationPhenomena(cityName, weatherData, lat, lon) {
+    if (!cityName) cityName = "Selected Location";
+    const nameLow = cityName.toLowerCase();
+
+    // 1. Check if matches any of our 24 contenders in EXTREME_AND_ANTIQUE_DATA
+    for (const k of Object.keys(EXTREME_AND_ANTIQUE_DATA)) {
+        const cat = EXTREME_AND_ANTIQUE_DATA[k];
+        for (let i = 0; i < cat.contenders.length; i++) {
+            const loc = cat.contenders[i];
+            const locCityLow = loc.city.toLowerCase();
+            const locShortLow = loc.shortName.toLowerCase();
+            const isCoordMatch = (lat !== undefined && lon !== undefined && 
+                Math.abs(loc.lat - lat) < 0.25 && Math.abs(loc.lon - lon) < 0.25);
+            
+            if (isCoordMatch || nameLow.includes(locShortLow.split(" ")[0].toLowerCase()) || locCityLow.includes(nameLow) || nameLow.includes(locCityLow)) {
+                return {
+                    isContender: true,
+                    catKey: k,
+                    icon: cat.icon,
+                    city: loc.city,
+                    alertLevel: loc.alertLevel,
+                    alertHeading: loc.alertHeading,
+                    alertDesc: loc.alertDesc,
+                    mechanism: loc.mechanism,
+                    antiqueTitle: loc.antiqueTitle,
+                    antiqueDate: loc.antiqueDate,
+                    antiqueStory: loc.antiqueStory,
+                    classification: loc.classification,
+                    record: loc.record
+                };
+            }
+        }
+    }
+
+    // 2. Dynamic synthesis for ANY global city based on real-time live telemetry
+    const curr = weatherData?.current || {};
+    const daily = weatherData?.daily || {};
+    const temp = curr.temperature_2m ?? 20;
+    const wind = curr.wind_speed_10m ?? 10;
+    const gusts = curr.wind_gusts_10m ?? wind;
+    const precip = curr.precipitation ?? 0;
+    const uv = daily.uv_index_max?.[0] ?? 3;
+    const pressure = curr.surface_pressure ?? 1013;
+
+    let alertLevel = "STABLE ATMOSPHERIC CONDITIONS ADVISORY";
+    let alertHeading = "Optimal Regional Barometric Equilibrium";
+    let alertDesc = `Current atmospheric pressure is stable at ${Math.round(pressure)} hPa with ambient wind of ${Math.round(wind)} km/h. No severe convective storm cells or thermal extremes detected within the local boundary layer.`;
+    let mechanism = "Subtropical / Mid-Latitude Synoptic Barometric Balance";
+    let alertIcon = "🟢";
+
+    if (temp >= 40) {
+        alertLevel = "EXTREME DANGEROUS HYPERTHERMIA WARNING";
+        alertHeading = "Severe Heat Dome & Thermal Radiation Advisory";
+        alertDesc = `Critical ambient air temperature (${temp}°C). Severe risk of heat stroke, surface heat absorption, and acute dehydration. Avoid strenuous outdoor activities.`;
+        mechanism = "Subtropical High Pressure Ridge & Adiabatic Compression";
+        alertIcon = "🔥";
+    } else if (temp >= 35) {
+        alertLevel = "HIGH AMBIENT HEAT & UV ADVISORY";
+        alertHeading = "Elevated Heat Index & Midday Thermal Warning";
+        alertDesc = `Elevated thermal telemetry (${temp}°C) with UV radiation. Prolonged exposure without hydration and sun protection increases heat exhaustion risk.`;
+        mechanism = "Solar Insolation Apex & Compressional Air Sinking";
+        alertIcon = "☀️";
+    } else if (temp <= -25) {
+        alertLevel = "DEEP POLAR CRYO-HAZARD WARNING";
+        alertHeading = "Extreme Sub-Zero Frostbite & Cryo-Freeze Alert";
+        alertDesc = `Brutal cryogenic temperatures (${temp}°C). Exposed flesh freezes in under 3 minutes. Hypothermia risk is immediate without multi-layer thermal insulation.`;
+        mechanism = "Polar Vortex Jet Displacement & Radiational Heat Deficit";
+        alertIcon = "❄️";
+    } else if (temp <= -5) {
+        alertLevel = "FREEZING CRYO-HAZARD & ROADWAY GLAZE ADVISORY";
+        alertHeading = "Sub-Zero Freeze & Black Ice Hazard Warning";
+        alertDesc = `Sub-zero temperatures (${temp}°C) are generating surface ice glaze and wind-chill stress. Exercise caution on elevated roadways and exposed walkways.`;
+        mechanism = "Continental Cold Air Advection & Radiative Cooling";
+        alertIcon = "🧊";
+    } else if (gusts >= 75 || wind >= 60) {
+        alertLevel = "SEVERE STORM-FORCE GALE WARNING";
+        alertHeading = "High-Velocity Gale & Squall Hazard Advisory";
+        alertDesc = `Turbulent wind gusts reaching ${Math.round(gusts)} km/h. Elevated risk of branch failure, structural facade stress, and pedestrian instability.`;
+        mechanism = "Tight Barometric Isobar Gradient & Upper-Tropospheric Jet Funneling";
+        alertIcon = "💨";
+    } else if (wind >= 40) {
+        alertLevel = "BRISK GALE & WIND SQUALL ADVISORY";
+        alertHeading = "Active Surface Wind Gust Advisory";
+        alertDesc = `Elevated winds measuring ${Math.round(wind)} km/h creating aerodynamic drag, dust agitation, and intensified wind-chill cooling.`;
+        mechanism = "Regional Pressure Discontinuity & Boundary-Layer Friction";
+        alertIcon = "💨";
+    } else if (precip >= 10) {
+        alertLevel = "TORRENTIAL PLUVIAL INUNDATION WARNING";
+        alertHeading = "Extreme Cloudburst & Pluvial Flooding Advisory";
+        alertDesc = `Intense precipitation rate (${precip} mm/h) exceeding local drainage capacities. Reduced horizontal visibility and flash-flood potential in low-lying zones.`;
+        mechanism = "Deep Convective Moist Updrafts & Orographic Moisture Lock";
+        alertIcon = "🌧️";
+    } else if (precip >= 1) {
+        alertLevel = "CONTINUOUS PRECIPITATION ADVISORY";
+        alertHeading = "Active Rainfall & Roadway Hydroplaning Alert";
+        alertDesc = `Consistent precipitation (${precip} mm) creating slick surfaces, humid boundary-layer saturation, and compromised visibility.`;
+        mechanism = "Warm Frontal Stratiform Cloud Condensation";
+        alertIcon = "🌧️";
+    } else if (uv >= 8) {
+        alertLevel = "HIGH ULTRAVIOLET RADIATION ALERT";
+        alertHeading = "Extreme Solar Photon Erythema Advisory";
+        alertDesc = `UV Index is dangerously elevated at ${uv.toFixed(1)}. Direct skin exposure without UV filtering can trigger cellular damage within 15 minutes.`;
+        mechanism = "High Solar Elevation Angle & Low Stratospheric Ozone Absorption";
+        alertIcon = "☀️";
+    }
+
+    // Antique curiosity lookup or procedural generator
+    let antique = null;
+    for (const k of Object.keys(HISTORICAL_CITY_CHRONICLES)) {
+        if (nameLow.includes(k)) {
+            antique = HISTORICAL_CITY_CHRONICLES[k];
+            break;
+        }
+    }
+
+    if (!antique) {
+        const latVal = lat !== undefined ? Number(lat) : 0;
+        const hemi = latVal >= 0 ? "Northern" : "Southern";
+        antique = {
+            title: `Microclimatic Heritage of the ${Math.abs(Math.round(latVal))}° Parallel`,
+            date: "Historical Climatological Baseline",
+            story: `${cityName} lies squarely in the ${hemi} Hemisphere along a unique geographic elevation threshold. Centuries of meteorological tracking indicate its local microclimate is governed by maritime and continental air-mass migrations following the annual solar solstice transit.`,
+            classification: "Regional Synoptic Climate Convergence"
+        };
+    }
+
+    return {
+        isContender: false,
+        catKey: "local",
+        icon: alertIcon,
+        city: cityName,
+        alertLevel: alertLevel,
+        alertHeading: alertHeading,
+        alertDesc: alertDesc,
+        mechanism: mechanism,
+        antiqueTitle: antique.title,
+        antiqueDate: antique.date,
+        antiqueStory: antique.story,
+        classification: antique.classification,
+        record: `Telemetry: ${temp}°C, Wind ${Math.round(wind)} km/h`
+    };
+}
+
+function renderSearchedLocationPhenomena(cityName, weatherData, lat, lon) {
+    const p = getSearchedLocationPhenomena(cityName, weatherData, lat, lon);
+    if (!p) return;
+
+    // 1. Update on-card strip in main dashboard
+    const strip = document.getElementById("searchedLocationAlertStrip");
+    const iconCircle = document.getElementById("alertStripIconCircle");
+    const levelEl = document.getElementById("alertStripLevel");
+    const headingEl = document.getElementById("alertStripHeading");
+    const antiqueTeaserEl = document.getElementById("alertStripAntiqueTeaser");
+
+    if (strip) strip.style.display = "flex";
+    if (iconCircle) iconCircle.textContent = p.icon;
+    if (levelEl) levelEl.textContent = p.alertLevel;
+    if (headingEl) headingEl.textContent = p.alertHeading;
+    if (antiqueTeaserEl) antiqueTeaserEl.textContent = `🏛️ Antique Wonder: ${p.antiqueTitle}`;
+
+    // 2. Pre-render content for modal strictly for this location
+    const modalCityName = document.getElementById("antiqueModalCityName");
+    const modalView = document.getElementById("searchedLocationModalView");
+    if (modalCityName) modalCityName.textContent = p.city;
+
+    if (modalView) {
+        modalView.innerHTML = `
+            <!-- CARD 1: ACTIVE SEVERE ALERT -->
+            <div class="modal-section-hero hero-alert">
+                <div class="hero-header-row">
+                    <div class="hero-icon-box">${p.icon}</div>
+                    <div class="hero-titles">
+                        <span class="hero-badge-tag">${escapeHtml(p.alertLevel)}</span>
+                        <h4 class="hero-title">${escapeHtml(p.alertHeading)}</h4>
+                        <span class="hero-city-tag">📍 ${escapeHtml(p.city)}</span>
+                    </div>
+                </div>
+                <p class="hero-desc">${escapeHtml(p.alertDesc)}</p>
+                <div class="hero-spec-grid">
+                    <div class="hero-spec-card">
+                        <span class="hero-spec-label">Atmospheric Mechanism</span>
+                        <strong class="hero-spec-value">${escapeHtml(p.mechanism)}</strong>
+                    </div>
+                    <div class="hero-spec-card">
+                        <span class="hero-spec-label">Climatic Baseline</span>
+                        <strong class="hero-spec-value">${escapeHtml(p.record)}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARD 2: ANTIQUE PHENOMENON & HISTORIC CHRONICLE -->
+            <div class="modal-section-hero hero-antique">
+                <div class="hero-header-row">
+                    <div class="hero-icon-box">🏛️</div>
+                    <div class="hero-titles">
+                        <span class="hero-badge-tag hero-badge-antique">Historical Meteorological Curiosity</span>
+                        <h4 class="hero-title">${escapeHtml(p.antiqueTitle)}</h4>
+                        <span class="hero-city-tag">📜 Chronicle: ${escapeHtml(p.antiqueDate)}</span>
+                    </div>
+                </div>
+                <p class="hero-desc">${escapeHtml(p.antiqueStory)}</p>
+                <div class="hero-spec-grid">
+                    <div class="hero-spec-card">
+                        <span class="hero-spec-label">Climatological Classification</span>
+                        <strong class="hero-spec-value">${escapeHtml(p.classification)}</strong>
+                    </div>
+                    <div class="hero-spec-card">
+                        <span class="hero-spec-label">Location Context</span>
+                        <strong class="hero-spec-value">Strictly for ${escapeHtml(p.city)}</strong>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+}
+
 function openAntiqueModal() {
     const modal = document.getElementById("antiqueModal");
     if (!modal) return;
+
+    // Ensure searched location view is updated strictly for current location
+    if (lastWeatherData) {
+        renderSearchedLocationPhenomena(currentCityLabel, lastWeatherData, currentLat, currentLon);
+    }
+
+    // Global grid is collapsed by default
+    const globalWrap = document.getElementById("antiqueGlobalRecordsWrap");
+    const toggleBtn = document.getElementById("globalRecordsToggleText");
+    if (globalWrap) globalWrap.style.display = "none";
+    if (toggleBtn) toggleBtn.textContent = "Browse Other Worldwide Records & Curiosities (Optional)";
+
     modal.style.display = "flex";
-    renderAntiqueModalCards("all");
 }
 
 function closeAntiqueModal() {
     const modal = document.getElementById("antiqueModal");
     if (modal) modal.style.display = "none";
+}
+
+function toggleGlobalRecordsGrid() {
+    const globalWrap = document.getElementById("antiqueGlobalRecordsWrap");
+    const toggleBtn = document.getElementById("globalRecordsToggleText");
+    if (!globalWrap) return;
+
+    if (globalWrap.style.display === "none") {
+        globalWrap.style.display = "block";
+        if (toggleBtn) toggleBtn.textContent = "Hide Worldwide Records";
+        renderAntiqueModalCards("all");
+    } else {
+        globalWrap.style.display = "none";
+        if (toggleBtn) toggleBtn.textContent = "Browse Other Worldwide Records & Curiosities (Optional)";
+    }
 }
 
 function filterAntiqueModalGrid(catKey, btn) {
@@ -3108,6 +3573,7 @@ function renderAntiqueModalCards(filterCat = "all") {
         if (filterCat !== "all" && filterCat !== k) return;
         const cat = EXTREME_AND_ANTIQUE_DATA[k];
         cat.contenders.forEach((loc, idx) => {
+            const live = getContenderLiveInfo(loc.lat, loc.lon);
             items.push({
                 catKey: k,
                 idx: idx,
@@ -3120,40 +3586,56 @@ function renderAntiqueModalCards(filterCat = "all") {
                 date: loc.antiqueDate,
                 story: loc.antiqueStory,
                 mechanism: loc.mechanism,
-                alertLevel: loc.alertLevel
+                alertLevel: loc.alertLevel,
+                live: live
             });
         });
     });
 
-    grid.innerHTML = items.map(item => `
-        <div class="antique-wonder-card">
-            <div>
-                <div class="antique-wonder-top">
-                    <div class="wonder-card-icon">${item.icon}</div>
-                    <div class="wonder-card-title-group">
-                        <span class="wonder-card-tag">${item.tag}</span>
-                        <h4 class="wonder-card-title">${item.title}</h4>
-                        <span class="wonder-card-city">📍 ${item.city}</span>
+    grid.innerHTML = items.map(item => {
+        let liveTag = "";
+        if (item.live) {
+            liveTag = `<span class="suggestion-live-temp ${item.live.temp <= 0 ? 'temp-cold' : 'temp-hot'}" style="margin-left: 6px; font-size: 11px;">🌡️ Live: ${formatTemp(item.live.temp)}°${currentUnit}</span>`;
+        }
+        return `
+            <div class="antique-wonder-card">
+                <div>
+                    <div class="antique-wonder-top">
+                        <div class="wonder-card-icon">${item.icon}</div>
+                        <div class="wonder-card-title-group">
+                            <span class="wonder-card-tag">${item.tag} ${liveTag}</span>
+                            <h4 class="wonder-card-title">${item.title}</h4>
+                            <span class="wonder-card-city">📍 ${item.city}</span>
+                        </div>
+                    </div>
+                    <p class="wonder-card-story" style="margin-top: 10px;">${item.story}</p>
+                    <div class="wonder-card-specs" style="margin-top: 12px;">
+                        <div class="wonder-spec-row">
+                            <span>Record / Spec:</span>
+                            <strong>${item.record}</strong>
+                        </div>
+                        <div class="wonder-spec-row">
+                            <span>Chronicle:</span>
+                            <strong>${item.date}</strong>
+                        </div>
                     </div>
                 </div>
-                <p class="wonder-card-story" style="margin-top: 10px;">${item.story}</p>
-                <div class="wonder-card-specs" style="margin-top: 12px;">
-                    <div class="wonder-spec-row">
-                        <span>Record / Spec:</span>
-                        <strong>${item.record}</strong>
-                    </div>
-                    <div class="wonder-spec-row">
-                        <span>Chronicle:</span>
-                        <strong>${item.date}</strong>
-                    </div>
-                </div>
+                <button type="button" class="wonder-card-action-btn" onclick="window.closeAntiqueModal && window.closeAntiqueModal(); window.triggerExtremeCategory && window.triggerExtremeCategory('${item.catKey}', ${item.idx})">
+                    <span>🛰️</span> View Live Telemetry & Station Dials ↗
+                </button>
             </div>
-            <button type="button" class="wonder-card-action-btn" onclick="window.closeAntiqueModal && window.closeAntiqueModal(); window.triggerExtremeCategory && window.triggerExtremeCategory('${item.catKey}', ${item.idx})">
-                <span>🛰️</span> View Live Telemetry & Station Dials ↗
-            </button>
-        </div>
-    `).join("");
+        `;
+    }).join("");
 }
+
+// Window attachments for cross-scope access
+window.openAntiqueModal = openAntiqueModal;
+window.closeAntiqueModal = closeAntiqueModal;
+window.toggleGlobalRecordsGrid = toggleGlobalRecordsGrid;
+window.filterAntiqueModalGrid = filterAntiqueModalGrid;
+window.selectExtremeCity = selectExtremeCity;
+window.selectGeocodedCity = selectGeocodedCity;
+window.hideSearchSuggestions = hideSearchSuggestions;
 
 /* ================= 11. WEATHER DATA RETRIEVAL ================= */
 function searchCurrentInput() {
@@ -3333,6 +3815,9 @@ function renderAllWeather(title, data) {
     // 24-Hour Hourly Timeline (Today vs Tomorrow)
     renderHourlyStream(hourly, currentTimezone, selectedHourlyDay);
 
+    // Searched Location Severe Alert & Antique Wonders Telemetry
+    renderSearchedLocationPhenomena(title, data, currentLat, currentLon);
+
     updateSaveButtonState();
     updateOpenDetailsLink();
 }
@@ -3455,6 +3940,7 @@ function initApp() {
     initCard3DTilt();
     initScrollDynamics();
     initSearchSuggestions();
+    prefetchContenderLiveWeather();
 
     const savedCity = safeStorage.getItem("weatherwise_last_city");
     if (savedCity) {

@@ -22,7 +22,7 @@
 
     <title>WeatherWise 3D | Real-Time Atmospheric Station</title>
 
-    <link rel="stylesheet" href="style.css?v=10.0">
+    <link rel="stylesheet" href="style.css?v=11.0">
 </head>
 
 <body>
@@ -230,6 +230,23 @@
                             <span id="weatherMoonEmoji" class="moon-badge-emoji">🌕</span>
                             <span id="weatherMoonText" class="moon-badge-text">Today's Moon: Calculating...</span>
                         </div>
+                    </div>
+
+                    <!-- SEARCHED LOCATION SEVERE ALERT & ANTIQUE STRIP -->
+                    <div id="searchedLocationAlertStrip" class="searched-alert-strip card-3d-layer-base" onclick="window.openAntiqueModal && window.openAntiqueModal()" title="View Searched Location Alert & Antique Wonder">
+                        <div class="alert-strip-left">
+                            <div class="alert-strip-icon-circle" id="alertStripIconCircle">🚨</div>
+                            <div class="alert-strip-text">
+                                <div class="alert-strip-level-row">
+                                    <span id="alertStripLevel" class="alert-strip-level">ATMOSPHERIC ADVISORY</span>
+                                    <strong id="alertStripHeading" class="alert-strip-heading">Scanning local telemetry...</strong>
+                                </div>
+                                <span id="alertStripAntiqueTeaser" class="alert-strip-antique-teaser">🏛️ Antique Wonder: Retrieving historical weather records...</span>
+                            </div>
+                        </div>
+                        <button type="button" class="alert-strip-view-btn" onclick="event.stopPropagation(); window.openAntiqueModal && window.openAntiqueModal();">
+                            <span>Details ↗</span>
+                        </button>
                     </div>
                 </div>
             </section>
@@ -865,42 +882,56 @@
         </div>
     </div>
 
-    <!-- ================= ANTIQUE METEOROLOGICAL WONDERS & GLOBAL ALERTS MODAL ================= -->
+    <!-- ================= SEARCHED LOCATION SEVERE ALERT & ANTIQUE WONDERS MODAL ================= -->
     <div id="antiqueModal" class="modal-overlay" style="display: none;" onclick="if(event.target === this) window.closeAntiqueModal && window.closeAntiqueModal()">
         <div class="modal-card-3d antique-modal-card">
             <div class="modal-header">
                 <div class="modal-title-wrap">
-                    <span class="modal-icon">🏛️</span>
+                    <span class="modal-icon" id="antiqueModalHeaderIcon">🚨</span>
                     <div>
-                        <h3 id="antiqueModalTitle">Antique Meteorological Wonders & Extreme Telemetry</h3>
-                        <p class="modal-subtitle">Earth's most extraordinary atmospheric spectacles, historic curiosities, and verified ground records</p>
+                        <h3 id="antiqueModalTitle">Searched Location Alert & Antique Wonder</h3>
+                        <p class="modal-subtitle" id="antiqueModalSubtitle">Active atmospheric advisory & antique curiosity strictly for <strong id="antiqueModalCityName" style="color: var(--primary);">Current Location</strong></p>
                     </div>
                 </div>
                 <button class="modal-close-btn" onclick="window.closeAntiqueModal && window.closeAntiqueModal()" title="Close modal" aria-label="Close modal">✕</button>
             </div>
 
             <div class="antique-modal-body">
-                <!-- Filter tabs in modal -->
-                <div class="antique-modal-tabs">
-                    <button type="button" class="antique-tab-btn active" data-cat="all" onclick="window.filterAntiqueModalGrid && window.filterAntiqueModalGrid('all', this)">All Wonders & Extremes</button>
-                    <button type="button" class="antique-tab-btn" data-cat="lowest_temp" onclick="window.filterAntiqueModalGrid && window.filterAntiqueModalGrid('lowest_temp', this)">❄️ Coldest Records</button>
-                    <button type="button" class="antique-tab-btn" data-cat="highest_temp" onclick="window.filterAntiqueModalGrid && window.filterAntiqueModalGrid('highest_temp', this)">🔥 Heat Records</button>
-                    <button type="button" class="antique-tab-btn" data-cat="rain" onclick="window.filterAntiqueModalGrid && window.filterAntiqueModalGrid('rain', this)">🌧️ Rain & Monsoons</button>
-                    <button type="button" class="antique-tab-btn" data-cat="snow" onclick="window.filterAntiqueModalGrid && window.filterAntiqueModalGrid('snow', this)">🌨️ Snow & Ice</button>
-                    <button type="button" class="antique-tab-btn" data-cat="wind" onclick="window.filterAntiqueModalGrid && window.filterAntiqueModalGrid('wind', this)">💨 Gale & Wind</button>
-                    <button type="button" class="antique-tab-btn" data-cat="alert" onclick="window.filterAntiqueModalGrid && window.filterAntiqueModalGrid('alert', this)">⚡ Antique Miracles</button>
+                <!-- FOCUS 1: SEARCHED LOCATION SEVERE ALERT & ANTIQUE CHRONICLE (PRIMARY) -->
+                <div id="searchedLocationModalView" class="searched-location-modal-view">
+                    <!-- Populated dynamically via JavaScript with searched location alert and antique wonder -->
                 </div>
 
-                <!-- Grid of Cards -->
-                <div id="antiqueWondersGrid" class="antique-wonders-grid">
-                    <!-- Populated dynamically via JavaScript with all categories and curiosities -->
+                <!-- FOCUS 2: OPTIONAL GLOBAL RECORDS EXPANDER -->
+                <div class="global-records-toggle-wrap">
+                    <button type="button" id="btnToggleGlobalRecords" class="global-records-toggle-btn" onclick="window.toggleGlobalRecordsGrid && window.toggleGlobalRecordsGrid()">
+                        <span>🌐</span> <span id="globalRecordsToggleText">Browse Other Worldwide Records & Curiosities (Optional)</span>
+                    </button>
+                </div>
+
+                <div id="antiqueGlobalRecordsWrap" style="display: none;">
+                    <!-- Filter tabs in modal -->
+                    <div class="antique-modal-tabs">
+                        <button type="button" class="antique-tab-btn active" data-cat="all" onclick="window.filterAntiqueModalGrid && window.filterAntiqueModalGrid('all', this)">All Records</button>
+                        <button type="button" class="antique-tab-btn" data-cat="lowest_temp" onclick="window.filterAntiqueModalGrid && window.filterAntiqueModalGrid('lowest_temp', this)">❄️ Coldest Records</button>
+                        <button type="button" class="antique-tab-btn" data-cat="highest_temp" onclick="window.filterAntiqueModalGrid && window.filterAntiqueModalGrid('highest_temp', this)">🔥 Heat Records</button>
+                        <button type="button" class="antique-tab-btn" data-cat="rain" onclick="window.filterAntiqueModalGrid && window.filterAntiqueModalGrid('rain', this)">🌧️ Rain & Monsoons</button>
+                        <button type="button" class="antique-tab-btn" data-cat="snow" onclick="window.filterAntiqueModalGrid && window.filterAntiqueModalGrid('snow', this)">🌨️ Snow & Ice</button>
+                        <button type="button" class="antique-tab-btn" data-cat="wind" onclick="window.filterAntiqueModalGrid && window.filterAntiqueModalGrid('wind', this)">💨 Gale & Wind</button>
+                        <button type="button" class="antique-tab-btn" data-cat="alert" onclick="window.filterAntiqueModalGrid && window.filterAntiqueModalGrid('alert', this)">⚡ Rare Miracles</button>
+                    </div>
+
+                    <!-- Grid of Cards -->
+                    <div id="antiqueWondersGrid" class="antique-wonders-grid" style="margin-top: 14px;">
+                        <!-- Populated dynamically via JavaScript with all categories and curiosities -->
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- MAIN JAVASCRIPT WITH CACHE BUSTING -->
-    <script src="script.js?v=10.0"></script>
+    <script src="script.js?v=11.0"></script>
 </body>
 
 </html>
