@@ -48,14 +48,14 @@
 }
 
 body.dark {
-    /* BESPOKE LUXURY OBSIDIAN & SLATE NIGHT PALETTE */
-    --bg-base: #0a0e17;
-    --bg-ambient: radial-gradient(circle at 18% 14%, #121c30 0%, #0d1525 45%, #070a12 100%);
+    /* BESPOKE LUXURY DEEP COSMOS & UNIVERSE NIGHT PALETTE */
+    --bg-base: #030712;
+    --bg-ambient: radial-gradient(ellipse at 50% -10%, #0d172e 0%, #050914 55%, #020409 100%);
     
-    --card-glass: rgba(17, 24, 39, 0.72);
-    --card-glass-hover: rgba(24, 34, 53, 0.84);
-    --card-inner: rgba(15, 23, 42, 0.6);
-    --card-border: rgba(255, 255, 255, 0.09);
+    --card-glass: rgba(11, 18, 33, 0.72);
+    --card-glass-hover: rgba(18, 28, 50, 0.84);
+    --card-inner: rgba(15, 23, 42, 0.65);
+    --card-border: rgba(147, 197, 253, 0.12);
     --card-border-glow: rgba(56, 189, 248, 0.35);
     
     --text: #f1f5f9;
@@ -1511,6 +1511,162 @@ body.dark .big-pressure {
     border-color: var(--primary);
     transform: translateY(-2px);
     box-shadow: 0 4px 14px var(--primary-glow);
+}
+
+/* ================= ASTRONOMICAL LUNAR PHASE TELEMETRY ================= */
+.weather-moon-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(147, 197, 253, 0.08);
+    border: 1px solid rgba(147, 197, 253, 0.2);
+    padding: 6px 14px;
+    border-radius: 9999px;
+    margin-top: 10px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: default;
+}
+
+.weather-moon-badge:hover {
+    background: rgba(147, 197, 253, 0.16);
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+
+.moon-badge-emoji {
+    font-size: 18px;
+    line-height: 1;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+}
+
+.moon-badge-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-heading);
+    letter-spacing: -0.01em;
+}
+
+/* OBSERVATORY LUNAR TELEMETRY STRIP */
+.lunar-telemetry-strip {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card-inner);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 14px 20px;
+    margin: 16px 0 20px;
+    gap: 16px;
+    flex-wrap: wrap;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lunar-telemetry-strip:hover {
+    border-color: var(--card-border-glow);
+    box-shadow: var(--shadow-hover);
+}
+
+.lunar-phase-highlight {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.lunar-large-icon {
+    font-size: 34px;
+    line-height: 1;
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.6));
+    animation: moonPulseSubtle 3s ease-in-out infinite alternate;
+}
+
+@keyframes moonPulseSubtle {
+    0% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4)); }
+    100% { transform: scale(1.06); filter: drop-shadow(0 0 16px rgba(147, 197, 253, 0.8)); }
+}
+
+.lunar-phase-text-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.lunar-primary-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.lunar-label-prefix {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.lunar-primary-line strong {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-heading);
+}
+
+.lunar-cat-badge {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--primary);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.lunar-cat-badge.cat-full-moon {
+    background: rgba(251, 191, 36, 0.18);
+    color: #fbbf24;
+    border-color: rgba(251, 191, 36, 0.4);
+    box-shadow: 0 0 12px rgba(251, 191, 36, 0.2);
+}
+
+.lunar-cat-badge.cat-half-moon {
+    background: rgba(168, 85, 247, 0.18);
+    color: #c084fc;
+    border-color: rgba(168, 85, 247, 0.4);
+}
+
+.lunar-cat-badge.cat-no-moon {
+    background: rgba(100, 116, 139, 0.2);
+    color: #94a3b8;
+    border-color: rgba(100, 116, 139, 0.35);
+}
+
+.lunar-subtext {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.lunar-countdown-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(168, 85, 247, 0.12);
+    border: 1px solid rgba(168, 85, 247, 0.25);
+    padding: 6px 14px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #c084fc;
+    backdrop-filter: blur(8px);
+}
+
+body:not(.dark) .lunar-countdown-pill {
+    color: #7e22ce;
+    background: rgba(168, 85, 247, 0.08);
 }
 
 /* 3D HORIZON DOME PERSPECTIVE STAGE */

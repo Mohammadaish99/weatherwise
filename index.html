@@ -217,6 +217,10 @@
 
                     <div class="condition-badge-wrap card-3d-layer-base">
                         <p id="condition" class="condition-text">Partly Cloudy</p>
+                        <div id="weatherMoonBadge" class="weather-moon-badge" title="Astronomical Lunar Phase">
+                            <span id="weatherMoonEmoji" class="moon-badge-emoji">🌕</span>
+                            <span id="weatherMoonText" class="moon-badge-text">Today's Moon: Calculating...</span>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -393,6 +397,25 @@
                             <button id="simResetBtn" class="sim-reset-btn" onclick="window.resetCelestialSimulation && window.resetCelestialSimulation()" title="Reset to Real-Time Local Position">
                                 <span>↺</span> Real-Time
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- PROMINENT ASTRONOMICAL LUNAR PHASE TELEMETRY STRIP -->
+                    <div class="lunar-telemetry-strip" id="lunarTelemetryStrip">
+                        <div class="lunar-phase-highlight">
+                            <span id="lunarPhaseIconLarge" class="lunar-large-icon">🌕</span>
+                            <div class="lunar-phase-text-group">
+                                <div class="lunar-primary-line">
+                                    <span class="lunar-label-prefix">Today's Moon:</span>
+                                    <strong id="lunarPhaseName">Calculating...</strong>
+                                    <span id="lunarCategoryBadge" class="lunar-cat-badge">Moon Phase</span>
+                                </div>
+                                <p id="lunarPhaseSubtext" class="lunar-subtext">Calculating illumination & synodic lunar telemetry...</p>
+                            </div>
+                        </div>
+                        <div class="lunar-countdown-pill" id="lunarCountdownPill">
+                            <span class="pill-icon">⏳</span>
+                            <span id="lunarNextPhaseText">Next Phase: Calculating...</span>
                         </div>
                     </div>
 

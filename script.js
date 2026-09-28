@@ -42,16 +42,20 @@ let isSimulating = false;
 let simInterval = null;
 let simProgress = 0; // 0 to 1
 
-// Three.js Atmospheric Background Scene
+// Three.js Universe & Cosmos Scene
 let threeScene = null;
 let threeCamera = null;
 let threeRenderer = null;
-let atmosphericMotes = null;
-let waveParticles = null;
-let waveGeo = null;
+let cosmicStarfield = null;
+let cosmicNebula = null;
+let cosmicMoonMesh = null;
+let cosmicMoonGroup = null;
+let cosmicSunLight = null;
+let starPositions = null;
 let targetCameraX = 0;
 let targetCameraY = 0;
 let scrollCameraY = 0;
+let scrollCameraZ = 0;
 
 /* ================= EXPOSE ALL HANDLERS ON WINDOW IMMEDIATELY ================= */
 window.toggleTheme = toggleTheme;
@@ -1413,6 +1417,99 @@ function getCompassCardinal(deg) {
     return directions[idx];
 }
 
+/* ================= 7.5 ASTRONOMICAL MOON PHASE CALCULATION ENGINE ================= */
+function calculateMoonPhase(targetDate = new Date()) {
+    // Reference New Moon: January 6, 2000, 18:14 UTC
+    const knownNewMoon = new Date(Date.UTC(2000, 0, 6, 18, 14, 0));
+    const synodicMonth = 29.53058867; // Average synodic lunar month in days
+    
+    const diffMs = targetDate.getTime() - knownNewMoon.getTime();
+    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+    
+    const moonAge = ((diffDays % synodicMonth) + synodicMonth) % synodicMonth;
+    const phaseFraction = moonAge / synodicMonth;
+    
+    // Geometric illumination percentage (0% to 100%)
+    const illumination = Math.round((1 - Math.cos(phaseFraction * 2 * Math.PI)) / 2 * 100);
+
+    let phaseName = "";
+    let simpleCategory = ""; // "No Moon", "Half Moon", "Full Moon", "Crescent Moon", "Gibbous Moon"
+    let emoji = "";
+    let nextPhaseText = "";
+    let categoryClass = "";
+
+    // Astronomical 8-phase breakdown with explicit Full Moon, Half Moon, and No Moon identification
+    if (phaseFraction < 0.03 || phaseFraction >= 0.97) {
+        phaseName = "New Moon (No Moon)";
+        simpleCategory = "No Moon";
+        emoji = "🌑";
+        categoryClass = "cat-no-moon";
+        const daysToHalf = ((0.25 - phaseFraction + 1) % 1) * synodicMonth;
+        nextPhaseText = `Next: Half Moon (First Quarter) in ${Math.round(daysToHalf)} days`;
+    } else if (phaseFraction < 0.22) {
+        phaseName = "Waxing Crescent Moon";
+        simpleCategory = "Crescent Moon";
+        emoji = "🌒";
+        categoryClass = "cat-crescent-moon";
+        const daysToHalf = (0.25 - phaseFraction) * synodicMonth;
+        nextPhaseText = `Next: Half Moon (First Quarter) in ${Math.max(1, Math.round(daysToHalf))} days`;
+    } else if (phaseFraction <= 0.28) {
+        phaseName = "First Quarter (Half Moon)";
+        simpleCategory = "Half Moon";
+        emoji = "🌓";
+        categoryClass = "cat-half-moon";
+        const daysToFull = (0.50 - phaseFraction) * synodicMonth;
+        nextPhaseText = `Next: Full Moon in ${Math.max(1, Math.round(daysToFull))} days`;
+    } else if (phaseFraction < 0.47) {
+        phaseName = "Waxing Gibbous Moon";
+        simpleCategory = "Gibbous Moon";
+        emoji = "🌔";
+        categoryClass = "cat-gibbous-moon";
+        const daysToFull = (0.50 - phaseFraction) * synodicMonth;
+        nextPhaseText = `Next: Full Moon in ${Math.max(1, Math.round(daysToFull))} days`;
+    } else if (phaseFraction <= 0.53) {
+        phaseName = "Full Moon";
+        simpleCategory = "Full Moon";
+        emoji = "🌕";
+        categoryClass = "cat-full-moon";
+        const daysToHalf = (0.75 - phaseFraction) * synodicMonth;
+        nextPhaseText = `Next: Half Moon (Last Quarter) in ${Math.max(1, Math.round(daysToHalf))} days`;
+    } else if (phaseFraction < 0.72) {
+        phaseName = "Waning Gibbous Moon";
+        simpleCategory = "Gibbous Moon";
+        emoji = "🌖";
+        categoryClass = "cat-gibbous-moon";
+        const daysToHalf = (0.75 - phaseFraction) * synodicMonth;
+        nextPhaseText = `Next: Half Moon (Last Quarter) in ${Math.max(1, Math.round(daysToHalf))} days`;
+    } else if (phaseFraction <= 0.78) {
+        phaseName = "Last Quarter (Half Moon)";
+        simpleCategory = "Half Moon";
+        emoji = "🌗";
+        categoryClass = "cat-half-moon";
+        const daysToNew = (1.0 - phaseFraction) * synodicMonth;
+        nextPhaseText = `Next: No Moon (New Moon) in ${Math.max(1, Math.round(daysToNew))} days`;
+    } else {
+        phaseName = "Waning Crescent Moon";
+        simpleCategory = "Crescent Moon";
+        emoji = "🌘";
+        categoryClass = "cat-crescent-moon";
+        const daysToNew = (1.0 - phaseFraction) * synodicMonth;
+        nextPhaseText = `Next: No Moon (New Moon) in ${Math.max(1, Math.round(daysToNew))} days`;
+    }
+
+    return {
+        moonAge: moonAge.toFixed(1),
+        phaseFraction,
+        illumination,
+        phaseName,
+        simpleCategory,
+        emoji,
+        categoryClass,
+        nextPhaseText,
+        subtext: `${illumination}% Illumination • Moon Age: ${moonAge.toFixed(1)} / 29.5 days`
+    };
+}
+
 /* ================= 8. ZERO-JITTER 3D CELESTIAL HORIZON DOME ================= */
 function updateCelestialHorizonDome(daily, timezone, customProgress = null) {
     if (!daily || !daily.sunrise || !daily.sunset) return;
@@ -1439,6 +1536,31 @@ function updateCelestialHorizonDome(daily, timezone, customProgress = null) {
 
         if (sunriseTimeEl) sunriseTimeEl.textContent = srStr || "06:00";
         if (sunsetTimeEl) sunsetTimeEl.textContent = ssStr || "18:00";
+
+        // Calculate astronomical moon data
+        const moonData = calculateMoonPhase(now);
+
+        // Update Weather Moon Badge in Main Weather Card
+        const weatherMoonEmoji = document.getElementById("weatherMoonEmoji");
+        const weatherMoonText = document.getElementById("weatherMoonText");
+        if (weatherMoonEmoji) weatherMoonEmoji.textContent = moonData.emoji;
+        if (weatherMoonText) weatherMoonText.textContent = `Today's Moon: ${moonData.phaseName} (${moonData.illumination}%)`;
+
+        // Update Observatory Lunar Telemetry Strip
+        const lunarPhaseIconLarge = document.getElementById("lunarPhaseIconLarge");
+        const lunarPhaseName = document.getElementById("lunarPhaseName");
+        const lunarCategoryBadge = document.getElementById("lunarCategoryBadge");
+        const lunarPhaseSubtext = document.getElementById("lunarPhaseSubtext");
+        const lunarNextPhaseText = document.getElementById("lunarNextPhaseText");
+
+        if (lunarPhaseIconLarge) lunarPhaseIconLarge.textContent = moonData.emoji;
+        if (lunarPhaseName) lunarPhaseName.textContent = moonData.phaseName;
+        if (lunarCategoryBadge) {
+            lunarCategoryBadge.textContent = moonData.simpleCategory;
+            lunarCategoryBadge.className = `lunar-cat-badge ${moonData.categoryClass}`;
+        }
+        if (lunarPhaseSubtext) lunarPhaseSubtext.textContent = moonData.subtext;
+        if (lunarNextPhaseText) lunarNextPhaseText.textContent = moonData.nextPhaseText;
 
         const [srH, srM] = (srStr || "06:00").split(":").map(Number);
         const [ssH, ssM] = (ssStr || "18:00").split(":").map(Number);
@@ -1499,19 +1621,19 @@ function updateCelestialHorizonDome(daily, timezone, customProgress = null) {
                 celestialRemainingText.textContent = `Sun is at ${percentText}% across the daytime sky`;
             }
         } else {
-            if (celestialModeIcon) celestialModeIcon.textContent = "🌙";
-            if (celestialModeName) celestialModeName.textContent = "Nocturnal Moon Orbit (Sunset to Dawn)";
-            if (celestialHeading) celestialHeading.textContent = "Moon Orbit Trajectory (Night Sky Arc)";
-            if (celestialEmoji) celestialEmoji.textContent = "🌙";
+            if (celestialModeIcon) celestialModeIcon.textContent = moonData.emoji;
+            if (celestialModeName) celestialModeName.textContent = `Nocturnal ${moonData.simpleCategory} Orbit (${moonData.phaseName})`;
+            if (celestialHeading) celestialHeading.textContent = `${moonData.phaseName} Trajectory (${moonData.illumination}% Illum)`;
+            if (celestialEmoji) celestialEmoji.textContent = moonData.emoji;
             if (celestialBody) celestialBody.className = "celestial-sphere-3d moon-sphere";
             if (celestialSvgArc) celestialSvgArc.setAttribute("stroke", "url(#domeArcGradNight)");
-            if (eastGateLabel) eastGateLabel.textContent = "East (Dawn)";
-            if (westGateLabel) westGateLabel.textContent = "West (Dusk)";
+            if (eastGateLabel) eastGateLabel.textContent = "East (Moonrise)";
+            if (westGateLabel) westGateLabel.textContent = "West (Moonset)";
 
             const percentText = Math.round(progress * 100);
             if (solarProgressBadge) solarProgressBadge.textContent = `${percentText}% Lunar Apex`;
             if (celestialRemainingText && customProgress === null) {
-                celestialRemainingText.textContent = `Moon is at ${percentText}% across the nocturnal sky`;
+                celestialRemainingText.textContent = `${moonData.phaseName} is at ${percentText}% across nocturnal horizon`;
             }
         }
 
@@ -1693,15 +1815,15 @@ function navigateToDetails(e) {
     window.location.href = targetUrl;
 }
 
-/* ================= 10. LUXURY ATMOSPHERIC PARTICLE & NEBULA BACKGROUND ================= */
+/* ================= 10. LUXURY UNIVERSE 3D COSMOS & SCROLLING ENGINE ================= */
 function initHighImpactThreeJS() {
     try {
         const canvas = document.getElementById("threeCanvas");
         if (!canvas || typeof THREE === "undefined") return;
 
         threeScene = new THREE.Scene();
-        threeCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        threeCamera.position.z = 40;
+        threeCamera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        threeCamera.position.set(0, 0, 40);
 
         threeRenderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "high-performance" });
         threeRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -1709,95 +1831,122 @@ function initHighImpactThreeJS() {
 
         const isDark = document.body.classList.contains("dark");
 
-        // 1. Serene Floating Atmospheric Motes (380 stardust particles)
-        const moteCount = 380;
-        const moteGeo = new THREE.BufferGeometry();
-        const motePos = new Float32Array(moteCount * 3);
-        const moteColors = new Float32Array(moteCount * 3);
+        // 1. DEEP UNIVERSE MULTI-DEPTH STARFIELD (1,200 stars along Z axis: -260 to +60)
+        const starCount = 1200;
+        const starGeo = new THREE.BufferGeometry();
+        starPositions = new Float32Array(starCount * 3);
+        const starColors = new Float32Array(starCount * 3);
 
-        for (let i = 0; i < moteCount * 3; i += 3) {
-            motePos[i] = (Math.random() - 0.5) * 110;
-            motePos[i + 1] = (Math.random() - 0.5) * 100;
-            motePos[i + 2] = (Math.random() - 0.5) * 60;
+        for (let i = 0; i < starCount * 3; i += 3) {
+            starPositions[i] = (Math.random() - 0.5) * 160;
+            starPositions[i + 1] = (Math.random() - 0.5) * 140;
+            starPositions[i + 2] = -240 + Math.random() * 300;
 
             if (isDark) {
                 const pick = Math.random();
-                if (pick < 0.4) {
-                    moteColors[i] = 0.22; moteColors[i + 1] = 0.74; moteColors[i + 2] = 0.97; // cyan
-                } else if (pick < 0.7) {
-                    moteColors[i] = 0.51; moteColors[i + 1] = 0.55; moteColors[i + 2] = 0.97; // indigo
+                if (pick < 0.45) {
+                    starColors[i] = 0.22; starColors[i + 1] = 0.74; starColors[i + 2] = 0.97; // Sirius Cyan
+                } else if (pick < 0.70) {
+                    starColors[i] = 0.65; starColors[i + 1] = 0.55; starColors[i + 2] = 0.98; // Nebula Violet
+                } else if (pick < 0.88) {
+                    starColors[i] = 0.98; starColors[i + 1] = 0.98; starColors[i + 2] = 1.0;  // Vega Diamond
                 } else {
-                    moteColors[i] = 0.92; moteColors[i + 1] = 0.95; moteColors[i + 2] = 1.0;  // silver
+                    starColors[i] = 0.96; starColors[i + 1] = 0.70; starColors[i + 2] = 0.25; // Solar Gold
                 }
             } else {
                 const pick = Math.random();
-                if (pick < 0.5) {
-                    moteColors[i] = 0.02; moteColors[i + 1] = 0.52; moteColors[i + 2] = 0.78; // sky blue
+                if (pick < 0.55) {
+                    starColors[i] = 0.02; starColors[i + 1] = 0.52; starColors[i + 2] = 0.78;
                 } else if (pick < 0.8) {
-                    moteColors[i] = 0.96; moteColors[i + 1] = 0.65; moteColors[i + 2] = 0.15; // amber sun
+                    starColors[i] = 0.96; starColors[i + 1] = 0.65; starColors[i + 2] = 0.15;
                 } else {
-                    moteColors[i] = 0.65; moteColors[i + 1] = 0.82; moteColors[i + 2] = 0.95; // light blue
+                    starColors[i] = 0.65; starColors[i + 1] = 0.82; starColors[i + 2] = 0.95;
                 }
             }
         }
 
-        moteGeo.setAttribute("position", new THREE.BufferAttribute(motePos, 3));
-        moteGeo.setAttribute("color", new THREE.BufferAttribute(moteColors, 3));
+        starGeo.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
+        starGeo.setAttribute("color", new THREE.BufferAttribute(starColors, 3));
 
-        const moteMat = new THREE.PointsMaterial({
-            size: isDark ? 1.6 : 1.4,
+        const starMat = new THREE.PointsMaterial({
+            size: isDark ? 1.8 : 1.4,
             vertexColors: true,
             transparent: true,
-            opacity: isDark ? 0.75 : 0.45,
+            opacity: isDark ? 0.85 : 0.45,
             blending: isDark ? THREE.AdditiveBlending : THREE.NormalBlending
         });
 
-        atmosphericMotes = new THREE.Points(moteGeo, moteMat);
-        threeScene.add(atmosphericMotes);
+        cosmicStarfield = new THREE.Points(starGeo, starMat);
+        threeScene.add(cosmicStarfield);
 
-        // 2. Atmospheric Flow Field (Wave Particles representing atmospheric jet streams)
-        const waveCols = 32;
-        const waveRows = 32;
-        const waveTotal = waveCols * waveRows;
-        waveGeo = new THREE.BufferGeometry();
-        const wavePos = new Float32Array(waveTotal * 3);
-        const waveColors = new Float32Array(waveTotal * 3);
+        // 2. COSMIC NEBULA DUST (360 ethereal floating particles)
+        const nebulaCount = 360;
+        const nebulaGeo = new THREE.BufferGeometry();
+        const nebulaPos = new Float32Array(nebulaCount * 3);
+        const nebulaColors = new Float32Array(nebulaCount * 3);
 
-        let pIdx = 0;
-        for (let x = 0; x < waveCols; x++) {
-            for (let y = 0; y < waveRows; y++) {
-                wavePos[pIdx * 3] = (x - waveCols / 2) * 2.8;
-                wavePos[pIdx * 3 + 1] = (y - waveRows / 2) * 2.8 - 4;
-                wavePos[pIdx * 3 + 2] = -12;
+        for (let i = 0; i < nebulaCount * 3; i += 3) {
+            nebulaPos[i] = (Math.random() - 0.5) * 110;
+            nebulaPos[i + 1] = (Math.random() - 0.5) * 90;
+            nebulaPos[i + 2] = -180 + Math.random() * 200;
 
-                waveColors[pIdx * 3] = isDark ? 0.22 : 0.02;
-                waveColors[pIdx * 3 + 1] = isDark ? 0.65 : 0.52;
-                waveColors[pIdx * 3 + 2] = isDark ? 0.95 : 0.78;
-                pIdx++;
+            if (isDark) {
+                nebulaColors[i] = 0.38 + Math.random() * 0.2;
+                nebulaColors[i + 1] = 0.30 + Math.random() * 0.25;
+                nebulaColors[i + 2] = 0.85 + Math.random() * 0.15;
+            } else {
+                nebulaColors[i] = 0.80;
+                nebulaColors[i + 1] = 0.88;
+                nebulaColors[i + 2] = 0.98;
             }
         }
 
-        waveGeo.setAttribute("position", new THREE.BufferAttribute(wavePos, 3));
-        waveGeo.setAttribute("color", new THREE.BufferAttribute(waveColors, 3));
+        nebulaGeo.setAttribute("position", new THREE.BufferAttribute(nebulaPos, 3));
+        nebulaGeo.setAttribute("color", new THREE.BufferAttribute(nebulaColors, 3));
 
-        const waveMat = new THREE.PointsMaterial({
-            size: 1.2,
+        const nebulaMat = new THREE.PointsMaterial({
+            size: isDark ? 3.0 : 2.2,
             vertexColors: true,
             transparent: true,
-            opacity: isDark ? 0.28 : 0.16,
+            opacity: isDark ? 0.38 : 0.20,
             blending: THREE.AdditiveBlending
         });
 
-        waveParticles = new THREE.Points(waveGeo, waveMat);
-        waveParticles.rotation.x = Math.PI / 3.2;
-        threeScene.add(waveParticles);
+        cosmicNebula = new THREE.Points(nebulaGeo, nebulaMat);
+        threeScene.add(cosmicNebula);
 
-        // Smooth Mouse Parallax (subtle and high-end)
+        // 3. 3D CELESTIAL MOON SPHERE (Realistic Lunar Orb in Space)
+        cosmicMoonGroup = new THREE.Group();
+        cosmicMoonGroup.position.set(24, 13, -26);
+
+        const moonGeo = new THREE.SphereGeometry(6.2, 36, 36);
+        const moonMat = new THREE.MeshLambertMaterial({
+            color: isDark ? 0xe2e8f0 : 0xf8fafc,
+            transparent: true,
+            opacity: isDark ? 0.95 : 0.85
+        });
+        cosmicMoonMesh = new THREE.Mesh(moonGeo, moonMat);
+        cosmicMoonGroup.add(cosmicMoonMesh);
+
+        // Ambient cosmic illumination
+        const ambientCosmic = new THREE.AmbientLight(isDark ? 0x1e293b : 0xe2e8f0, isDark ? 0.6 : 0.9);
+        threeScene.add(ambientCosmic);
+
+        // Directional lunar sunlight matching phase
+        cosmicSunLight = new THREE.DirectionalLight(0xffffff, isDark ? 1.6 : 1.2);
+        const currentMoon = calculateMoonPhase(new Date());
+        const lightAngle = currentMoon.phaseFraction * Math.PI * 2;
+        cosmicSunLight.position.set(Math.cos(lightAngle) * 35, 10, Math.sin(lightAngle) * 35);
+        threeScene.add(cosmicSunLight);
+
+        threeScene.add(cosmicMoonGroup);
+
+        // Subtle mouse parallax
         window.addEventListener("mousemove", (e) => {
             const normX = (e.clientX / window.innerWidth) * 2 - 1;
             const normY = -(e.clientY / window.innerHeight) * 2 + 1;
-            targetCameraX = normX * 1.5;
-            targetCameraY = normY * 1.2;
+            targetCameraX = normX * 2.0;
+            targetCameraY = normY * 1.5;
         }, { passive: true });
 
         window.addEventListener("resize", () => {
@@ -1807,36 +1956,35 @@ function initHighImpactThreeJS() {
             threeRenderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        let clock = 0;
+        let universeClock = 0;
         function animate() {
             requestAnimationFrame(animate);
-            clock += 0.012;
+            universeClock += 0.008;
 
-            // Gentle organic drift of atmospheric motes
-            if (atmosphericMotes) {
-                atmosphericMotes.rotation.y = clock * 0.03;
-                atmosphericMotes.rotation.x = Math.sin(clock * 0.02) * 0.04;
+            // Gentle axial lunar rotation
+            if (cosmicMoonMesh) {
+                cosmicMoonMesh.rotation.y += 0.0012;
             }
 
-            // Gentle wave undulating
-            if (waveGeo) {
-                const pos = waveGeo.attributes.position.array;
-                let idx = 0;
-                for (let x = 0; x < waveCols; x++) {
-                    for (let y = 0; y < waveRows; y++) {
-                        pos[idx * 3 + 2] = Math.sin(clock * 0.8 + x * 0.3) * 1.8 + Math.cos(clock * 0.6 + y * 0.3) * 1.8 - 12;
-                        idx++;
-                    }
-                }
-                waveGeo.attributes.position.needsUpdate = true;
+            // Gentle galactic drift of deep universe starfield
+            if (cosmicStarfield) {
+                cosmicStarfield.rotation.y = universeClock * 0.015;
             }
 
-            // High-damping smooth camera interpolation (including scroll offset)
+            // Ethereal nebula breathing
+            if (cosmicNebula) {
+                cosmicNebula.rotation.y = -universeClock * 0.01;
+                cosmicNebula.rotation.z = Math.sin(universeClock * 0.5) * 0.02;
+            }
+
+            // UNIVERSE SCROLLING VOYAGE ENGINE:
+            // High-damping smooth camera navigation forward through stellar space as user scrolls
             if (threeCamera) {
-                const finalTargetY = targetCameraY + scrollCameraY;
-                threeCamera.position.x += (targetCameraX - threeCamera.position.x) * 0.04;
-                threeCamera.position.y += (finalTargetY - threeCamera.position.y) * 0.04;
-                threeCamera.lookAt(0, scrollCameraY * 0.6, 0);
+                const targetZ = 40 - scrollCameraZ;
+                threeCamera.position.z += (targetZ - threeCamera.position.z) * 0.05;
+                threeCamera.position.y += ((targetCameraY + scrollCameraY) - threeCamera.position.y) * 0.05;
+                threeCamera.position.x += (targetCameraX - threeCamera.position.x) * 0.05;
+                threeCamera.lookAt(0, scrollCameraY * 0.4, -40);
             }
 
             threeRenderer.render(threeScene, threeCamera);
@@ -1844,7 +1992,7 @@ function initHighImpactThreeJS() {
 
         animate();
     } catch (err) {
-        console.warn("Atmospheric background notice:", err);
+        console.warn("Universe 3D background notice:", err);
     }
 }
 
@@ -1852,23 +2000,25 @@ function updateThreeJSPalette() {
     if (!threeScene) return;
     const isDark = document.body.classList.contains("dark");
 
-    if (atmosphericMotes && atmosphericMotes.geometry) {
-        const colors = atmosphericMotes.geometry.attributes.color.array;
+    if (cosmicStarfield && cosmicStarfield.geometry) {
+        const colors = cosmicStarfield.geometry.attributes.color.array;
         const count = colors.length / 3;
 
         for (let i = 0; i < count * 3; i += 3) {
             if (isDark) {
                 const pick = Math.random();
-                if (pick < 0.4) {
+                if (pick < 0.45) {
                     colors[i] = 0.22; colors[i + 1] = 0.74; colors[i + 2] = 0.97;
-                } else if (pick < 0.7) {
-                    colors[i] = 0.51; colors[i + 1] = 0.55; colors[i + 2] = 0.97;
+                } else if (pick < 0.70) {
+                    colors[i] = 0.65; colors[i + 1] = 0.55; colors[i + 2] = 0.98;
+                } else if (pick < 0.88) {
+                    colors[i] = 0.98; colors[i + 1] = 0.98; colors[i + 2] = 1.0;
                 } else {
-                    colors[i] = 0.92; colors[i + 1] = 0.95; colors[i + 2] = 1.0;
+                    colors[i] = 0.96; colors[i + 1] = 0.70; colors[i + 2] = 0.25;
                 }
             } else {
                 const pick = Math.random();
-                if (pick < 0.5) {
+                if (pick < 0.55) {
                     colors[i] = 0.02; colors[i + 1] = 0.52; colors[i + 2] = 0.78;
                 } else if (pick < 0.8) {
                     colors[i] = 0.96; colors[i + 1] = 0.65; colors[i + 2] = 0.15;
@@ -1877,15 +2027,19 @@ function updateThreeJSPalette() {
                 }
             }
         }
-        atmosphericMotes.geometry.attributes.color.needsUpdate = true;
-        if (atmosphericMotes.material) {
-            atmosphericMotes.material.opacity = isDark ? 0.75 : 0.45;
-            atmosphericMotes.material.blending = isDark ? THREE.AdditiveBlending : THREE.NormalBlending;
+        cosmicStarfield.geometry.attributes.color.needsUpdate = true;
+        if (cosmicStarfield.material) {
+            cosmicStarfield.material.opacity = isDark ? 0.85 : 0.45;
+            cosmicStarfield.material.blending = isDark ? THREE.AdditiveBlending : THREE.NormalBlending;
         }
     }
 
-    if (waveParticles && waveParticles.material) {
-        waveParticles.material.opacity = isDark ? 0.28 : 0.16;
+    if (cosmicNebula && cosmicNebula.material) {
+        cosmicNebula.material.opacity = isDark ? 0.38 : 0.20;
+    }
+
+    if (cosmicMoonMesh && cosmicMoonMesh.material) {
+        cosmicMoonMesh.material.color.setHex(isDark ? 0xe2e8f0 : 0xf8fafc);
     }
 }
 
@@ -1964,7 +2118,9 @@ function initScrollDynamics() {
             }
         }
 
-        // Three.js background vertical altitude shift on scroll
+        // Universe-travel depth flight on scroll (camera traverses forward through deep space)
+        const scrollFrac = docHeight > 0 ? (scrollTop / docHeight) : 0;
+        scrollCameraZ = scrollFrac * 110;
         scrollCameraY = -scrollTop * 0.012;
     };
 
