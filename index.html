@@ -27,6 +27,9 @@
 
 <body>
 
+    <!-- LUMINOUS SCROLL PROGRESS BAR -->
+    <div id="scrollProgressBar" class="scroll-progress-bar"></div>
+
     <!-- 3D INTERACTIVE CELESTIAL PLANETARIUM CANVAS -->
     <canvas id="threeCanvas"></canvas>
 
@@ -61,7 +64,7 @@
         <header class="header">
             <div class="logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" style="cursor: pointer;">
                 <span class="logo-icon-3d">🌦️</span>
-                <span class="logo-text">Weather<span class="gradient-text-shimmer">Wise 3D</span></span>
+                <span class="logo-text">Weather<span class="gradient-text-shimmer">Wise</span></span>
             </div>
 
             <!-- LOCATION-ACCURATE LIVE CLOCK -->
@@ -98,7 +101,7 @@
         <main>
 
             <!-- HERO & REAL-TIME MONITOR BAR -->
-            <section class="hero">
+            <section class="hero scroll-reveal">
                 <div class="monitor-live-bar">
                     <div class="monitor-pulse">
                         <span class="pulse-dot"></span>
@@ -110,15 +113,15 @@
                     </button>
                 </div>
 
-                <h1 class="hero-title">Atmospheric Station in <span class="gradient-text-shimmer">Deep 3D</span></h1>
+                <h1 class="hero-title">Atmospheric Station & <span class="gradient-text-shimmer">Live Telemetry</span></h1>
                 <p class="hero-subtitle">
-                    Interactive 3D celestial planetarium, 3D rotating wind compass, live barometric pressure, and astronomical horizon dome.
+                    Live meteorological radar, precision rotating wind compass, barometric telemetry, and astronomical horizon dome.
                 </p>
             </section>
 
 
             <!-- SEARCH & SPECIAL CITY SECTION -->
-            <section class="search-section">
+            <section class="search-section scroll-reveal">
                 <div class="search-box-3d" id="searchBox3D">
                     <span class="search-icon">🔍</span>
                     <input
@@ -157,7 +160,7 @@
 
 
             <!-- SAVED / SPECIAL CITIES DRAWER -->
-            <section id="savedCitiesSection" class="saved-cities-section">
+            <section id="savedCitiesSection" class="saved-cities-section scroll-reveal">
                 <div class="section-header-compact">
                     <div class="saved-title-group">
                         <span class="saved-star-icon">⭐</span>
@@ -180,9 +183,8 @@
             </div>
 
 
-            <!-- ================= MAIN 3D WEATHER CARD (TRUE 3D DEPTH STAGE) ================= -->
-            <section id="weatherCard" class="weather-card-3d card-3d-interactive card-3d-stage">
-                <div class="card-3d-glow-ring"></div>
+            <!-- ================= MAIN WEATHER CARD ================= -->
+            <section id="weatherCard" class="weather-card-3d card-3d-interactive card-3d-stage scroll-reveal">
                 <div class="card-glare"></div>
 
                 <div class="weather-card-inner-3d">
@@ -221,7 +223,7 @@
 
 
             <!-- ================= REAL-TIME ATMOSPHERIC MONITORING DASHBOARD ================= -->
-            <section class="monitoring-section">
+            <section class="monitoring-section scroll-reveal">
                 <div class="section-title">
                     <h2>⚡ Real-Time Atmospheric Monitoring</h2>
                     <span class="refresh-badge-3d">
@@ -366,16 +368,16 @@
             </section>
 
 
-            <!-- ================= 3D CELESTIAL HORIZON DOME (OBSERVATORY ARCH) ================= -->
-            <section class="celestial-section-below">
+            <!-- ================= CELESTIAL HORIZON DOME ================= -->
+            <section class="celestial-section-below scroll-reveal">
                 <div class="section-title">
-                    <h2>🌅 3D Celestial Horizon Dome: Sunrise to Sunset & Night Cycle</h2>
+                    <h2>🌅 Celestial Horizon Dome: Solar & Lunar Trajectory</h2>
                     <span class="refresh-badge-3d">
                         <span id="celestialModeIcon">☀️</span> <span id="celestialModeName">Day Sun Path</span>
                     </span>
                 </div>
 
-                <div class="celestial-dome-card-3d card-3d-glow card-3d-interactive" id="celestialDomeCard">
+                <div class="celestial-dome-card-3d card-3d-interactive" id="celestialDomeCard">
                     <div class="card-glare"></div>
                     <div class="dome-meta-header">
                         <div class="dome-info">
@@ -394,7 +396,7 @@
                         </div>
                     </div>
 
-                    <!-- 3D PERSPECTIVE HORIZON DOME STAGE -->
+                    <!-- PERSPECTIVE HORIZON DOME STAGE -->
                     <div class="horizon-dome-stage" id="horizonDomeStage">
                         <svg class="dome-svg" id="domeSvg" viewBox="0 0 700 240" preserveAspectRatio="xMidYMid meet">
                             <defs>
@@ -418,7 +420,7 @@
                             <!-- Sky glow area under arch -->
                             <path d="M 40 210 Q 350 20 660 210 Z" fill="url(#skyGlowGrad)" />
 
-                            <!-- 3D Perspective Elevation Guide Arcs (Zenith 90°, 60°, 30°) -->
+                            <!-- Perspective Elevation Guide Arcs (Zenith 90°, 60°, 30°) -->
                             <path d="M 120 210 Q 350 70 580 210" fill="none" stroke="rgba(255,255,255,0.22)" stroke-dasharray="6,6" stroke-width="1.6" />
                             <path d="M 200 210 Q 350 115 500 210" fill="none" stroke="rgba(255,255,255,0.15)" stroke-dasharray="4,5" stroke-width="1.3" />
 
@@ -426,14 +428,14 @@
                             <path id="celestialSvgArc" d="M 40 210 Q 350 20 660 210" fill="none" stroke="url(#domeArcGradDay)" stroke-width="5.5" stroke-linecap="round" />
                         </svg>
 
-                        <!-- 3D GLOWING CELESTIAL ORBITER (SUN / MOON) -->
+                        <!-- GLOWING CELESTIAL ORBITER (SUN / MOON) -->
                         <div id="celestialOrbiter" class="celestial-orbiter-3d" style="left: 50%; top: 48%;">
                             <div id="celestialBody" class="celestial-sphere-3d sun-sphere">
                                 <span id="celestialEmoji">☀️</span>
                             </div>
                         </div>
 
-                        <!-- 3D HORIZON BASE -->
+                        <!-- HORIZON BASE -->
                         <div class="dome-horizon-ground">
                             <div class="horizon-gate horizon-east">
                                 <span class="gate-icon">🌅</span>
@@ -471,7 +473,7 @@
 
 
             <!-- ================= DETAILED HOURLY TIMELINE (TODAY vs TOMORROW) ================= -->
-            <section class="hourly-section">
+            <section class="hourly-section scroll-reveal">
                 <div class="section-title">
                     <h2>⏳ Detailed Hourly Telemetry</h2>
 

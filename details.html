@@ -13,22 +13,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,700&display=swap" rel="stylesheet">
 
-    <!-- Three.js CDN for High-Impact WebGL 3D Planetarium Background -->
+    <!-- Three.js CDN for High-Impact WebGL Atmospheric Background -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-    <title>WeatherWise 3D | Detailed Hourly Telemetry</title>
+    <title>WeatherWise | Detailed Hourly Forecast & Telemetry</title>
 
     <link rel="stylesheet" href="style.css?v=5.1">
     <style>
-        /* ================= 3D CONTAINER & PERSPECTIVE ================= */
+        /* ================= LUXURY DETAILS APP CONTAINER ================= */
         .details-page-app {
             position: relative;
             z-index: 1;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 24px 20px 60px;
-            perspective: 1400px;
-            transform-style: preserve-3d;
+            padding: 20px 20px 60px;
         }
 
         /* ================= NAVIGATION BAR ================= */
@@ -36,9 +34,24 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 26px;
+            margin-bottom: 24px;
             flex-wrap: wrap;
             gap: 14px;
+            position: sticky;
+            top: 14px;
+            z-index: 1000;
+            padding: 10px 16px;
+            border-radius: 24px;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .back-nav-bar.scrolled {
+            background: var(--card-glass);
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            border: 1px solid var(--card-border);
+            box-shadow: var(--shadow-main);
+            padding: 8px 16px;
         }
 
         .back-nav-left {
@@ -53,45 +66,43 @@
             align-items: center;
             gap: 8px;
             background: var(--card-glass);
-            border: 1.5px solid var(--card-border);
+            border: 1px solid var(--card-border);
             color: var(--primary);
-            padding: 10px 22px;
-            border-radius: 18px;
+            padding: 9px 20px;
+            border-radius: 16px;
             font-size: 14px;
-            font-weight: 800;
+            font-weight: 700;
             text-decoration: none;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: var(--shadow-main);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            transform-style: preserve-3d;
         }
 
         .back-btn:hover {
-            transform: translateY(-3px) translateZ(12px) scale(1.02);
+            transform: translateY(-2px);
             border-color: var(--primary);
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16), 0 0 16px var(--primary-glow);
+            box-shadow: var(--shadow-hover);
         }
 
-        /* ================= 3D HERO CONTAINER ================= */
+        /* ================= HERO CONTAINER ================= */
         .details-hero {
             position: relative;
             background: var(--card-glass);
-            border: 1.5px solid var(--card-border-glow);
-            backdrop-filter: blur(22px);
-            -webkit-backdrop-filter: blur(22px);
-            border-radius: 32px;
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 28px;
             padding: 32px;
-            margin-bottom: 28px;
+            margin-bottom: 26px;
             box-shadow: var(--shadow-main);
-            transform-style: preserve-3d;
-            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+            transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease, border-color 0.28s ease;
             overflow: hidden;
         }
 
         .details-hero:hover {
             box-shadow: var(--shadow-hover);
-            border-color: var(--primary-glow);
+            border-color: var(--card-border-glow);
         }
 
         .details-hero-top {
@@ -101,23 +112,19 @@
             flex-wrap: wrap;
             gap: 16px;
             margin-bottom: 24px;
-            transform: translateZ(16px);
         }
 
-        /* 3D Extruded City Title */
         .city-heading-3d {
-            font-size: 38px;
+            font-size: 36px;
             font-weight: 800;
             color: var(--text-heading);
             margin-bottom: 6px;
-            letter-spacing: -0.8px;
-            text-shadow: 0 1px 0 #ffffff, 0 2px 0 #cbd5e1, 0 3px 0 #94a3b8, 0 4px 0 #64748b, 0 6px 14px rgba(0, 0, 0, 0.18);
-            transition: all 0.3s ease;
+            letter-spacing: -0.03em;
+            transition: color 0.3s ease;
         }
 
         body.dark .city-heading-3d {
             color: #ffffff;
-            text-shadow: 0 1px 0 #38bdf8, 0 2px 0 #0284c7, 0 3px 0 #0369a1, 0 4px 0 #075985, 0 8px 24px rgba(56, 189, 248, 0.4);
         }
 
         .location-clock-card {
@@ -125,21 +132,14 @@
             align-items: center;
             gap: 12px;
             background: var(--card-inner);
-            border: 1.5px solid var(--card-border);
+            border: 1px solid var(--card-border);
             padding: 12px 20px;
             border-radius: 20px;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.04);
-            transform: translateZ(18px);
+            box-shadow: var(--shadow-sm);
         }
 
         .clock-icon {
-            font-size: 26px;
-            animation: pulseSlow 3s infinite ease-in-out;
-        }
-
-        @keyframes pulseSlow {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+            font-size: 24px;
         }
 
         .clock-time {
@@ -156,17 +156,16 @@
             color: var(--text-muted);
         }
 
-        /* 3D Day Tabs Switcher */
+        /* Day Tabs Switcher */
         .details-day-tabs {
             display: inline-flex;
             gap: 8px;
             background: var(--card-inner);
             padding: 6px;
             border-radius: 20px;
-            border: 1.5px solid var(--card-border);
+            border: 1px solid var(--card-border);
             margin-bottom: 24px;
-            transform: translateZ(12px);
-            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .details-tab-btn {
@@ -176,62 +175,58 @@
             padding: 10px 24px;
             border-radius: 14px;
             font-size: 14px;
-            font-weight: 800;
+            font-weight: 700;
             font-family: inherit;
             cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .details-tab-btn:hover {
             color: var(--text-heading);
-            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.04);
         }
 
         .details-tab-btn.active {
             background: var(--primary);
             color: #ffffff;
-            box-shadow: 0 4px 16px var(--primary-glow);
-            transform: translateY(-2px);
+            box-shadow: 0 4px 14px var(--primary-glow);
         }
 
-        /* ================= 3D SUMMARY METRICS GRID ================= */
+        /* ================= SUMMARY METRICS GRID ================= */
         .day-summary-cards {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 16px;
-            transform: translateZ(14px);
         }
 
         .summary-card {
             position: relative;
             background: var(--card-inner);
-            border: 1.5px solid var(--card-border);
-            border-radius: 22px;
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
             padding: 20px 16px;
             text-align: center;
-            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
-            transform-style: preserve-3d;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+            box-shadow: var(--shadow-sm);
             overflow: hidden;
             cursor: pointer;
         }
 
         .summary-card:hover {
-            transform: perspective(1000px) translateY(-8px) translateZ(18px) scale(1.03);
+            transform: translateY(-3px);
             border-color: var(--card-border-glow);
-            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.18), 0 0 20px var(--primary-glow);
+            box-shadow: var(--shadow-hover);
         }
 
         .summary-icon {
             font-size: 26px;
-            margin-bottom: 6px;
-            transform: translateZ(16px);
+            margin-bottom: 8px;
             display: inline-block;
-            transition: transform 0.3s ease;
+            transition: transform 0.25s ease;
         }
 
         .summary-card:hover .summary-icon {
-            transform: translateZ(24px) scale(1.2) rotate(8deg);
+            transform: scale(1.08);
         }
 
         .summary-card p {
@@ -241,7 +236,6 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 6px;
-            transform: translateZ(10px);
         }
 
         .summary-card strong {
@@ -249,21 +243,17 @@
             font-size: 20px;
             font-weight: 800;
             color: var(--text-heading);
-            transform: translateZ(14px);
-            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
         }
 
         body.dark .summary-card strong {
             color: #ffffff;
-            text-shadow: 0 1px 0 #38bdf8, 0 0 12px rgba(56, 189, 248, 0.35);
         }
 
-        /* ================= 3D HOURLY VISUAL STREAM (CAROUSEL) ================= */
+        /* ================= HOURLY VISUAL STREAM (CAROUSEL) ================= */
         .details-hourly-strip-wrap {
             margin-bottom: 30px;
             position: relative;
             z-index: 2;
-            transform-style: preserve-3d;
         }
 
         .details-strip-title {
@@ -286,7 +276,7 @@
 
         .strip-hint {
             font-size: 12px;
-            font-weight: 700;
+            font-weight: 600;
             color: var(--text-muted);
             background: var(--card-inner);
             border: 1px solid var(--card-border);
@@ -301,11 +291,10 @@
             padding: 12px 6px 20px;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
-            perspective: 1200px;
         }
 
         .details-hourly-strip::-webkit-scrollbar {
-            height: 8px;
+            height: 6px;
         }
 
         .details-hourly-strip::-webkit-scrollbar-track {
@@ -322,64 +311,58 @@
             position: relative;
             flex: 0 0 114px;
             background: var(--card-glass);
-            border: 1.5px solid var(--card-border);
+            border: 1px solid var(--card-border);
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
-            border-radius: 22px;
+            border-radius: 20px;
             padding: 16px 10px;
             text-align: center;
             cursor: pointer;
-            transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.22s ease, border-color 0.22s ease;
-            transform-style: preserve-3d;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+            transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.22s ease;
+            box-shadow: var(--shadow-sm);
             user-select: none;
             overflow: hidden;
         }
 
         .details-hourly-card-3d:hover,
         .details-hourly-card-3d.active {
-            transform: perspective(1000px) translateY(-10px) translateZ(20px) scale(1.05);
+            transform: translateY(-4px);
             border-color: var(--primary);
-            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.2), 0 0 20px var(--primary-glow);
+            box-shadow: var(--shadow-hover);
         }
 
         .details-hourly-card-3d.active {
             background: var(--card-inner);
-            border-width: 2px;
+            border-color: var(--primary);
         }
 
         .hourly-card-time {
             font-size: 13px;
-            font-weight: 800;
+            font-weight: 700;
             color: var(--text-heading);
             margin-bottom: 8px;
-            transform: translateZ(10px);
         }
 
         .hourly-card-icon {
-            font-size: 32px;
+            font-size: 30px;
             margin-bottom: 8px;
             display: inline-block;
-            transition: transform 0.3s ease;
-            transform: translateZ(16px);
+            transition: transform 0.25s ease;
         }
 
         .details-hourly-card-3d:hover .hourly-card-icon {
-            transform: translateZ(26px) scale(1.18) rotate(8deg);
+            transform: scale(1.08);
         }
 
         .hourly-card-temp {
-            font-size: 21px;
+            font-size: 20px;
             font-weight: 800;
             color: var(--text-heading);
             margin-bottom: 6px;
-            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
-            transform: translateZ(12px);
         }
 
         body.dark .hourly-card-temp {
             color: #ffffff;
-            text-shadow: 0 1px 0 #38bdf8, 0 0 10px rgba(56, 189, 248, 0.35);
         }
 
         .hourly-card-rain {
@@ -387,7 +370,6 @@
             font-weight: 700;
             color: var(--primary);
             margin-bottom: 4px;
-            transform: translateZ(8px);
         }
 
         .hourly-card-rain.placeholder {
@@ -399,27 +381,26 @@
             font-size: 11px;
             font-weight: 600;
             color: var(--text-muted);
-            transform: translateZ(6px);
         }
 
-        /* ================= 3D TELEMETRY TABLE CONSOLE ================= */
+        /* ================= TELEMETRY TABLE CONSOLE ================= */
         .table-wrap {
             position: relative;
             overflow-x: auto;
             background: var(--card-glass);
-            border: 1.5px solid var(--card-border-glow);
-            border-radius: 28px;
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
             box-shadow: var(--shadow-main);
             padding: 20px;
             -webkit-overflow-scrolling: touch;
             backdrop-filter: blur(22px);
             -webkit-backdrop-filter: blur(22px);
-            transform-style: preserve-3d;
-            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+            transition: box-shadow 0.25s ease, border-color 0.25s ease;
         }
 
         .table-wrap:hover {
             box-shadow: var(--shadow-hover);
+            border-color: var(--card-border-glow);
         }
 
         .table-header-title {
@@ -429,7 +410,6 @@
             margin-bottom: 16px;
             flex-wrap: wrap;
             gap: 10px;
-            transform: translateZ(12px);
         }
 
         .table-header-title h3 {
@@ -551,7 +531,10 @@
 
 <body>
 
-    <!-- HIGH-IMPACT 3D WEBGL PLANETARIUM CANVAS -->
+    <!-- SCROLL PROGRESS BAR -->
+    <div id="scrollProgressBar" class="scroll-progress-bar"></div>
+
+    <!-- HIGH-IMPACT WEBGL ATMOSPHERIC BACKGROUND CANVAS -->
     <canvas id="threeCanvas"></canvas>
 
     <div class="details-page-app">
@@ -559,8 +542,8 @@
         <!-- NAVIGATION -->
         <nav class="back-nav-bar">
             <div class="back-nav-left">
-                <a href="index.html" class="back-btn" title="Return to interactive 3D station dashboard">
-                    <span>⬅️</span> Back to 3D Dashboard
+                <a href="index.html" class="back-btn" title="Return to weather dashboard">
+                    <span>⬅️</span> Back to Dashboard
                 </a>
             </div>
 
@@ -574,8 +557,8 @@
             </div>
         </nav>
 
-        <!-- DETAILS 3D HERO -->
-        <header class="details-hero">
+        <!-- DETAILS HERO -->
+        <header class="details-hero scroll-reveal">
             <div class="card-glare"></div>
 
             <div class="details-hero-top">
@@ -606,7 +589,7 @@
                 </button>
             </div>
 
-            <!-- DAY SUMMARY METRICS (4 3D METRIC CARDS) -->
+            <!-- DAY SUMMARY METRICS (4 METRIC CARDS) -->
             <div class="day-summary-cards">
                 <div class="summary-card">
                     <div class="card-glare"></div>
@@ -641,22 +624,22 @@
             <p>Loading complete atmospheric hourly telemetry...</p>
         </div>
 
-        <!-- 3D HOURLY VISUAL STREAM (HORIZONTAL CAROUSEL) -->
-        <section class="details-hourly-strip-wrap">
+        <!-- HOURLY VISUAL STREAM (HORIZONTAL CAROUSEL) -->
+        <section class="details-hourly-strip-wrap scroll-reveal">
             <div class="details-strip-title">
                 <h3>
                     <span>✨</span>
-                    <span>3D Hourly Visual Stream</span>
+                    <span>Hourly Forecast Stream</span>
                 </h3>
                 <span class="strip-hint">Scroll horizontally • Click card to highlight table row</span>
             </div>
             <div id="detailsHourlyStrip" class="details-hourly-strip">
-                <!-- Populated dynamically with 3D hourly cards -->
+                <!-- Populated dynamically with hourly cards -->
             </div>
         </section>
 
         <!-- DETAILED HOURLY DATA TABLE CONSOLE -->
-        <section class="table-wrap">
+        <section class="table-wrap scroll-reveal">
             <div class="card-glare"></div>
             <div class="table-header-title">
                 <h3>
@@ -959,13 +942,11 @@
             });
         }
 
-        /* ================= DYNAMIC 3D CARD TILT ENGINE ================= */
+        /* ================= DYNAMIC MICRO TILT ENGINE ================= */
         function initDetailsCard3DTilt() {
             const cardSelectors = [
-                ".details-hero",
                 ".summary-card",
-                ".details-hourly-card-3d",
-                ".table-wrap"
+                ".details-hourly-card-3d"
             ];
 
             const cards = document.querySelectorAll(cardSelectors.join(","));
@@ -987,57 +968,38 @@
                     const xPct = (mouseX / rect.width - 0.5) * 2;
                     const yPct = (mouseY / rect.height - 0.5) * 2;
 
-                    const isBig = card.classList.contains("details-hero") || card.classList.contains("table-wrap");
-                    const maxTilt = isBig ? 3.5 : 8;
+                    const maxTilt = 1.6;
                     const tiltX = -yPct * maxTilt;
                     const tiltY = xPct * maxTilt;
 
-                    card.style.transform = `perspective(1000px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) translateY(-6px) translateZ(16px)`;
+                    card.style.transform = `perspective(1000px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) translateY(-3px)`;
 
                     const glare = card.querySelector(".card-glare");
                     if (glare) {
-                        glare.style.opacity = "0.8";
-                        glare.style.background = `radial-gradient(circle at ${(mouseX / rect.width * 100).toFixed(1)}% ${(mouseY / rect.height * 100).toFixed(1)}%, rgba(255, 255, 255, 0.4) 0%, transparent 65%)`;
+                        glare.style.opacity = "0.5";
+                        glare.style.background = `radial-gradient(circle at ${(mouseX / rect.width * 100).toFixed(1)}% ${(mouseY / rect.height * 100).toFixed(1)}%, rgba(255, 255, 255, 0.15) 0%, transparent 65%)`;
                     }
                 });
 
                 card.addEventListener("mouseleave", () => {
-                    card.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0) translateZ(0)";
+                    card.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)";
                     const glare = card.querySelector(".card-glare");
                     if (glare) {
-                        glare.style.opacity = "0.4";
+                        glare.style.opacity = "0.2";
                     }
-                    rect = null;
-                });
-
-                // Touch support for mobile devices
-                card.addEventListener("touchmove", (e) => {
-                    if (!e.touches || !e.touches[0]) return;
-                    if (!rect) rect = card.getBoundingClientRect();
-                    const touch = e.touches[0];
-                    const touchX = touch.clientX - rect.left;
-                    const touchY = touch.clientY - rect.top;
-                    if (touchX < 0 || touchX > rect.width || touchY < 0 || touchY > rect.height) return;
-
-                    const xPct = (touchX / rect.width - 0.5) * 2;
-                    const yPct = (touchY / rect.height - 0.5) * 2;
-                    const maxTilt = 4;
-                    card.style.transform = `perspective(1000px) rotateX(${(-yPct * maxTilt).toFixed(2)}deg) rotateY(${(xPct * maxTilt).toFixed(2)}deg) translateY(-4px)`;
-                }, { passive: true });
-
-                card.addEventListener("touchend", () => {
-                    card.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)";
                     rect = null;
                 });
             });
         }
 
-        /* ================= HIGH-IMPACT 3D WEBGL ATMOSPHERIC PLANETARIUM ================= */
+        /* ================= HIGH-IMPACT WEBGL ATMOSPHERIC PARTICLES & WAVES ================= */
         let threeScene, threeCamera, threeRenderer;
-        let threeCelestialGlobe, threeOrbitRing, threeOrbitRing2, threeStarParticles, threeStarMaterial;
-        let targetCameraX = 0, targetCameraY = 0;
+        let threeStardustParticles, threeStardustMaterial;
+        let threeWavePoints, threeWaveGeo, waveInitialPositions;
+        let targetCameraX = 0, targetCameraY = 0, scrollCameraY = 0;
+        let waveClock = 0;
 
-        function initThreePlanetarium() {
+        function initThreeAtmosphere() {
             try {
                 const canvas = document.getElementById("threeCanvas");
                 if (!canvas || typeof THREE === "undefined") return;
@@ -1052,89 +1014,109 @@
 
                 const isDark = document.body.classList.contains("dark");
 
-                // 1. Central 3D Celestial Wireframe Globe
-                const globeGeo = new THREE.SphereGeometry(14, 28, 28);
-                const globeMat = new THREE.MeshBasicMaterial({
-                    color: isDark ? 0x38bdf8 : 0x0284c7,
-                    wireframe: true,
-                    transparent: true,
-                    opacity: isDark ? 0.38 : 0.24
-                });
-                threeCelestialGlobe = new THREE.Mesh(globeGeo, globeMat);
-                threeCelestialGlobe.position.set(0, -2, -5);
-                threeScene.add(threeCelestialGlobe);
-
-                // 2. 3D Primary Planetary Orbit Ring
-                const ringGeo = new THREE.RingGeometry(18, 18.7, 64);
-                const ringMat = new THREE.MeshBasicMaterial({
-                    color: isDark ? 0xa855f7 : 0xf59e0b,
-                    side: THREE.DoubleSide,
-                    transparent: true,
-                    opacity: isDark ? 0.45 : 0.32
-                });
-                threeOrbitRing = new THREE.Mesh(ringGeo, ringMat);
-                threeOrbitRing.rotation.x = Math.PI / 2.6;
-                threeOrbitRing.rotation.y = Math.PI / 8;
-                threeOrbitRing.position.set(0, -2, -5);
-                threeScene.add(threeOrbitRing);
-
-                // 3. 3D Secondary Concentric Ring
-                const ring2Geo = new THREE.RingGeometry(22, 22.6, 64);
-                const ring2Mat = new THREE.MeshBasicMaterial({
-                    color: isDark ? 0x22d3ee : 0x06b6d4,
-                    side: THREE.DoubleSide,
-                    transparent: true,
-                    opacity: isDark ? 0.35 : 0.22
-                });
-                threeOrbitRing2 = new THREE.Mesh(ring2Geo, ring2Mat);
-                threeOrbitRing2.rotation.x = Math.PI / 3.4;
-                threeOrbitRing2.rotation.y = -Math.PI / 6;
-                threeOrbitRing2.position.set(0, -2, -5);
-                threeScene.add(threeOrbitRing2);
-
-                // 4. Floating 3D Celestial Particles (240 points)
-                const particleCount = 240;
+                // 1. Serene Floating Atmospheric Stardust Motes (320 points)
+                const particleCount = 320;
                 const particleGeo = new THREE.BufferGeometry();
                 const posArray = new Float32Array(particleCount * 3);
                 const colorArray = new Float32Array(particleCount * 3);
 
                 for (let i = 0; i < particleCount * 3; i += 3) {
-                    posArray[i] = (Math.random() - 0.5) * 80;
-                    posArray[i + 1] = (Math.random() - 0.5) * 70;
-                    posArray[i + 2] = (Math.random() - 0.5) * 50;
+                    posArray[i] = (Math.random() - 0.5) * 90;
+                    posArray[i + 1] = (Math.random() - 0.5) * 80;
+                    posArray[i + 2] = (Math.random() - 0.5) * 60;
 
                     if (isDark) {
-                        colorArray[i] = 0.2 + Math.random() * 0.4;
+                        colorArray[i] = 0.2 + Math.random() * 0.35;
                         colorArray[i + 1] = 0.7 + Math.random() * 0.3;
                         colorArray[i + 2] = 1.0;
                     } else {
-                        colorArray[i] = 0.96;
-                        colorArray[i + 1] = 0.7 + Math.random() * 0.25;
-                        colorArray[i + 2] = 0.2 + Math.random() * 0.3;
+                        colorArray[i] = 0.95;
+                        colorArray[i + 1] = 0.65 + Math.random() * 0.25;
+                        colorArray[i + 2] = 0.2 + Math.random() * 0.2;
                     }
                 }
 
                 particleGeo.setAttribute("position", new THREE.BufferAttribute(posArray, 3));
                 particleGeo.setAttribute("color", new THREE.BufferAttribute(colorArray, 3));
 
-                threeStarMaterial = new THREE.PointsMaterial({
-                    size: 2.2,
+                threeStardustMaterial = new THREE.PointsMaterial({
+                    size: 1.8,
                     vertexColors: true,
                     transparent: true,
-                    opacity: isDark ? 0.85 : 0.70,
+                    opacity: isDark ? 0.75 : 0.55,
                     blending: THREE.AdditiveBlending
                 });
 
-                threeStarParticles = new THREE.Points(particleGeo, threeStarMaterial);
-                threeScene.add(threeStarParticles);
+                threeStardustParticles = new THREE.Points(particleGeo, threeStardustMaterial);
+                threeScene.add(threeStardustParticles);
 
-                // Mouse Parallax
+                // 2. Atmospheric Flow Field Waves (36 x 36 grid)
+                const waveRows = 36;
+                const waveCols = 36;
+                const totalWavePoints = waveRows * waveCols;
+                threeWaveGeo = new THREE.BufferGeometry();
+                const wavePositions = new Float32Array(totalWavePoints * 3);
+                waveInitialPositions = new Float32Array(totalWavePoints * 3);
+                const waveColors = new Float32Array(totalWavePoints * 3);
+
+                let pIdx = 0;
+                const spacing = 1.8;
+                const startX = -((waveCols - 1) * spacing) / 2;
+                const startZ = -((waveRows - 1) * spacing) / 2 - 4;
+
+                for (let r = 0; r < waveRows; r++) {
+                    for (let c = 0; c < waveCols; c++) {
+                        const px = startX + c * spacing;
+                        const py = -10 + Math.sin(c * 0.2) * 1.5;
+                        const pz = startZ + r * spacing;
+
+                        wavePositions[pIdx] = px;
+                        wavePositions[pIdx + 1] = py;
+                        wavePositions[pIdx + 2] = pz;
+
+                        waveInitialPositions[pIdx] = px;
+                        waveInitialPositions[pIdx + 1] = py;
+                        waveInitialPositions[pIdx + 2] = pz;
+
+                        if (isDark) {
+                            waveColors[pIdx] = 0.22;
+                            waveColors[pIdx + 1] = 0.74;
+                            waveColors[pIdx + 2] = 0.97;
+                        } else {
+                            waveColors[pIdx] = 0.01;
+                            waveColors[pIdx + 1] = 0.52;
+                            waveColors[pIdx + 2] = 0.78;
+                        }
+
+                        pIdx += 3;
+                    }
+                }
+
+                threeWaveGeo.setAttribute("position", new THREE.BufferAttribute(wavePositions, 3));
+                threeWaveGeo.setAttribute("color", new THREE.BufferAttribute(waveColors, 3));
+
+                const waveMaterial = new THREE.PointsMaterial({
+                    size: 1.4,
+                    vertexColors: true,
+                    transparent: true,
+                    opacity: isDark ? 0.42 : 0.28,
+                    blending: THREE.AdditiveBlending
+                });
+
+                threeWavePoints = new THREE.Points(threeWaveGeo, waveMaterial);
+                threeScene.add(threeWavePoints);
+
+                // Mouse & Scroll Parallax
                 window.addEventListener("mousemove", (e) => {
                     const normX = (e.clientX / window.innerWidth) * 2 - 1;
                     const normY = -(e.clientY / window.innerHeight) * 2 + 1;
-                    targetCameraX = normX * 4;
-                    targetCameraY = normY * 3;
+                    targetCameraX = normX * 2.5;
+                    targetCameraY = normY * 1.8;
                 });
+
+                window.addEventListener("scroll", () => {
+                    scrollCameraY = window.scrollY * 0.012;
+                }, { passive: true });
 
                 window.addEventListener("resize", () => {
                     if (!threeCamera || !threeRenderer) return;
@@ -1146,24 +1128,31 @@
                 function animate() {
                     requestAnimationFrame(animate);
 
-                    if (threeCelestialGlobe) {
-                        threeCelestialGlobe.rotation.y += 0.0014;
-                        threeCelestialGlobe.rotation.x += 0.0005;
+                    waveClock += 0.018;
+
+                    if (threeStardustParticles) {
+                        threeStardustParticles.rotation.y += 0.0004;
+                        threeStardustParticles.rotation.x = Math.sin(waveClock * 0.2) * 0.04;
                     }
-                    if (threeOrbitRing) {
-                        threeOrbitRing.rotation.z += 0.0018;
-                    }
-                    if (threeOrbitRing2) {
-                        threeOrbitRing2.rotation.z -= 0.0015;
-                    }
-                    if (threeStarParticles) {
-                        threeStarParticles.rotation.y += 0.0008;
+
+                    if (threeWavePoints && threeWaveGeo && waveInitialPositions) {
+                        const pos = threeWaveGeo.attributes.position.array;
+                        const count = pos.length / 3;
+                        for (let i = 0; i < count; i++) {
+                            const i3 = i * 3;
+                            const origX = waveInitialPositions[i3];
+                            const origZ = waveInitialPositions[i3 + 2];
+                            const dist = Math.sqrt(origX * origX + origZ * origZ);
+                            pos[i3 + 1] = waveInitialPositions[i3 + 1] + Math.sin(dist * 0.16 - waveClock) * 1.2 + Math.cos(origX * 0.2 + waveClock * 0.8) * 0.6;
+                        }
+                        threeWaveGeo.attributes.position.needsUpdate = true;
                     }
 
                     if (threeCamera) {
+                        const desiredY = targetCameraY - scrollCameraY;
                         threeCamera.position.x += (targetCameraX - threeCamera.position.x) * 0.05;
-                        threeCamera.position.y += (targetCameraY - threeCamera.position.y) * 0.05;
-                        threeCamera.lookAt(0, 0, 0);
+                        threeCamera.position.y += (desiredY - threeCamera.position.y) * 0.05;
+                        threeCamera.lookAt(0, -scrollCameraY * 0.4, 0);
                     }
 
                     threeRenderer.render(threeScene, threeCamera);
@@ -1179,43 +1168,98 @@
             if (!threeScene) return;
             const isDark = document.body.classList.contains("dark");
 
-            if (threeCelestialGlobe && threeCelestialGlobe.material) {
-                threeCelestialGlobe.material.color.setHex(isDark ? 0x38bdf8 : 0x0284c7);
-                threeCelestialGlobe.material.opacity = isDark ? 0.38 : 0.24;
-            }
-            if (threeOrbitRing && threeOrbitRing.material) {
-                threeOrbitRing.material.color.setHex(isDark ? 0xa855f7 : 0xf59e0b);
-                threeOrbitRing.material.opacity = isDark ? 0.45 : 0.32;
-            }
-            if (threeOrbitRing2 && threeOrbitRing2.material) {
-                threeOrbitRing2.material.color.setHex(isDark ? 0x22d3ee : 0x06b6d4);
-                threeOrbitRing2.material.opacity = isDark ? 0.35 : 0.22;
-            }
-            if (threeStarParticles && threeStarParticles.geometry) {
-                const colors = threeStarParticles.geometry.attributes.color.array;
+            if (threeStardustParticles && threeStardustParticles.geometry) {
+                const colors = threeStardustParticles.geometry.attributes.color.array;
                 const count = colors.length / 3;
 
                 for (let i = 0; i < count * 3; i += 3) {
                     if (isDark) {
-                        colors[i] = 0.2 + Math.random() * 0.4;
+                        colors[i] = 0.2 + Math.random() * 0.35;
                         colors[i + 1] = 0.7 + Math.random() * 0.3;
                         colors[i + 2] = 1.0;
                     } else {
-                        colors[i] = 0.96;
-                        colors[i + 1] = 0.7 + Math.random() * 0.25;
-                        colors[i + 2] = 0.2 + Math.random() * 0.3;
+                        colors[i] = 0.95;
+                        colors[i + 1] = 0.65 + Math.random() * 0.25;
+                        colors[i + 2] = 0.2 + Math.random() * 0.2;
                     }
                 }
-                threeStarParticles.geometry.attributes.color.needsUpdate = true;
+                threeStardustParticles.geometry.attributes.color.needsUpdate = true;
             }
-            if (threeStarMaterial) {
-                threeStarMaterial.opacity = isDark ? 0.85 : 0.70;
+            if (threeStardustMaterial) {
+                threeStardustMaterial.opacity = isDark ? 0.75 : 0.55;
+            }
+
+            if (threeWavePoints && threeWavePoints.geometry) {
+                const wColors = threeWavePoints.geometry.attributes.color.array;
+                const count = wColors.length / 3;
+                for (let i = 0; i < count * 3; i += 3) {
+                    if (isDark) {
+                        wColors[i] = 0.22;
+                        wColors[i + 1] = 0.74;
+                        wColors[i + 2] = 0.97;
+                    } else {
+                        wColors[i] = 0.01;
+                        wColors[i + 1] = 0.52;
+                        wColors[i + 2] = 0.78;
+                    }
+                }
+                threeWavePoints.geometry.attributes.color.needsUpdate = true;
+                if (threeWavePoints.material) {
+                    threeWavePoints.material.opacity = isDark ? 0.42 : 0.28;
+                }
             }
         }
 
-        // Initialize WebGL planetarium and load data
+        /* ================= SCROLL DYNAMICS & PROGRESS BAR ================= */
+        function initScrollDynamics() {
+            const progressBar = document.getElementById("scrollProgressBar");
+            const navBar = document.querySelector(".back-nav-bar");
+
+            const handleScroll = () => {
+                const scrollY = window.scrollY || document.documentElement.scrollTop;
+                const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+
+                if (progressBar) {
+                    const scrollPct = docHeight > 0 ? (scrollY / docHeight) * 100 : 0;
+                    progressBar.style.width = `${Math.min(100, Math.max(0, scrollPct))}%`;
+                }
+
+                if (navBar) {
+                    if (scrollY > 30) {
+                        navBar.classList.add("scrolled");
+                    } else {
+                        navBar.classList.remove("scrolled");
+                    }
+                }
+            };
+
+            window.addEventListener("scroll", handleScroll, { passive: true });
+            handleScroll();
+
+            // Intersection Observer for silky scroll-reveal
+            if ("IntersectionObserver" in window) {
+                const revealObserver = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add("revealed");
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, {
+                    threshold: 0.1,
+                    rootMargin: "0px 0px -40px 0px"
+                });
+
+                document.querySelectorAll(".scroll-reveal").forEach(el => revealObserver.observe(el));
+            } else {
+                document.querySelectorAll(".scroll-reveal").forEach(el => el.classList.add("revealed"));
+            }
+        }
+
+        // Initialize WebGL atmosphere and load data
         window.addEventListener("DOMContentLoaded", () => {
-            initThreePlanetarium();
+            initThreeAtmosphere();
+            initScrollDynamics();
             loadData();
         });
     </script>

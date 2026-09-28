@@ -42,17 +42,16 @@ let isSimulating = false;
 let simInterval = null;
 let simProgress = 0; // 0 to 1
 
-// Three.js 3D WebGL Planetarium Scene
+// Three.js Atmospheric Background Scene
 let threeScene = null;
 let threeCamera = null;
 let threeRenderer = null;
-let threeCelestialGlobe = null;
-let threeOrbitRing = null;
-let threeOrbitRing2 = null;
-let threeStarParticles = null;
-let threeStarMaterial = null;
+let atmosphericMotes = null;
+let waveParticles = null;
+let waveGeo = null;
 let targetCameraX = 0;
 let targetCameraY = 0;
+let scrollCameraY = 0;
 
 /* ================= EXPOSE ALL HANDLERS ON WINDOW IMMEDIATELY ================= */
 window.toggleTheme = toggleTheme;
@@ -1694,15 +1693,15 @@ function navigateToDetails(e) {
     window.location.href = targetUrl;
 }
 
-/* ================= 10. HIGH-IMPACT 3D WEBGL ATMOSPHERIC PLANETARIUM ================= */
+/* ================= 10. LUXURY ATMOSPHERIC PARTICLE & NEBULA BACKGROUND ================= */
 function initHighImpactThreeJS() {
     try {
         const canvas = document.getElementById("threeCanvas");
         if (!canvas || typeof THREE === "undefined") return;
 
         threeScene = new THREE.Scene();
-        threeCamera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-        threeCamera.position.z = 32;
+        threeCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        threeCamera.position.z = 40;
 
         threeRenderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "high-performance" });
         threeRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -1710,91 +1709,96 @@ function initHighImpactThreeJS() {
 
         const isDark = document.body.classList.contains("dark");
 
-        // 1. Central 3D Celestial Wireframe Globe
-        const globeGeo = new THREE.SphereGeometry(14, 28, 28);
-        const globeMat = new THREE.MeshBasicMaterial({
-            color: isDark ? 0x38bdf8 : 0x0284c7,
-            wireframe: true,
-            transparent: true,
-            opacity: isDark ? 0.38 : 0.24
-        });
-        threeCelestialGlobe = new THREE.Mesh(globeGeo, globeMat);
-        threeCelestialGlobe.position.set(0, -2, -5);
-        threeScene.add(threeCelestialGlobe);
+        // 1. Serene Floating Atmospheric Motes (380 stardust particles)
+        const moteCount = 380;
+        const moteGeo = new THREE.BufferGeometry();
+        const motePos = new Float32Array(moteCount * 3);
+        const moteColors = new Float32Array(moteCount * 3);
 
-        // 2. 3D Primary Planetary Orbit Ring
-        const ringGeo = new THREE.RingGeometry(18, 18.7, 64);
-        const ringMat = new THREE.MeshBasicMaterial({
-            color: isDark ? 0xa855f7 : 0xf59e0b,
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: isDark ? 0.45 : 0.32
-        });
-        threeOrbitRing = new THREE.Mesh(ringGeo, ringMat);
-        threeOrbitRing.rotation.x = Math.PI / 2.6;
-        threeOrbitRing.rotation.y = Math.PI / 8;
-        threeOrbitRing.position.set(0, -2, -5);
-        threeScene.add(threeOrbitRing);
-
-        // 3. 3D Secondary Concentric Ring
-        const ring2Geo = new THREE.RingGeometry(22, 22.6, 64);
-        const ring2Mat = new THREE.MeshBasicMaterial({
-            color: isDark ? 0x22d3ee : 0x06b6d4,
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: isDark ? 0.35 : 0.22
-        });
-        threeOrbitRing2 = new THREE.Mesh(ring2Geo, ring2Mat);
-        threeOrbitRing2.rotation.x = Math.PI / 3.4;
-        threeOrbitRing2.rotation.y = -Math.PI / 6;
-        threeOrbitRing2.position.set(0, -2, -5);
-        threeScene.add(threeOrbitRing2);
-
-        // 4. Floating 3D Celestial Particles (240 points)
-        const particleCount = 240;
-        const particleGeo = new THREE.BufferGeometry();
-        const posArray = new Float32Array(particleCount * 3);
-        const colorArray = new Float32Array(particleCount * 3);
-
-        for (let i = 0; i < particleCount * 3; i += 3) {
-            posArray[i] = (Math.random() - 0.5) * 80;
-            posArray[i + 1] = (Math.random() - 0.5) * 70;
-            posArray[i + 2] = (Math.random() - 0.5) * 50;
+        for (let i = 0; i < moteCount * 3; i += 3) {
+            motePos[i] = (Math.random() - 0.5) * 110;
+            motePos[i + 1] = (Math.random() - 0.5) * 100;
+            motePos[i + 2] = (Math.random() - 0.5) * 60;
 
             if (isDark) {
-                // Night colors: Cyan, Indigo, Silver
-                colorArray[i] = 0.2 + Math.random() * 0.4;
-                colorArray[i + 1] = 0.7 + Math.random() * 0.3;
-                colorArray[i + 2] = 1.0;
+                const pick = Math.random();
+                if (pick < 0.4) {
+                    moteColors[i] = 0.22; moteColors[i + 1] = 0.74; moteColors[i + 2] = 0.97; // cyan
+                } else if (pick < 0.7) {
+                    moteColors[i] = 0.51; moteColors[i + 1] = 0.55; moteColors[i + 2] = 0.97; // indigo
+                } else {
+                    moteColors[i] = 0.92; moteColors[i + 1] = 0.95; moteColors[i + 2] = 1.0;  // silver
+                }
             } else {
-                // Day colors: Golden Amber, Azure, Sunlight Gold
-                colorArray[i] = 0.96;
-                colorArray[i + 1] = 0.7 + Math.random() * 0.25;
-                colorArray[i + 2] = 0.2 + Math.random() * 0.3;
+                const pick = Math.random();
+                if (pick < 0.5) {
+                    moteColors[i] = 0.02; moteColors[i + 1] = 0.52; moteColors[i + 2] = 0.78; // sky blue
+                } else if (pick < 0.8) {
+                    moteColors[i] = 0.96; moteColors[i + 1] = 0.65; moteColors[i + 2] = 0.15; // amber sun
+                } else {
+                    moteColors[i] = 0.65; moteColors[i + 1] = 0.82; moteColors[i + 2] = 0.95; // light blue
+                }
             }
         }
 
-        particleGeo.setAttribute("position", new THREE.BufferAttribute(posArray, 3));
-        particleGeo.setAttribute("color", new THREE.BufferAttribute(colorArray, 3));
+        moteGeo.setAttribute("position", new THREE.BufferAttribute(motePos, 3));
+        moteGeo.setAttribute("color", new THREE.BufferAttribute(moteColors, 3));
 
-        threeStarMaterial = new THREE.PointsMaterial({
-            size: 2.2,
+        const moteMat = new THREE.PointsMaterial({
+            size: isDark ? 1.6 : 1.4,
             vertexColors: true,
             transparent: true,
-            opacity: isDark ? 0.85 : 0.70,
+            opacity: isDark ? 0.75 : 0.45,
+            blending: isDark ? THREE.AdditiveBlending : THREE.NormalBlending
+        });
+
+        atmosphericMotes = new THREE.Points(moteGeo, moteMat);
+        threeScene.add(atmosphericMotes);
+
+        // 2. Atmospheric Flow Field (Wave Particles representing atmospheric jet streams)
+        const waveCols = 32;
+        const waveRows = 32;
+        const waveTotal = waveCols * waveRows;
+        waveGeo = new THREE.BufferGeometry();
+        const wavePos = new Float32Array(waveTotal * 3);
+        const waveColors = new Float32Array(waveTotal * 3);
+
+        let pIdx = 0;
+        for (let x = 0; x < waveCols; x++) {
+            for (let y = 0; y < waveRows; y++) {
+                wavePos[pIdx * 3] = (x - waveCols / 2) * 2.8;
+                wavePos[pIdx * 3 + 1] = (y - waveRows / 2) * 2.8 - 4;
+                wavePos[pIdx * 3 + 2] = -12;
+
+                waveColors[pIdx * 3] = isDark ? 0.22 : 0.02;
+                waveColors[pIdx * 3 + 1] = isDark ? 0.65 : 0.52;
+                waveColors[pIdx * 3 + 2] = isDark ? 0.95 : 0.78;
+                pIdx++;
+            }
+        }
+
+        waveGeo.setAttribute("position", new THREE.BufferAttribute(wavePos, 3));
+        waveGeo.setAttribute("color", new THREE.BufferAttribute(waveColors, 3));
+
+        const waveMat = new THREE.PointsMaterial({
+            size: 1.2,
+            vertexColors: true,
+            transparent: true,
+            opacity: isDark ? 0.28 : 0.16,
             blending: THREE.AdditiveBlending
         });
 
-        threeStarParticles = new THREE.Points(particleGeo, threeStarMaterial);
-        threeScene.add(threeStarParticles);
+        waveParticles = new THREE.Points(waveGeo, waveMat);
+        waveParticles.rotation.x = Math.PI / 3.2;
+        threeScene.add(waveParticles);
 
-        // Parallax Interaction with Mouse
+        // Smooth Mouse Parallax (subtle and high-end)
         window.addEventListener("mousemove", (e) => {
             const normX = (e.clientX / window.innerWidth) * 2 - 1;
             const normY = -(e.clientY / window.innerHeight) * 2 + 1;
-            targetCameraX = normX * 4;
-            targetCameraY = normY * 3;
-        });
+            targetCameraX = normX * 1.5;
+            targetCameraY = normY * 1.2;
+        }, { passive: true });
 
         window.addEventListener("resize", () => {
             if (!threeCamera || !threeRenderer) return;
@@ -1803,29 +1807,36 @@ function initHighImpactThreeJS() {
             threeRenderer.setSize(window.innerWidth, window.innerHeight);
         });
 
+        let clock = 0;
         function animate() {
             requestAnimationFrame(animate);
+            clock += 0.012;
 
-            // Rotate 3D celestial elements
-            if (threeCelestialGlobe) {
-                threeCelestialGlobe.rotation.y += 0.0014;
-                threeCelestialGlobe.rotation.x += 0.0005;
-            }
-            if (threeOrbitRing) {
-                threeOrbitRing.rotation.z += 0.0018;
-            }
-            if (threeOrbitRing2) {
-                threeOrbitRing2.rotation.z -= 0.0015;
-            }
-            if (threeStarParticles) {
-                threeStarParticles.rotation.y += 0.0008;
+            // Gentle organic drift of atmospheric motes
+            if (atmosphericMotes) {
+                atmosphericMotes.rotation.y = clock * 0.03;
+                atmosphericMotes.rotation.x = Math.sin(clock * 0.02) * 0.04;
             }
 
-            // Smooth parallax lerp
+            // Gentle wave undulating
+            if (waveGeo) {
+                const pos = waveGeo.attributes.position.array;
+                let idx = 0;
+                for (let x = 0; x < waveCols; x++) {
+                    for (let y = 0; y < waveRows; y++) {
+                        pos[idx * 3 + 2] = Math.sin(clock * 0.8 + x * 0.3) * 1.8 + Math.cos(clock * 0.6 + y * 0.3) * 1.8 - 12;
+                        idx++;
+                    }
+                }
+                waveGeo.attributes.position.needsUpdate = true;
+            }
+
+            // High-damping smooth camera interpolation (including scroll offset)
             if (threeCamera) {
-                threeCamera.position.x += (targetCameraX - threeCamera.position.x) * 0.05;
-                threeCamera.position.y += (targetCameraY - threeCamera.position.y) * 0.05;
-                threeCamera.lookAt(0, 0, 0);
+                const finalTargetY = targetCameraY + scrollCameraY;
+                threeCamera.position.x += (targetCameraX - threeCamera.position.x) * 0.04;
+                threeCamera.position.y += (finalTargetY - threeCamera.position.y) * 0.04;
+                threeCamera.lookAt(0, scrollCameraY * 0.6, 0);
             }
 
             threeRenderer.render(threeScene, threeCamera);
@@ -1833,7 +1844,7 @@ function initHighImpactThreeJS() {
 
         animate();
     } catch (err) {
-        console.warn("WebGL Three.js 3D background notice:", err);
+        console.warn("Atmospheric background notice:", err);
     }
 }
 
@@ -1841,41 +1852,44 @@ function updateThreeJSPalette() {
     if (!threeScene) return;
     const isDark = document.body.classList.contains("dark");
 
-    if (threeCelestialGlobe && threeCelestialGlobe.material) {
-        threeCelestialGlobe.material.color.setHex(isDark ? 0x38bdf8 : 0x0284c7);
-        threeCelestialGlobe.material.opacity = isDark ? 0.38 : 0.24;
-    }
-    if (threeOrbitRing && threeOrbitRing.material) {
-        threeOrbitRing.material.color.setHex(isDark ? 0xa855f7 : 0xf59e0b);
-        threeOrbitRing.material.opacity = isDark ? 0.45 : 0.32;
-    }
-    if (threeOrbitRing2 && threeOrbitRing2.material) {
-        threeOrbitRing2.material.color.setHex(isDark ? 0x22d3ee : 0x06b6d4);
-        threeOrbitRing2.material.opacity = isDark ? 0.35 : 0.22;
-    }
-    if (threeStarParticles && threeStarParticles.geometry) {
-        const colors = threeStarParticles.geometry.attributes.color.array;
+    if (atmosphericMotes && atmosphericMotes.geometry) {
+        const colors = atmosphericMotes.geometry.attributes.color.array;
         const count = colors.length / 3;
 
         for (let i = 0; i < count * 3; i += 3) {
             if (isDark) {
-                colors[i] = 0.2 + Math.random() * 0.4;
-                colors[i + 1] = 0.7 + Math.random() * 0.3;
-                colors[i + 2] = 1.0;
+                const pick = Math.random();
+                if (pick < 0.4) {
+                    colors[i] = 0.22; colors[i + 1] = 0.74; colors[i + 2] = 0.97;
+                } else if (pick < 0.7) {
+                    colors[i] = 0.51; colors[i + 1] = 0.55; colors[i + 2] = 0.97;
+                } else {
+                    colors[i] = 0.92; colors[i + 1] = 0.95; colors[i + 2] = 1.0;
+                }
             } else {
-                colors[i] = 0.96;
-                colors[i + 1] = 0.7 + Math.random() * 0.25;
-                colors[i + 2] = 0.2 + Math.random() * 0.3;
+                const pick = Math.random();
+                if (pick < 0.5) {
+                    colors[i] = 0.02; colors[i + 1] = 0.52; colors[i + 2] = 0.78;
+                } else if (pick < 0.8) {
+                    colors[i] = 0.96; colors[i + 1] = 0.65; colors[i + 2] = 0.15;
+                } else {
+                    colors[i] = 0.65; colors[i + 1] = 0.82; colors[i + 2] = 0.95;
+                }
             }
         }
-        threeStarParticles.geometry.attributes.color.needsUpdate = true;
+        atmosphericMotes.geometry.attributes.color.needsUpdate = true;
+        if (atmosphericMotes.material) {
+            atmosphericMotes.material.opacity = isDark ? 0.75 : 0.45;
+            atmosphericMotes.material.blending = isDark ? THREE.AdditiveBlending : THREE.NormalBlending;
+        }
     }
-    if (threeStarMaterial) {
-        threeStarMaterial.opacity = isDark ? 0.85 : 0.70;
+
+    if (waveParticles && waveParticles.material) {
+        waveParticles.material.opacity = isDark ? 0.28 : 0.16;
     }
 }
 
-/* ================= 10.1 DYNAMIC 3D TILT ENGINE FOR ALL DASHBOARD BOXES ================= */
+/* ================= 10.1 REFINED MICRO-TILT ENGINE (SUBTLE & ZERO JITTER) ================= */
 function initCard3DTilt() {
     const cardSelectors = [
         ".weather-card-3d",
@@ -1900,53 +1914,80 @@ function initCard3DTilt() {
             const mouseX = e.clientX - rect.left;
             const mouseY = e.clientY - rect.top;
 
-            const xPct = (mouseX / rect.width - 0.5) * 2; // -1 to 1
-            const yPct = (mouseY / rect.height - 0.5) * 2; // -1 to 1
+            const xPct = (mouseX / rect.width - 0.5) * 2;
+            const yPct = (mouseY / rect.height - 0.5) * 2;
 
-            const maxTilt = 8; // degrees
+            // Very subtle micro-tilt (max 1.6 degrees)
+            const maxTilt = 1.6;
             const tiltX = -yPct * maxTilt;
             const tiltY = xPct * maxTilt;
 
-            card.style.transform = `perspective(1000px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) translateY(-8px) translateZ(16px)`;
+            card.style.transform = `perspective(1000px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) translateY(-4px)`;
 
             const glare = card.querySelector(".card-glare");
             if (glare) {
-                glare.style.opacity = "0.85";
-                glare.style.background = `radial-gradient(circle at ${(mouseX / rect.width * 100).toFixed(1)}% ${(mouseY / rect.height * 100).toFixed(1)}%, rgba(255, 255, 255, 0.42) 0%, transparent 65%)`;
+                glare.style.opacity = "0.7";
+                glare.style.background = `radial-gradient(circle at ${(mouseX / rect.width * 100).toFixed(1)}% ${(mouseY / rect.height * 100).toFixed(1)}%, rgba(255, 255, 255, 0.16) 0%, transparent 60%)`;
             }
         });
 
         card.addEventListener("mouseleave", () => {
-            card.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0) translateZ(0)";
+            card.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)";
             const glare = card.querySelector(".card-glare");
             if (glare) {
-                glare.style.opacity = "0.4";
+                glare.style.opacity = "0";
             }
             rect = null;
         });
-
-        // Touch support for mobile 3D tilt
-        card.addEventListener("touchmove", (e) => {
-            if (!e.touches || !e.touches[0]) return;
-            if (!rect) rect = card.getBoundingClientRect();
-            const touch = e.touches[0];
-            const touchX = touch.clientX - rect.left;
-            const touchY = touch.clientY - rect.top;
-
-            const xPct = Math.max(-1, Math.min(1, (touchX / rect.width - 0.5) * 2));
-            const yPct = Math.max(-1, Math.min(1, (touchY / rect.height - 0.5) * 2));
-
-            const tiltX = -yPct * 7;
-            const tiltY = xPct * 7;
-
-            card.style.transform = `perspective(800px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) translateY(-4px) translateZ(10px)`;
-        }, { passive: true });
-
-        card.addEventListener("touchend", () => {
-            card.style.transform = "perspective(800px) rotateX(0deg) rotateY(0deg) translateY(0) translateZ(0)";
-            rect = null;
-        });
     });
+}
+
+/* ================= 10.2 SCROLL DYNAMICS & REVEAL ENGINE ================= */
+function initScrollDynamics() {
+    const progressBar = document.getElementById("scrollProgressBar");
+    const header = document.querySelector(".header");
+
+    const onScroll = () => {
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrollPct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+
+        if (progressBar) {
+            progressBar.style.width = `${Math.min(100, Math.max(0, scrollPct))}%`;
+        }
+
+        if (header) {
+            if (scrollTop > 24) {
+                header.classList.add("scrolled");
+            } else {
+                header.classList.remove("scrolled");
+            }
+        }
+
+        // Three.js background vertical altitude shift on scroll
+        scrollCameraY = -scrollTop * 0.012;
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+
+    // Intersection Observer for silky scroll reveals
+    if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("revealed");
+                }
+            });
+        }, {
+            threshold: 0.08,
+            rootMargin: "0px 0px -30px 0px"
+        });
+
+        document.querySelectorAll(".scroll-reveal").forEach(el => observer.observe(el));
+    } else {
+        document.querySelectorAll(".scroll-reveal").forEach(el => el.classList.add("revealed"));
+    }
 }
 
 /* ================= 11. WEATHER DATA RETRIEVAL ================= */
@@ -2223,6 +2264,7 @@ function initApp() {
     renderSavedCities();
     initHighImpactThreeJS();
     initCard3DTilt();
+    initScrollDynamics();
 
     const savedCity = safeStorage.getItem("weatherwise_last_city");
     if (savedCity) {
