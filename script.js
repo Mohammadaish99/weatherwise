@@ -2308,7 +2308,7 @@ const EXTREME_AND_ANTIQUE_DATA = {
         defaultIndex: 0,
         contenders: [
             {
-                city: "Furnace Creek, Death Valley, California, USA",
+                city: "Death Valley, California, USA",
                 shortName: "Death Valley (+56.7°C)",
                 lat: 36.4614,
                 lon: -116.8656,
@@ -2660,6 +2660,11 @@ function detectExtremeOrAntiqueQuery(rawQuery) {
     if (!rawQuery) return null;
     const q = rawQuery.trim().toLowerCase();
 
+    // Hot & Cold combined query (e.g. "hot and cold", "cold and hot")
+    if (/\b(hot|heat)\b/i.test(q) && /\b(cold|freeze|ice)\b/i.test(q)) {
+        return { category: "lowest_temp", index: 0 };
+    }
+
     // Lowest Temperature / Polar & Cold records (includes 'cold', 'lowest', 'min temp', 'freeze', 'ice', 'polar', 'sub zero')
     if (/^(cold|coldest|colder|lowest|lowest\s*temp|lowest\s*temperature|min\s*temp|minimum\s*temp|coldest\s*city|coldest\s*place|coldest\s*country|extreme\s*cold|freezing\s*record|freeze|freezing|ice\s*record|sub\s*zero|low\s*temp)\b/i.test(q) ||
         /\b(coldest|coldest\s*place|coldest\s*city|coldest\s*in\s*the\s*world|lowest\s*temp|lowest\s*temperature)\b/i.test(q)) {
@@ -2917,8 +2922,8 @@ function renderSearchSuggestions(query = "") {
     } else {
         const extremeIntent = detectExtremeOrAntiqueQuery(q);
         if (extremeIntent) {
-            if (q === "hold" || q === "temp" || q === "temperature") {
-                // Typo 'hold' or 'temp': show both lowest and highest temperature world records!
+            if (q === "hold" || q === "temp" || q === "temperature" || (/\b(hot|heat)\b/i.test(q) && /\b(cold|freeze|ice)\b/i.test(q))) {
+                // Typo 'hold', 'temp', or combined 'hot and cold': show both lowest and highest temperature world records!
                 matchedItems = allContenders.filter(c => 
                     (c.catKey === "lowest_temp" && (c.idx === 0 || c.idx === 1)) ||
                     (c.catKey === "highest_temp" && (c.idx === 0 || c.idx === 1))
@@ -2949,8 +2954,10 @@ function renderSearchSuggestions(query = "") {
     // Render immediate local / extreme matches synchronously
     buildDropdownHTML(matchedItems, []);
 
-    // Debounced live geocoding for any city or country query (e.g. Paris, London, Tokyo, Delhi, Mumbai, etc.)
-    if (q.length >= 2) {
+    // Debounced live geocoding ONLY for regular cities/countries (e.g. Paris, London, Tokyo, Delhi, Mumbai, etc.)
+    // CRITICAL: NEVER geocode weather queries (rain, snow, cold, hot, hold, wind, alert)
+    // because Open-Meteo geocoding has towns named "Rain" in Germany and "Snow" in Oklahoma!
+    if (q.length >= 2 && !detectExtremeOrAntiqueQuery(q)) {
         debounceGeocode(q, matchedItems);
     }
 }
@@ -2959,6 +2966,11 @@ function debounceGeocode(q, existingMatches) {
     if (geocodeDebounceTimer) clearTimeout(geocodeDebounceTimer);
     if (activeGeocodeAbortController) {
         activeGeocodeAbortController.abort();
+    }
+
+    // Never fetch geocoded towns for weather condition searches!
+    if (detectExtremeOrAntiqueQuery(q)) {
+        return;
     }
 
     geocodeDebounceTimer = setTimeout(async () => {
@@ -3167,6 +3179,16 @@ function searchCurrentInput() {
 }
 
 async function fetchWeatherByCity(city) {
+    if (!city) return;
+
+    // Route weather phenomenon keywords directly to their world record extreme locations
+    // rather than geocoding to accidental matches like "Rain, Germany" or "Snow, Oklahoma"
+    const extreme = detectExtremeOrAntiqueQuery(city);
+    if (extreme) {
+        triggerExtremeCategory(extreme.category, extreme.index, false);
+        return;
+    }
+
     showLoading(true, `Connecting to satellites for "${city}"...`);
     hideError();
 

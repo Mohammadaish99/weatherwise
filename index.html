@@ -22,7 +22,7 @@
 
     <title>WeatherWise 3D | Real-Time Atmospheric Station</title>
 
-    <link rel="stylesheet" href="style.css?v=9.0">
+    <link rel="stylesheet" href="style.css?v=10.0">
 </head>
 
 <body>
@@ -377,6 +377,129 @@
                         </div>
                     </div>
 
+                </div>
+            </section>
+
+
+            <!-- ================= 8. CELESTIAL HORIZON DOME: SOLAR & LUNAR TRAJECTORY ================= -->
+            <section class="celestial-section-below scroll-reveal">
+                <div class="section-title">
+                    <h2>🌅 Celestial Horizon Dome: Solar & Lunar Trajectory</h2>
+                    <span class="refresh-badge-3d">
+                        <span id="celestialModeIcon">☀️</span> <span id="celestialModeName">Day Sun Path</span>
+                    </span>
+                </div>
+
+                <div class="celestial-dome-card-3d card-3d-interactive" id="celestialDomeCard">
+                    <div class="card-glare"></div>
+                    <div class="dome-meta-header">
+                        <div class="dome-info">
+                            <h3 id="celestialHeading">Sun Orbit Trajectory (Sunrise to Sunset)</h3>
+                            <p id="celestialRemainingText">Calculating astronomical elevation...</p>
+                        </div>
+
+                        <!-- 24-HOUR SIMULATION CONTROLS -->
+                        <div class="simulation-controls">
+                            <button id="simPlayBtn" class="sim-play-btn" onclick="window.toggleCelestialSimulation && window.toggleCelestialSimulation()" title="Simulate 24-Hour Day/Night Cycle">
+                                <span>▶️</span> Play 24h Arc
+                            </button>
+                            <button id="simResetBtn" class="sim-reset-btn" onclick="window.resetCelestialSimulation && window.resetCelestialSimulation()" title="Reset to Real-Time Local Position">
+                                <span>↺</span> Real-Time
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- PROMINENT ASTRONOMICAL LUNAR PHASE TELEMETRY STRIP -->
+                    <div class="lunar-telemetry-strip" id="lunarTelemetryStrip">
+                        <div class="lunar-phase-highlight">
+                            <span id="lunarPhaseIconLarge" class="lunar-large-icon">🌕</span>
+                            <div class="lunar-phase-text-group">
+                                <div class="lunar-primary-line">
+                                    <span class="lunar-label-prefix">Today's Moon:</span>
+                                    <strong id="lunarPhaseName">Calculating...</strong>
+                                    <span id="lunarCategoryBadge" class="lunar-cat-badge">Moon Phase</span>
+                                </div>
+                                <p id="lunarPhaseSubtext" class="lunar-subtext">Calculating illumination & synodic lunar telemetry...</p>
+                            </div>
+                        </div>
+                        <div class="lunar-countdown-pill" id="lunarCountdownPill">
+                            <span class="pill-icon">⏳</span>
+                            <span id="lunarNextPhaseText">Next Phase: Calculating...</span>
+                        </div>
+                    </div>
+
+                    <!-- PERSPECTIVE HORIZON DOME STAGE -->
+                    <div class="horizon-dome-stage" id="horizonDomeStage">
+                        <svg class="dome-svg" id="domeSvg" viewBox="0 0 700 240" preserveAspectRatio="xMidYMid meet">
+                            <defs>
+                                <linearGradient id="domeArcGradDay" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.95" />
+                                    <stop offset="50%" stop-color="#38bdf8" stop-opacity="1" />
+                                    <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.95" />
+                                </linearGradient>
+                                <linearGradient id="domeArcGradNight" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#6366f1" stop-opacity="0.95" />
+                                    <stop offset="50%" stop-color="#38bdf8" stop-opacity="1" />
+                                    <stop offset="100%" stop-color="#818cf8" stop-opacity="0.95" />
+                                </linearGradient>
+                                <radialGradient id="skyGlowGrad" cx="50%" cy="100%" r="90%">
+                                    <stop offset="0%" stop-color="rgba(56, 189, 248, 0.35)" />
+                                    <stop offset="50%" stop-color="rgba(245, 158, 11, 0.12)" />
+                                    <stop offset="100%" stop-color="rgba(56, 189, 248, 0.0)" />
+                                </radialGradient>
+                            </defs>
+
+                            <!-- Sky glow area under arch -->
+                            <path d="M 40 210 Q 350 20 660 210 Z" fill="url(#skyGlowGrad)" />
+
+                            <!-- Perspective Elevation Guide Arcs (Zenith 90°, 60°, 30°) -->
+                            <path d="M 120 210 Q 350 70 580 210" fill="none" stroke="rgba(255,255,255,0.22)" stroke-dasharray="6,6" stroke-width="1.6" />
+                            <path d="M 200 210 Q 350 115 500 210" fill="none" stroke="rgba(255,255,255,0.15)" stroke-dasharray="4,5" stroke-width="1.3" />
+
+                            <!-- Main Celestial Trajectory Arch -->
+                            <path id="celestialSvgArc" d="M 40 210 Q 350 20 660 210" fill="none" stroke="url(#domeArcGradDay)" stroke-width="5.5" stroke-linecap="round" />
+                        </svg>
+
+                        <!-- GLOWING CELESTIAL ORBITER (SUN / MOON) -->
+                        <div id="celestialOrbiter" class="celestial-orbiter-3d" style="left: 50%; top: 48%;">
+                            <div id="celestialBody" class="celestial-sphere-3d sun-sphere">
+                                <span id="celestialEmoji">☀️</span>
+                            </div>
+                        </div>
+
+                        <!-- HORIZON BASE -->
+                        <div class="dome-horizon-ground">
+                            <div class="horizon-gate horizon-east">
+                                <span class="gate-icon">🌅</span>
+                                <span class="gate-name" id="eastGateLabel">East (Sunrise)</span>
+                                <strong id="sunriseTime">06:00</strong>
+                            </div>
+
+                            <div class="horizon-apex-badge">
+                                <span id="solarProgressBadge" class="apex-pill">50% Solar Zenith</span>
+                            </div>
+
+                            <div class="horizon-gate horizon-west">
+                                <span class="gate-icon">🌇</span>
+                                <span class="gate-name" id="westGateLabel">West (Sunset)</span>
+                                <strong id="sunsetTime">18:00</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Trajectory Scrubber -->
+                    <div class="scrubber-bar-wrap">
+                        <span class="scrub-label">Manual Celestial Scrub:</span>
+                        <input
+                            type="range"
+                            id="celestialScrubber"
+                            min="0"
+                            max="100"
+                            value="50"
+                            class="celestial-slider"
+                            oninput="window.handleScrubberInput && window.handleScrubberInput(event)"
+                        >
+                    </div>
                 </div>
             </section>
 
@@ -777,7 +900,7 @@
     </div>
 
     <!-- MAIN JAVASCRIPT WITH CACHE BUSTING -->
-    <script src="script.js?v=9.0"></script>
+    <script src="script.js?v=10.0"></script>
 </body>
 
 </html>
