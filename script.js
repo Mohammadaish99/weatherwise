@@ -1517,13 +1517,13 @@ function calculateMoonPhase(targetDate = new Date()) {
 
 /* ================= 8. ZERO-JITTER 3D CELESTIAL HORIZON DOME ================= */
 function updateCelestialHorizonDome(daily, timezone, customProgress = null) {
-    if (!daily || !daily.sunrise || !daily.sunset) return;
+    const celestialOrbiter = document.getElementById("celestialOrbiter");
+    if (!celestialOrbiter || !daily || !daily.sunrise || !daily.sunset) return;
 
     const celestialModeIcon = document.getElementById("celestialModeIcon");
     const celestialModeName = document.getElementById("celestialModeName");
     const celestialHeading = document.getElementById("celestialHeading");
     const celestialRemainingText = document.getElementById("celestialRemainingText");
-    const celestialOrbiter = document.getElementById("celestialOrbiter");
     const celestialBody = document.getElementById("celestialBody");
     const celestialEmoji = document.getElementById("celestialEmoji");
     const sunriseTimeEl = document.getElementById("sunriseTime");
@@ -2700,18 +2700,23 @@ function detectExtremeOrAntiqueQuery(rawQuery) {
 function triggerExtremeCategory(catKey, locIndex = 0) {
     const cat = EXTREME_AND_ANTIQUE_DATA[catKey];
     if (!cat) return;
+
+    // IF USER QUERIED FOR ALERTS / ANTIQUE WONDERS: POPUP THE MODAL ONLY!
+    if (catKey === "alert") {
+        hideSearchSuggestions();
+        openAntiqueModal();
+        return;
+    }
+
     const loc = cat.contenders[locIndex] || cat.contenders[0];
 
-    // Update search box input
+    // For rain, temp, snow, wind: SHOW IN SEARCH BAR & LOAD WEATHER DIRECTLY INTO DASHBOARD (NO EXTRA DASHBOARD CLUTTER)
     const input = document.getElementById("cityInput");
     if (input) {
-        input.value = `${cat.icon} ${cat.categoryBadge}: ${loc.city}`;
+        input.value = loc.city;
     }
 
     hideSearchSuggestions();
-
-    // Render showcase card
-    renderExtremeShowcase(catKey, locIndex);
 
     // Fetch real-time live satellite Open-Meteo weather
     currentCityLabel = loc.city;

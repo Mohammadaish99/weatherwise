@@ -22,7 +22,7 @@
 
     <title>WeatherWise 3D | Real-Time Atmospheric Station</title>
 
-    <link rel="stylesheet" href="style.css?v=7.0">
+    <link rel="stylesheet" href="style.css?v=8.0">
 </head>
 
 <body>
@@ -149,6 +149,10 @@
                     <button id="saveCityBtn" class="control-btn-3d save-btn" onclick="window.handleSaveCityClick && window.handleSaveCityClick()" title="Save as Favorite / Special City">
                         <span id="saveCityIcon">⭐</span> <span id="saveCityText">Save Special City</span>
                     </button>
+
+                    <button id="antiqueBtn" class="control-btn-3d antique-btn" onclick="window.openAntiqueModal && window.openAntiqueModal()" title="View Antique Wonders & Severe Alerts">
+                        <span>🏛️</span> Antique Wonders & Alerts
+                    </button>
                 </div>
 
                 <!-- QUICK POPULAR PILLS -->
@@ -160,39 +164,6 @@
                     <button class="city-pill-3d" data-city="Paris" onclick="window.fetchWeatherByCity && window.fetchWeatherByCity('Paris')">Paris</button>
                     <button class="city-pill-3d" data-city="Dubai" onclick="window.fetchWeatherByCity && window.fetchWeatherByCity('Dubai')">Dubai</button>
                     <button class="city-pill-3d" data-city="Lucknow" onclick="window.fetchWeatherByCity && window.fetchWeatherByCity('Lucknow')">Lucknow</button>
-                </div>
-
-                <!-- EXTREME WEATHER & ANTIQUE QUICK DISCOVERY PILLS -->
-                <div class="extreme-discovery-bar">
-                    <div class="extreme-discovery-header">
-                        <div class="extreme-header-left">
-                            <span class="extreme-badge-sparkle">⚡ DISCOVERY RADAR:</span>
-                            <span class="extreme-badge-hint">Instant Extremes & Antique Curiosities</span>
-                        </div>
-                        <button type="button" class="antique-explorer-link-btn" onclick="window.openAntiqueModal && window.openAntiqueModal()">
-                            <span>🏛️</span> View Antique Wonders & Alerts ↗
-                        </button>
-                    </div>
-                    <div class="extreme-pills-row">
-                        <button type="button" class="extreme-pill-3d pill-cold" onclick="window.triggerExtremeCategory && window.triggerExtremeCategory('lowest_temp', 0)" title="Explore Coldest Inhabited Place on Earth">
-                            <span class="pill-ico">❄️</span> Lowest Temp <span class="pill-tag">-71°C</span>
-                        </button>
-                        <button type="button" class="extreme-pill-3d pill-heat" onclick="window.triggerExtremeCategory && window.triggerExtremeCategory('highest_temp', 0)" title="Explore Hottest Place on Earth">
-                            <span class="pill-ico">🔥</span> Highest Temp <span class="pill-tag">+57°C</span>
-                        </button>
-                        <button type="button" class="extreme-pill-3d pill-rain" onclick="window.triggerExtremeCategory && window.triggerExtremeCategory('rain', 0)" title="Explore Wettest Place on Earth">
-                            <span class="pill-ico">🌧️</span> Rain Record <span class="pill-tag">11,872mm</span>
-                        </button>
-                        <button type="button" class="extreme-pill-3d pill-snow" onclick="window.triggerExtremeCategory && window.triggerExtremeCategory('snow', 0)" title="Explore Snowiest City on Earth">
-                            <span class="pill-ico">🌨️</span> Extreme Snow <span class="pill-tag">8m Drift</span>
-                        </button>
-                        <button type="button" class="extreme-pill-3d pill-wind" onclick="window.triggerExtremeCategory && window.triggerExtremeCategory('wind', 0)" title="Explore Windiest City on Earth">
-                            <span class="pill-ico">💨</span> Highest Wind <span class="pill-tag">Gale</span>
-                        </button>
-                        <button type="button" class="extreme-pill-3d pill-antique" onclick="window.triggerExtremeCategory && window.triggerExtremeCategory('alert', 0)" title="Explore Antique Meteorological Wonders & Severe Alerts">
-                            <span class="pill-ico">⚡</span> Alerts & Antique Wonders <span class="pill-tag">Rare</span>
-                        </button>
-                    </div>
                 </div>
             </section>
 
@@ -219,93 +190,6 @@
                 <div class="spinner-3d"></div>
                 <p id="loadingMsg">Synchronizing with live atmospheric satellites...</p>
             </div>
-
-
-            <!-- ================= EXTREME METEOROLOGICAL & ANTIQUE WONDERS SHOWCASE ================= -->
-            <section id="extremeShowcaseSection" class="extreme-showcase-section" style="display: none;" aria-live="polite">
-                <div id="extremeShowcaseCard" class="extreme-showcase-card card-3d-interactive">
-                    <div class="card-glare"></div>
-                    <div class="extreme-header-bar">
-                        <div class="extreme-title-cluster">
-                            <span id="extremeCatIcon" class="extreme-cat-icon">❄️</span>
-                            <div class="extreme-title-texts">
-                                <div class="extreme-badge-row">
-                                    <span id="extremeCategoryBadge" class="extreme-category-pill">GLOBAL RECORD EXPEDITION</span>
-                                    <span id="extremeLiveStatusPill" class="extreme-live-pill"><span class="live-ping"></span> Live Satellite Feed</span>
-                                </div>
-                                <h2 id="extremeShowcaseTitle" class="extreme-headline">Lowest Temperature on Planet Earth</h2>
-                                <p id="extremeShowcaseSubtitle" class="extreme-subhead">Official Meteorological Ground Extremes & Historical Curiosities</p>
-                            </div>
-                        </div>
-                        <button type="button" class="extreme-close-btn" onclick="window.closeExtremeShowcase && window.closeExtremeShowcase()" title="Dismiss Extreme Showcase" aria-label="Close Extreme Showcase">✕</button>
-                    </div>
-
-                    <!-- CONTENDER LOCATION SELECTOR PILLS -->
-                    <div class="extreme-contenders-wrap">
-                        <span class="contenders-label">Top Record Contenders & Cities:</span>
-                        <div id="extremeContendersRow" class="extreme-contenders-row">
-                            <!-- Populated dynamically via JavaScript -->
-                        </div>
-                    </div>
-
-                    <!-- SEVERE WEATHER ALERT & ADVISORY BANNER -->
-                    <div id="severeAlertBanner" class="severe-alert-banner">
-                        <div class="alert-icon-box">
-                            <span id="severeAlertIcon" class="alert-symbol">🚨</span>
-                        </div>
-                        <div class="alert-details-box">
-                            <div class="alert-top-line">
-                                <span id="severeAlertLevel" class="alert-level-tag">EXTREME ATMOSPHERIC ADVISORY</span>
-                                <span id="severeAlertTargetCity" class="alert-target-city">Oymyakon, Sakha, Russia</span>
-                            </div>
-                            <h4 id="severeAlertHeading" class="alert-heading">Polar Frostbite & Instant Crystallization Alert</h4>
-                            <p id="severeAlertDescription" class="alert-desc">Exposed human skin freezes in under 120 seconds. Ambient moisture crystallizes into needle ice upon exhalation.</p>
-                        </div>
-                    </div>
-
-                    <!-- ANTIQUE HISTORICAL CURIOSITY & PHENOMENON CARD -->
-                    <div class="antique-showcase-row">
-                        <div class="antique-trivia-card">
-                            <div class="antique-card-header">
-                                <div class="antique-title-group">
-                                    <span class="antique-seal-badge">🏛️ ANTIQUE PHENOMENON & TRIVIA</span>
-                                    <h4 id="antiquePhenomenonTitle">"The Whisper of the Stars" & 10,000-Year Permafrost</h4>
-                                </div>
-                                <span id="antiqueRecordDate" class="antique-date-badge">Recorded 1924 / 1933</span>
-                            </div>
-                            <p id="antiquePhenomenonStory" class="antique-story-text">
-                                In sub -60°C conditions, human breath freezes instantly, colliding with itself and falling as micro ice crystals with a crisp whispering sound locals call the "whisper of the stars".
-                            </p>
-                            <div class="antique-specs-grid">
-                                <div class="antique-spec-item">
-                                    <span class="spec-label">Ground Extremum Record</span>
-                                    <strong id="antiqueSpecRecord">-71.2°C (-96.2°F)</strong>
-                                </div>
-                                <div class="antique-spec-item">
-                                    <span class="spec-label">Physical Mechanism</span>
-                                    <strong id="antiqueSpecMechanism">Continental Siberian High & Valley Cold Air Pooling</strong>
-                                </div>
-                                <div class="antique-spec-item">
-                                    <span class="spec-label">Atmospheric Classification</span>
-                                    <strong id="antiqueSpecClassification">Hyperborean Cryosphere</strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- FOOTER ACTIONS -->
-                    <div class="extreme-card-footer">
-                        <div class="extreme-footer-info">
-                            <span>🛰️ Real-time telemetry for <strong id="extremeFooterCityName">Oymyakon, Russia</strong> is rendered in the station dials below.</span>
-                        </div>
-                        <div class="extreme-footer-btns">
-                            <button type="button" class="btn-open-antique-modal" onclick="window.openAntiqueModal && window.openAntiqueModal()">
-                                <span>📜</span> Browse All Antique Wonders & Records
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
 
             <!-- ================= MAIN WEATHER CARD ================= -->
@@ -493,129 +377,6 @@
                         </div>
                     </div>
 
-                </div>
-            </section>
-
-
-            <!-- ================= CELESTIAL HORIZON DOME ================= -->
-            <section class="celestial-section-below scroll-reveal">
-                <div class="section-title">
-                    <h2>🌅 Celestial Horizon Dome: Solar & Lunar Trajectory</h2>
-                    <span class="refresh-badge-3d">
-                        <span id="celestialModeIcon">☀️</span> <span id="celestialModeName">Day Sun Path</span>
-                    </span>
-                </div>
-
-                <div class="celestial-dome-card-3d card-3d-interactive" id="celestialDomeCard">
-                    <div class="card-glare"></div>
-                    <div class="dome-meta-header">
-                        <div class="dome-info">
-                            <h3 id="celestialHeading">Sun Orbit Trajectory (Sunrise to Sunset)</h3>
-                            <p id="celestialRemainingText">Calculating astronomical elevation...</p>
-                        </div>
-
-                        <!-- 24-HOUR SIMULATION CONTROLS -->
-                        <div class="simulation-controls">
-                            <button id="simPlayBtn" class="sim-play-btn" onclick="window.toggleCelestialSimulation && window.toggleCelestialSimulation()" title="Simulate 24-Hour Day/Night Cycle">
-                                <span>▶️</span> Play 24h Arc
-                            </button>
-                            <button id="simResetBtn" class="sim-reset-btn" onclick="window.resetCelestialSimulation && window.resetCelestialSimulation()" title="Reset to Real-Time Local Position">
-                                <span>↺</span> Real-Time
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- PROMINENT ASTRONOMICAL LUNAR PHASE TELEMETRY STRIP -->
-                    <div class="lunar-telemetry-strip" id="lunarTelemetryStrip">
-                        <div class="lunar-phase-highlight">
-                            <span id="lunarPhaseIconLarge" class="lunar-large-icon">🌕</span>
-                            <div class="lunar-phase-text-group">
-                                <div class="lunar-primary-line">
-                                    <span class="lunar-label-prefix">Today's Moon:</span>
-                                    <strong id="lunarPhaseName">Calculating...</strong>
-                                    <span id="lunarCategoryBadge" class="lunar-cat-badge">Moon Phase</span>
-                                </div>
-                                <p id="lunarPhaseSubtext" class="lunar-subtext">Calculating illumination & synodic lunar telemetry...</p>
-                            </div>
-                        </div>
-                        <div class="lunar-countdown-pill" id="lunarCountdownPill">
-                            <span class="pill-icon">⏳</span>
-                            <span id="lunarNextPhaseText">Next Phase: Calculating...</span>
-                        </div>
-                    </div>
-
-                    <!-- PERSPECTIVE HORIZON DOME STAGE -->
-                    <div class="horizon-dome-stage" id="horizonDomeStage">
-                        <svg class="dome-svg" id="domeSvg" viewBox="0 0 700 240" preserveAspectRatio="xMidYMid meet">
-                            <defs>
-                                <linearGradient id="domeArcGradDay" x1="0%" y1="0%" x2="100%" y2="0%">
-                                    <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.95" />
-                                    <stop offset="50%" stop-color="#38bdf8" stop-opacity="1" />
-                                    <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.95" />
-                                </linearGradient>
-                                <linearGradient id="domeArcGradNight" x1="0%" y1="0%" x2="100%" y2="0%">
-                                    <stop offset="0%" stop-color="#6366f1" stop-opacity="0.95" />
-                                    <stop offset="50%" stop-color="#38bdf8" stop-opacity="1" />
-                                    <stop offset="100%" stop-color="#818cf8" stop-opacity="0.95" />
-                                </linearGradient>
-                                <radialGradient id="skyGlowGrad" cx="50%" cy="100%" r="90%">
-                                    <stop offset="0%" stop-color="rgba(56, 189, 248, 0.35)" />
-                                    <stop offset="50%" stop-color="rgba(245, 158, 11, 0.12)" />
-                                    <stop offset="100%" stop-color="rgba(56, 189, 248, 0.0)" />
-                                </radialGradient>
-                            </defs>
-
-                            <!-- Sky glow area under arch -->
-                            <path d="M 40 210 Q 350 20 660 210 Z" fill="url(#skyGlowGrad)" />
-
-                            <!-- Perspective Elevation Guide Arcs (Zenith 90°, 60°, 30°) -->
-                            <path d="M 120 210 Q 350 70 580 210" fill="none" stroke="rgba(255,255,255,0.22)" stroke-dasharray="6,6" stroke-width="1.6" />
-                            <path d="M 200 210 Q 350 115 500 210" fill="none" stroke="rgba(255,255,255,0.15)" stroke-dasharray="4,5" stroke-width="1.3" />
-
-                            <!-- Main Celestial Trajectory Arch -->
-                            <path id="celestialSvgArc" d="M 40 210 Q 350 20 660 210" fill="none" stroke="url(#domeArcGradDay)" stroke-width="5.5" stroke-linecap="round" />
-                        </svg>
-
-                        <!-- GLOWING CELESTIAL ORBITER (SUN / MOON) -->
-                        <div id="celestialOrbiter" class="celestial-orbiter-3d" style="left: 50%; top: 48%;">
-                            <div id="celestialBody" class="celestial-sphere-3d sun-sphere">
-                                <span id="celestialEmoji">☀️</span>
-                            </div>
-                        </div>
-
-                        <!-- HORIZON BASE -->
-                        <div class="dome-horizon-ground">
-                            <div class="horizon-gate horizon-east">
-                                <span class="gate-icon">🌅</span>
-                                <span class="gate-name" id="eastGateLabel">East (Sunrise)</span>
-                                <strong id="sunriseTime">06:00</strong>
-                            </div>
-
-                            <div class="horizon-apex-badge">
-                                <span id="solarProgressBadge" class="apex-pill">50% Solar Zenith</span>
-                            </div>
-
-                            <div class="horizon-gate horizon-west">
-                                <span class="gate-icon">🌇</span>
-                                <span class="gate-name" id="westGateLabel">West (Sunset)</span>
-                                <strong id="sunsetTime">18:00</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Interactive Trajectory Scrubber -->
-                    <div class="scrubber-bar-wrap">
-                        <span class="scrub-label">Manual Celestial Scrub:</span>
-                        <input
-                            type="range"
-                            id="celestialScrubber"
-                            min="0"
-                            max="100"
-                            value="50"
-                            class="celestial-slider"
-                            oninput="window.handleScrubberInput && window.handleScrubberInput(event)"
-                        >
-                    </div>
                 </div>
             </section>
 
@@ -1016,7 +777,7 @@
     </div>
 
     <!-- MAIN JAVASCRIPT WITH CACHE BUSTING -->
-    <script src="script.js?v=7.0"></script>
+    <script src="script.js?v=8.0"></script>
 </body>
 
 </html>

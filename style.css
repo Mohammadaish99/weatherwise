@@ -704,6 +704,16 @@ body.dark .city-heading-3d {
     box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25);
 }
 
+.antique-btn {
+    color: var(--accent-gold);
+    border-color: rgba(245, 158, 11, 0.4);
+}
+
+.antique-btn:hover {
+    border-color: var(--accent-gold);
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25);
+}
+
 /* QUICK POPULAR PILLS */
 .quick-cities {
     display: flex;
