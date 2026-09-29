@@ -2238,7 +2238,7 @@ const EXTREME_AND_ANTIQUE_DATA = {
         contenders: [
             {
                 city: "Oymyakon, Sakha, Russia",
-                shortName: "Oymyakon (-71.2°C)",
+                shortName: "Oymyakon, Sakha",
                 lat: 63.4641,
                 lon: 142.7737,
                 record: "-71.2°C (-96.2°F)",
@@ -2253,7 +2253,7 @@ const EXTREME_AND_ANTIQUE_DATA = {
             },
             {
                 city: "Yakutsk, Sakha Republic, Russia",
-                shortName: "Yakutsk (-64.4°C)",
+                shortName: "Yakutsk, Siberia",
                 lat: 62.0355,
                 lon: 129.6755,
                 record: "-64.4°C (-83.9°F)",
@@ -2268,7 +2268,7 @@ const EXTREME_AND_ANTIQUE_DATA = {
             },
             {
                 city: "Vostok Station, Antarctica",
-                shortName: "Vostok Station (-89.2°C)",
+                shortName: "Vostok Station, Antarctica",
                 lat: -78.4642,
                 lon: 106.8373,
                 record: "-89.2°C (-128.6°F) Absolute Earth Record",
@@ -2283,7 +2283,7 @@ const EXTREME_AND_ANTIQUE_DATA = {
             },
             {
                 city: "Eureka, Nunavut, Canada",
-                shortName: "Eureka (-55.3°C)",
+                shortName: "Eureka, Nunavut",
                 lat: 79.9889,
                 lon: -85.9408,
                 record: "-55.3°C (-67.5°F)",
@@ -2309,7 +2309,7 @@ const EXTREME_AND_ANTIQUE_DATA = {
         contenders: [
             {
                 city: "Death Valley, California, USA",
-                shortName: "Death Valley (+56.7°C)",
+                shortName: "Death Valley, California",
                 lat: 36.4614,
                 lon: -116.8656,
                 record: "56.7°C (134°F) / Ground 93.9°C (201°F)",
@@ -2324,7 +2324,7 @@ const EXTREME_AND_ANTIQUE_DATA = {
             },
             {
                 city: "Kuwait City, Kuwait",
-                shortName: "Kuwait City (+53.5°C)",
+                shortName: "Kuwait City, Kuwait",
                 lat: 29.3759,
                 lon: 47.9774,
                 record: "53.5°C (128.3°F)",
@@ -2339,7 +2339,7 @@ const EXTREME_AND_ANTIQUE_DATA = {
             },
             {
                 city: "Dallol, Danakil Depression, Ethiopia",
-                shortName: "Dallol (+48°C Mean)",
+                shortName: "Dallol, Danakil Depression",
                 lat: 14.2417,
                 lon: 40.2989,
                 record: "Highest Year-Round Average Temperature on Earth",
@@ -2354,7 +2354,7 @@ const EXTREME_AND_ANTIQUE_DATA = {
             },
             {
                 city: "Ahvaz, Khuzestan, Iran",
-                shortName: "Ahvaz (+54.0°C)",
+                shortName: "Ahvaz, Khuzestan",
                 lat: 31.3183,
                 lon: 48.6706,
                 record: "54.0°C (129.2°F)",
@@ -2380,7 +2380,7 @@ const EXTREME_AND_ANTIQUE_DATA = {
         contenders: [
             {
                 city: "Mawsynram, Meghalaya, India",
-                shortName: "Mawsynram (11,872mm/yr)",
+                shortName: "Mawsynram, Meghalaya",
                 lat: 25.2975,
                 lon: 91.5826,
                 record: "11,872 mm (467.4 inches) Annual Rainfall",
@@ -2395,7 +2395,7 @@ const EXTREME_AND_ANTIQUE_DATA = {
             },
             {
                 city: "Cherrapunji (Sohra), Meghalaya, India",
-                shortName: "Cherrapunji (Twin Rain Capital)",
+                shortName: "Cherrapunji, Meghalaya",
                 lat: 25.2702,
                 lon: 91.7323,
                 record: "Holds World 48-Hour Rainfall Record (2,493 mm)",
@@ -2410,7 +2410,7 @@ const EXTREME_AND_ANTIQUE_DATA = {
             },
             {
                 city: "Tutunendo, Chocó, Colombia",
-                shortName: "Tutunendo (300 Rain Days)",
+                shortName: "Tutunendo, Chocó",
                 lat: 5.7500,
                 lon: -76.5333,
                 record: "11,770 mm (463.4 inches) / Rain 300+ Days/Year",
@@ -2425,7 +2425,7 @@ const EXTREME_AND_ANTIQUE_DATA = {
             },
             {
                 city: "Mount Waiʻaleʻale, Kauai, Hawaii",
-                shortName: "Mt. Waiʻaleʻale (11,430mm)",
+                shortName: "Mount Waiʻaleʻale, Hawaii",
                 lat: 22.0700,
                 lon: -159.5000,
                 record: "11,430 mm (450 inches) / 335 Rain Days/Year",
@@ -2451,7 +2451,7 @@ const EXTREME_AND_ANTIQUE_DATA = {
         contenders: [
             {
                 city: "Aomori City, Tōhoku, Japan",
-                shortName: "Aomori (8-Meter Snow Walls)",
+                shortName: "Aomori City, Tōhoku",
                 lat: 40.8244,
                 lon: 140.7400,
                 record: "7.9 to 8.2 Meters (26 to 28 Feet) Annual Snowfall",
@@ -2466,7 +2466,7 @@ const EXTREME_AND_ANTIQUE_DATA = {
             },
             {
                 city: "Sapporo, Hokkaido, Japan",
-                shortName: "Sapporo (6-Meter Snow)",
+                shortName: "Sapporo, Hokkaido",
                 lat: 43.0618,
                 lon: 141.3545,
                 record: "5.97 Meters (20 Feet) Snowfall in a 2M Pop. Metropolis",
@@ -2481,7 +2481,7 @@ const EXTREME_AND_ANTIQUE_DATA = {
             },
             {
                 city: "Valdez, Alaska, USA",
-                shortName: "Valdez (8.3m Snowfall)",
+                shortName: "Valdez, Alaska",
                 lat: 61.1308,
                 lon: -146.3483,
                 record: "8.26 Meters (325 Inches) Annual Snowfall",
@@ -2496,7 +2496,7 @@ const EXTREME_AND_ANTIQUE_DATA = {
             },
             {
                 city: "Mount Washington, New Hampshire, USA",
-                shortName: "Mt Washington (Extreme Rime)",
+                shortName: "Mount Washington, New Hampshire",
                 lat: 44.2706,
                 lon: -71.3033,
                 record: "7.14 Meters Snowfall + Rime Ice Feathers",
@@ -2522,7 +2522,7 @@ const EXTREME_AND_ANTIQUE_DATA = {
         contenders: [
             {
                 city: "Wellington, Greater Wellington, New Zealand",
-                shortName: "Wellington (Gale City)",
+                shortName: "Wellington, New Zealand",
                 lat: -41.2865,
                 lon: 174.7762,
                 record: "Winds Exceed Gale Force (63+ km/h) Over 173 Days/Year",
@@ -2537,7 +2537,7 @@ const EXTREME_AND_ANTIQUE_DATA = {
             },
             {
                 city: "Commonwealth Bay, George V Coast, Antarctica",
-                shortName: "Commonwealth Bay (320km/h)",
+                shortName: "Commonwealth Bay, Antarctica",
                 lat: -67.0000,
                 lon: 142.6667,
                 record: "Average Annual Wind 80 km/h (50 mph) / Gusts to 320 km/h (200 mph)",
@@ -2552,7 +2552,7 @@ const EXTREME_AND_ANTIQUE_DATA = {
             },
             {
                 city: "Mount Washington Observatory, USA",
-                shortName: "Mt Washington (372 km/h Record)",
+                shortName: "Mount Washington Observatory",
                 lat: 44.2706,
                 lon: -71.3033,
                 record: "372 km/h (231 mph) Historic Surface Wind Record",
@@ -2567,7 +2567,7 @@ const EXTREME_AND_ANTIQUE_DATA = {
             },
             {
                 city: "Cape Blanco, Oregon, USA",
-                shortName: "Cape Blanco (Ocean Gale)",
+                shortName: "Cape Blanco, Oregon",
                 lat: 42.8364,
                 lon: -124.5658,
                 record: "Frequent Winter Pacific Gusts Over 160 km/h (100 mph)",
@@ -2579,6 +2579,77 @@ const EXTREME_AND_ANTIQUE_DATA = {
                 antiqueStory: "Oregon's oldest standing lighthouse has survived 150+ years of violent ocean gales. Keepers historically reported sea spume and gravel crashing against the lantern room 250 feet above sea level.",
                 mechanism: "Pacific Mid-Latitude Cyclonic Fetch Striking Rocky Headland",
                 classification: "Pacific Maritime Coastal Promontory"
+            }
+        ]
+    },
+
+    wind_slow: {
+        id: "wind_slow",
+        name: "Earth's Calmest Winds (Zero-Velocity Dead Calm Basins)",
+        icon: "🍃",
+        categoryBadge: "Calmest Wind Today",
+        keywords: ["wind slow", "slow wind", "calm", "calmest", "calm wind", "slowest wind", "least wind", "no wind", "dead calm", "calm place", "gentle wind", "slow wind today", "today wind slow", "low wind"],
+        defaultIndex: 0,
+        contenders: [
+            {
+                city: "Oymyakon, Sakha, Russia",
+                shortName: "Oymyakon, Sakha",
+                lat: 63.4641,
+                lon: 142.7737,
+                record: "Dead Calm Intermontane Basin (Winds < 1 km/h for Months)",
+                alertLevel: "PERSISTENT SIBERIAN DEAD CALM INVERSION",
+                alertHeading: "Zero-Wind Siberian Valley Inversion",
+                alertDesc: "Trapped within deep mountain ranges, high-pressure Siberian anticyclones generate near-total atmospheric stillness, holding near-zero wind velocity.",
+                antiqueTitle: "Antique Yakut Chronicles of the 'Whisper of the Stars'",
+                antiqueDate: "Centuries of Siberian Lore",
+                antiqueStory: "In Oymyakon's dead calm freeze, breath turns instantly to ice crystals that collide with a faint rustling sound called 'the whisper of the stars'.",
+                mechanism: "Catabatic Cold Air Pooling in Enclosed Mountain Valley",
+                classification: "Subarctic Intermontane Inversion Sink"
+            },
+            {
+                city: "Eureka, Nunavut, Canada",
+                shortName: "Eureka, Nunavut",
+                lat: 79.9889,
+                lon: -85.9408,
+                record: "High Arctic High-Pressure Stagnation Zone",
+                alertLevel: "POLAR RIDGE ATMOSPHERIC STAGNATION",
+                alertHeading: "Calm Polar High Pressure Advisory",
+                alertDesc: "Under persistent high-pressure ridges of Ellesmere Island, winds regularly diminish to under 2 km/h under tranquil Arctic skies.",
+                antiqueTitle: "Antique High Arctic Expeditions of Ellesmere Island",
+                antiqueDate: "Station Founded 1947",
+                antiqueStory: "Early meteorological observers at Eureka noted sound travelled for miles without distortion across the frozen fjord due to the absolute lack of wind.",
+                mechanism: "Polar Anticyclonic Stagnation Shielded by Sawtooth Range",
+                classification: "High-Latitude Continental Fjord Basin"
+            },
+            {
+                city: "Cherrapunji (Sohra), Meghalaya, India",
+                shortName: "Cherrapunji, Meghalaya",
+                lat: 25.2702,
+                lon: 91.7323,
+                record: "Plateau Escarpment Calm Air Pocket",
+                alertLevel: "TROPICAL PRE-CONVECTIVE CALM",
+                alertHeading: "Gentle Khasi Hills Breeze Advisory",
+                alertDesc: "Protected plateau hollows experience near-zero surface air movement prior to orographic moisture condensation.",
+                antiqueTitle: "Antique British Raj Records of Sohra",
+                antiqueDate: "Recorded 1861",
+                antiqueStory: "Early colonial meteorologists noted eerie stillness settling over the limestone gorges between monumental monsoon cloudbursts.",
+                mechanism: "Khasi Hills Leeward Micro-Basin Wind Shadow",
+                classification: "Subtropical Highland Ridge"
+            },
+            {
+                city: "Dallol, Danakil Depression, Ethiopia",
+                shortName: "Dallol, Danakil Depression",
+                lat: 14.2417,
+                lon: 40.2989,
+                record: "Depression Stagnant Thermal Furnace (-130m Below Sea Level)",
+                alertLevel: "VOLCANIC BASIN STAGNANT HEAT TRAP",
+                alertHeading: "Stagnant Hyper-Arid Rift Basin Advisory",
+                alertDesc: "Sunken 130 meters below sea level, ambient air becomes trapped between tectonic horsts with minimal air displacement.",
+                antiqueTitle: "Antique Afar Chronicles of the Danakil Crucible",
+                antiqueDate: "Caravan Route Observations",
+                antiqueStory: "Nomadic Afar salt caravans described midday air so motionless that mirages mirrored the basalt formations with zero atmospheric shimmer.",
+                mechanism: "Tectonic Graben Subsidence Shielded by Escarpments",
+                classification: "Afar Triple Junction Rift Graben"
             }
         ]
     },
@@ -2659,66 +2730,74 @@ const EXTREME_AND_ANTIQUE_DATA = {
 function detectExtremeOrAntiqueQuery(rawQuery) {
     if (!rawQuery) return null;
     const q = rawQuery.trim().toLowerCase();
+    const cleaned = q.replace(/\b(today|today's|todays|now|current|currently|live|realtime|real-time|world|earth|world's|earth's|on earth|in the world|tell|show|check|find|what is|whats)\b/gi, ' ').replace(/\s+/g, ' ').trim();
 
-    // Hot & Cold combined query (e.g. "hot and cold", "cold and hot")
-    if (/\b(hot|heat)\b/i.test(q) && /\b(cold|freeze|ice)\b/i.test(q)) {
-        return { category: "lowest_temp", index: 0 };
-    }
+    const targets = [q, cleaned].filter(Boolean);
 
-    // Lowest Temperature / Polar & Cold records (includes 'cold', 'lowest', 'min temp', 'freeze', 'ice', 'polar', 'sub zero')
-    if (/^(cold|coldest|colder|lowest|lowest\s*temp|lowest\s*temperature|min\s*temp|minimum\s*temp|coldest\s*city|coldest\s*place|coldest\s*country|extreme\s*cold|freezing\s*record|freeze|freezing|ice\s*record|sub\s*zero|low\s*temp)\b/i.test(q) ||
-        /\b(coldest|coldest\s*place|coldest\s*city|coldest\s*in\s*the\s*world|lowest\s*temp|lowest\s*temperature)\b/i.test(q)) {
-        return { category: "lowest_temp", index: 0 };
-    }
+    for (const t of targets) {
+        // Wind slow and fast combined query (e.g. "wind slow and fast", "slow and fast wind", "calm and fast wind")
+        if (/\b(wind\s*slow|slow\s*wind|calm|calmest|slow)\b/i.test(t) && /\b(wind\s*fast|fast\s*wind|fast|fastest|high\s*wind|windiest)\b/i.test(t)) {
+            return { category: "wind_both", index: 0 };
+        }
 
-    // Highest Temperature / Extreme Heat records (includes 'hot', 'heat', 'warm', 'highest', 'max temp', 'furnace')
-    if (/^(hot|hottest|hotter|heat|heatwave|warm|warmest|highest|highest\s*temp|highest\s*temperature|max\s*temp|maximum\s*temp|hottest\s*city|hottest\s*place|hottest\s*country|extreme\s*heat|heat\s*record|high\s*temp|furnace)\b/i.test(q) ||
-        /\b(highest\s*temp|hottest\s*place|hottest\s*city|hottest\s*in\s*the\s*world|highest\s*temperature)\b/i.test(q)) {
-        return { category: "highest_temp", index: 0 };
-    }
+        // Hot & Cold combined query (e.g. "hot and cold", "cold and hot", "highest and lowest temp")
+        if (/\b(hot|heat|highest\s*temp)\b/i.test(t) && /\b(cold|freeze|ice|lowest\s*temp)\b/i.test(t)) {
+            return { category: "temp_both", index: 0 };
+        }
 
-    // Typo 'hold' (commonly typed for hot or cold on keyboards)
-    if (/^(hold)\b/i.test(q)) {
-        return { category: "lowest_temp", index: 0 };
-    }
+        // Slow Wind / Calmest Place on Earth (e.g. "wind slow", "slow wind", "calm", "calmest", "calm wind", "slowest wind", "least wind", "no wind", "dead calm")
+        if (/\b(wind\s*slow|slow\s*wind|calm\s*wind|calmest\s*wind|slowest\s*wind|least\s*wind|no\s*wind|dead\s*calm|calm|calmest|slow\s*breeze|gentle\s*wind|low\s*wind|lowest\s*wind)\b/i.test(t) ||
+            /^(calm|calmest|slow\s*wind|calm\s*place|calmest\s*place)\b/i.test(t)) {
+            return { category: "wind_slow", index: 0 };
+        }
 
-    // General temperature keyword ('temp', 'temperature')
-    if (/^(temp|temperature)\b/i.test(q)) {
-        return { category: "lowest_temp", index: 0 };
-    }
+        // Fast Wind / Gale records (e.g. "wind fast", "fast wind", "highest wind", "windiest")
+        if (/\b(wind\s*fast|fast\s*wind|highest\s*wind|windiest|fastest\s*wind|strongest\s*wind|extreme\s*wind|gale|gale\s*record|cyclone|hurricane|stormy\s*wind)\b/i.test(t) ||
+            /^(wind|windy|windiest|highest\s*wind|most\s*wind)\b/i.test(t)) {
+            return { category: "wind", index: 0 };
+        }
 
-    // Extreme Rain / Monsoon records (includes 'rain', 'rainy', 'monsoon', 'wet', 'deluge', 'downpour')
-    if (/^(rain|rainy|raining|rainfall|wet|wettest|most\s*rain|heavy\s*rain|rain\s*record|extreme\s*rain|monsoon|monsoon\s*record|downpour)\b/i.test(q) ||
-        /\b(wettest\s*place|wettest\s*city|most\s*rain|rain\s*record|highest\s*rain)\b/i.test(q)) {
-        return { category: "rain", index: 0 };
-    }
+        // Lowest Temperature / Polar & Cold records (e.g. "lowest temp", "coldest", "low temp", "freeze", "ice")
+        if (/\b(lowest\s*temp|lowest\s*temperature|low\s*temp|coldest|coldest\s*place|coldest\s*city|extreme\s*cold|sub\s*zero|freezing\s*record|freeze|ice\s*record)\b/i.test(t) ||
+            /^(cold|coldest|colder|lowest|lowest\s*temp|lowest\s*temperature|min\s*temp|minimum\s*temp|extreme\s*cold|sub\s*zero|low\s*temp)\b/i.test(t)) {
+            return { category: "lowest_temp", index: 0 };
+        }
 
-    // Extreme Snow / Blizzard records (includes 'snow', 'snowy', 'snowing', 'snowfall', 'blizzard')
-    if (/^(snow|snowy|snowing|snowfall|snowiest|most\s*snow|heavy\s*snow|snow\s*record|extreme\s*snow|blizzard|blizzard\s*record)\b/i.test(q) ||
-        /\b(snowiest\s*place|snowiest\s*city|most\s*snow|snow\s*record|highest\s*snow)\b/i.test(q)) {
-        return { category: "snow", index: 0 };
-    }
+        // Highest Temperature / Extreme Heat records (e.g. "highest temp", "hottest", "high temp", "heat")
+        if (/\b(highest\s*temp|highest\s*temperature|high\s*temp|hottest|hottest\s*place|hottest\s*city|extreme\s*heat|heatwave|heat\s*record)\b/i.test(t) ||
+            /^(hot|hottest|hotter|highest|highest\s*temp|highest\s*temperature|max\s*temp|maximum\s*temp|extreme\s*heat|high\s*temp|heat|furnace)\b/i.test(t)) {
+            return { category: "highest_temp", index: 0 };
+        }
 
-    // Extreme Wind / Gale records (includes 'wind', 'windy', 'windiest', 'gale', 'cyclone', 'storm')
-    if (/^(wind|windy|windiest|highest\s*wind|stormy\s*wind|wind\s*record|extreme\s*wind|gale|gale\s*record|cyclone|hurricane)\b/i.test(q) ||
-        /\b(windiest\s*place|windiest\s*city|highest\s*wind|most\s*wind|windiest)\b/i.test(q)) {
-        return { category: "wind", index: 0 };
-    }
+        // Typo 'hold' and general temperature keywords
+        if (/^(hold)\b/i.test(t) || /^(temp|temperature)\b/i.test(t)) {
+            return { category: "temp_both", index: 0 };
+        }
 
-    // Weather Alerts, Special Happenings & Antique Phenomena (opens modal popup)
-    if (/^(alert|alerts|warning|warnings|special|antique|antique\s*things|special\s*happening|special\s*weather|wonder|wonders|phenomenon|phenomena|rare\s*weather|miracle|catatumbo|aurora|blood\s*rain|morning\s*glory|sailing\s*stones)/i.test(q) ||
-        /\b(alert|antique|special\s*happening|antique\s*things|rare\s*phenomenon|extreme\s*wonder|aurora\s*borealis)\b/i.test(q)) {
-        return { category: "alert", index: 0 };
+        // Extreme Rain / Monsoon records (e.g. "rain", "rainy", "rainfall", "wet", "monsoon")
+        if (/\b(rain|rainy|raining|rainfall|wet|wettest|most\s*rain|heavy\s*rain|monsoon|monsoon\s*record|deluge|downpour)\b/i.test(t) ||
+            /^(rain|rainy|raining|rainfall|wet|wettest|monsoon|deluge)\b/i.test(t)) {
+            return { category: "rain", index: 0 };
+        }
+
+        // Extreme Snow / Blizzard records (e.g. "snow", "snowy", "snowfall", "blizzard")
+        if (/\b(snow|snowy|snowing|snowfall|snowiest|most\s*snow|heavy\s*snow|blizzard|blizzard\s*record|extreme\s*snow)\b/i.test(t) ||
+            /^(snow|snowy|snowfall|snowiest|blizzard)\b/i.test(t)) {
+            return { category: "snow", index: 0 };
+        }
+
+        // Weather Alerts, Special Happenings & Antique Phenomena
+        if (/\b(alert|alerts|warning|warnings|special|antique|antique\s*things|special\s*happening|special\s*weather|wonder|wonders|phenomenon|phenomena|rare\s*weather|miracle|catatumbo|aurora|blood\s*rain|morning\s*glory|sailing\s*stones)\b/i.test(t) ||
+            /^(alert|alerts|warning|special|antique)\b/i.test(t)) {
+            return { category: "alert", index: 0 };
+        }
     }
 
     return null;
 }
 
 /* ================= 10.7 EXTREME CATEGORY TRIGGER & TELEMETRY LOADER ================= */
-function triggerExtremeCategory(catKey, locIndex = 0, updateInput = false) {
-    const cat = EXTREME_AND_ANTIQUE_DATA[catKey];
-    if (!cat) return;
-
+async function triggerExtremeCategory(catKey, locIndex = 0, updateInput = false) {
     // IF USER QUERIED FOR ALERTS / ANTIQUE WONDERS: POPUP THE MODAL ONLY!
     if (catKey === "alert") {
         hideSearchSuggestions();
@@ -2726,7 +2805,49 @@ function triggerExtremeCategory(catKey, locIndex = 0, updateInput = false) {
         return;
     }
 
-    const loc = cat.contenders[locIndex] || cat.contenders[0];
+    let targetCatKey = catKey;
+    if (catKey === "temp_both") targetCatKey = "lowest_temp";
+    if (catKey === "wind_both") targetCatKey = "wind";
+
+    const cat = EXTREME_AND_ANTIQUE_DATA[targetCatKey];
+    if (!cat) return;
+
+    // Ensure real-time telemetry cache is available
+    if (!contendersLiveCacheTimestamp || Object.keys(contendersLiveCache).length === 0) {
+        await prefetchContenderLiveWeather();
+    }
+
+    let loc = cat.contenders[locIndex];
+
+    // If locIndex is 0 (default search without clicking a specific contender), dynamically pick TODAY'S LIVE LEADER!
+    if (locIndex === 0 && cat.contenders && cat.contenders.length > 0) {
+        const contendersWithLive = cat.contenders.map(c => ({
+            ...c,
+            live: getContenderLiveInfo(c.lat, c.lon)
+        }));
+
+        if (targetCatKey === "lowest_temp") {
+            contendersWithLive.sort((a, b) => ((a.live?.temp ?? 999) - (b.live?.temp ?? 999)));
+            loc = contendersWithLive[0];
+        } else if (targetCatKey === "highest_temp") {
+            contendersWithLive.sort((a, b) => ((b.live?.temp ?? -999) - (a.live?.temp ?? -999)));
+            loc = contendersWithLive[0];
+        } else if (targetCatKey === "wind") {
+            contendersWithLive.sort((a, b) => ((b.live?.wind ?? -999) - (a.live?.wind ?? -999)));
+            loc = contendersWithLive[0];
+        } else if (targetCatKey === "wind_slow") {
+            contendersWithLive.sort((a, b) => ((a.live?.wind ?? 999) - (b.live?.wind ?? 999)));
+            loc = contendersWithLive[0];
+        } else if (targetCatKey === "rain") {
+            const rainy = contendersWithLive.find(c => (c.live?.precip > 0 || (c.live?.code >= 51 && c.live?.code <= 67)));
+            if (rainy) loc = rainy;
+        } else if (targetCatKey === "snow") {
+            contendersWithLive.sort((a, b) => ((a.live?.temp ?? 999) - (b.live?.temp ?? 999)));
+            loc = contendersWithLive[0];
+        }
+    }
+
+    if (!loc) loc = cat.contenders[0];
 
     // DO NOT autotype in search bar during search execution! Only update if explicitly requested
     if (updateInput) {
@@ -2950,7 +3071,9 @@ function getAllExtremeContenders() {
             } else if (k === "snow") {
                 kw.push("snow", "snowy", "snowing", "snowfall", "snowiest", "blizzard", "heavy snow");
             } else if (k === "wind") {
-                kw.push("wind", "windy", "windiest", "gale", "cyclone", "storm", "hurricane", "highest wind");
+                kw.push("wind", "windy", "windiest", "gale", "cyclone", "storm", "hurricane", "highest wind", "wind fast", "fast wind");
+            } else if (k === "wind_slow") {
+                kw.push("wind slow", "slow wind", "calm", "calmest", "calm wind", "slowest wind", "least wind", "no wind", "dead calm", "gentle wind", "low wind");
             } else if (k === "alert") {
                 kw.push("alert", "alerts", "warning", "antique", "antique things", "special", "special happening", "wonder", "phenomenon");
             }
@@ -2996,35 +3119,57 @@ function renderSearchSuggestions(query = "") {
         // Default: display live world-record capitals with real-time conditions
         const coldGroup = allContenders.filter(c => c.catKey === "lowest_temp");
         coldGroup.sort((a, b) => ((a.live?.temp ?? 999) - (b.live?.temp ?? 999)));
-        const topCold = coldGroup[0] || allContenders.find(c => c.catKey === "lowest_temp" && c.idx === 0);
+        const topCold = coldGroup[0];
         if (topCold && topCold.live) {
-            topCold.customLiveBadge = `❄️ Earth's Coldest: ${formatTemp(topCold.live.temp)}°${currentUnit}`;
+            topCold.customLiveBadge = `❄️ Today's Lowest Temp: ${formatTemp(topCold.live.temp)}°${currentUnit}`;
             topCold.isTopLive = true;
         }
 
         const heatGroup = allContenders.filter(c => c.catKey === "highest_temp");
         heatGroup.sort((a, b) => ((b.live?.temp ?? -999) - (a.live?.temp ?? -999)));
-        const topHeat = heatGroup[0] || allContenders.find(c => c.catKey === "highest_temp" && c.idx === 0);
+        const topHeat = heatGroup[0];
         if (topHeat && topHeat.live) {
-            topHeat.customLiveBadge = `🔥 Peak Heat: ${formatTemp(topHeat.live.temp)}°${currentUnit}`;
+            topHeat.customLiveBadge = `🔥 Today's Highest Temp: ${formatTemp(topHeat.live.temp)}°${currentUnit}`;
             topHeat.isTopLive = true;
         }
 
-        const windGroup = allContenders.filter(c => c.catKey === "wind");
-        windGroup.sort((a, b) => ((b.live?.wind ?? -999) - (a.live?.wind ?? -999)));
-        const topWind = windGroup[0] || allContenders.find(c => c.catKey === "wind" && c.idx === 0);
-        if (topWind && topWind.live) {
-            topWind.customLiveBadge = `💨 Windiest Now: ${Math.round(topWind.live.wind)} km/h`;
-            topWind.isTopLive = true;
+        const fastWindGroup = allContenders.filter(c => c.catKey === "wind");
+        fastWindGroup.sort((a, b) => ((b.live?.wind ?? -999) - (a.live?.wind ?? -999)));
+        const topFastWind = fastWindGroup[0];
+        if (topFastWind && topFastWind.live) {
+            topFastWind.customLiveBadge = `💨 Today's Fastest Wind: ${Math.round(topFastWind.live.wind)} km/h`;
+            topFastWind.isTopLive = true;
         }
 
-        const topRain = allContenders.find(c => c.catKey === "rain" && c.idx === 0);
-        const topSnow = allContenders.find(c => c.catKey === "snow" && c.idx === 0);
+        const slowWindGroup = allContenders.filter(c => c.catKey === "wind_slow");
+        slowWindGroup.sort((a, b) => ((a.live?.wind ?? 999) - (b.live?.wind ?? 999)));
+        const topSlowWind = slowWindGroup[0];
+        if (topSlowWind && topSlowWind.live) {
+            topSlowWind.customLiveBadge = `🍃 Today's Calmest Wind: ${topSlowWind.live.wind.toFixed(1)} km/h`;
+            topSlowWind.isTopLive = true;
+        }
+
+        const rainGroup = allContenders.filter(c => c.catKey === "rain");
+        rainGroup.sort((a, b) => ((b.live?.precip ?? 0) - (a.live?.precip ?? 0)));
+        const topRain = rainGroup[0];
+        if (topRain && topRain.live) {
+            topRain.customLiveBadge = topRain.live.precip > 0 ? `🌧️ Rain Today: ${topRain.live.precip}mm` : `🌧️ Wettest Today`;
+            topRain.isTopLive = true;
+        }
+
+        const snowGroup = allContenders.filter(c => c.catKey === "snow");
+        snowGroup.sort((a, b) => ((a.live?.temp ?? 999) - (b.live?.temp ?? 999)));
+        const topSnow = snowGroup[0];
+        if (topSnow && topSnow.live) {
+            topSnow.customLiveBadge = `❄️ Cryo & Freeze: ${formatTemp(topSnow.live.temp)}°${currentUnit}`;
+            topSnow.isTopLive = true;
+        }
 
         matchedItems = [
             topCold,
             topHeat,
-            topWind,
+            topFastWind,
+            topSlowWind,
             topRain,
             topSnow,
             {
@@ -3038,51 +3183,104 @@ function renderSearchSuggestions(query = "") {
     } else {
         const extremeIntent = detectExtremeOrAntiqueQuery(q);
         if (extremeIntent) {
-            if (q === "hold" || q === "temp" || q === "temperature" || (/\b(hot|heat)\b/i.test(q) && /\b(cold|freeze|ice)\b/i.test(q))) {
-                // Show ALL 8 temperature contenders (both coldest 4 and hottest 4)
+            if (extremeIntent.category === "temp_both") {
                 const colds = allContenders.filter(c => c.catKey === "lowest_temp");
                 colds.sort((a, b) => ((a.live?.temp ?? 999) - (b.live?.temp ?? 999)));
                 if (colds[0] && colds[0].live) {
-                    colds[0].customLiveBadge = `❄️ Earth's Coldest Now`;
+                    colds[0].customLiveBadge = `❄️ Today's Lowest Temp: ${formatTemp(colds[0].live.temp)}°${currentUnit}`;
                     colds[0].isTopLive = true;
                 }
 
                 const hots = allContenders.filter(c => c.catKey === "highest_temp");
                 hots.sort((a, b) => ((b.live?.temp ?? -999) - (a.live?.temp ?? -999)));
                 if (hots[0] && hots[0].live) {
-                    hots[0].customLiveBadge = `🔥 Earth's Peak Heat Now`;
+                    hots[0].customLiveBadge = `🔥 Today's Highest Temp: ${formatTemp(hots[0].live.temp)}°${currentUnit}`;
                     hots[0].isTopLive = true;
                 }
 
                 matchedItems = [...colds, ...hots];
+            } else if (extremeIntent.category === "wind_both") {
+                const calms = allContenders.filter(c => c.catKey === "wind_slow");
+                calms.sort((a, b) => ((a.live?.wind ?? 999) - (b.live?.wind ?? 999)));
+                if (calms[0] && calms[0].live) {
+                    calms[0].customLiveBadge = `🍃 Today's Calmest Wind: ${calms[0].live.wind.toFixed(1)} km/h`;
+                    calms[0].isTopLive = true;
+                }
+
+                const fasts = allContenders.filter(c => c.catKey === "wind");
+                fasts.sort((a, b) => ((b.live?.wind ?? -999) - (a.live?.wind ?? -999)));
+                if (fasts[0] && fasts[0].live) {
+                    fasts[0].customLiveBadge = `💨 Today's Fastest Wind: ${Math.round(fasts[0].live.wind)} km/h`;
+                    fasts[0].isTopLive = true;
+                }
+
+                matchedItems = [...calms, ...fasts];
             } else if (extremeIntent.category === "lowest_temp") {
-                // Sort all 4 cold contenders by live temperature ASCENDING (coldest first)
                 matchedItems = allContenders.filter(c => c.catKey === "lowest_temp");
                 matchedItems.sort((a, b) => ((a.live?.temp ?? 999) - (b.live?.temp ?? 999)));
-                if (matchedItems[0] && matchedItems[0].live) {
-                    matchedItems[0].customLiveBadge = `❄️ Coldest on Earth: ${formatTemp(matchedItems[0].live.temp)}°${currentUnit}`;
-                    matchedItems[0].isTopLive = true;
-                }
+                matchedItems.forEach((item, idx) => {
+                    if (item.live) {
+                        item.customLiveBadge = idx === 0 
+                            ? `❄️ Today's Lowest Temp: ${formatTemp(item.live.temp)}°${currentUnit}`
+                            : `❄️ Live: ${formatTemp(item.live.temp)}°${currentUnit}`;
+                        if (idx === 0) item.isTopLive = true;
+                    }
+                });
             } else if (extremeIntent.category === "highest_temp") {
-                // Sort all 4 heat contenders by live temperature DESCENDING (hottest first)
                 matchedItems = allContenders.filter(c => c.catKey === "highest_temp");
                 matchedItems.sort((a, b) => ((b.live?.temp ?? -999) - (a.live?.temp ?? -999)));
-                if (matchedItems[0] && matchedItems[0].live) {
-                    matchedItems[0].customLiveBadge = `🔥 Peak Heat on Earth: ${formatTemp(matchedItems[0].live.temp)}°${currentUnit}`;
-                    matchedItems[0].isTopLive = true;
-                }
+                matchedItems.forEach((item, idx) => {
+                    if (item.live) {
+                        item.customLiveBadge = idx === 0 
+                            ? `🔥 Today's Highest Temp: ${formatTemp(item.live.temp)}°${currentUnit}`
+                            : `🔥 Live: ${formatTemp(item.live.temp)}°${currentUnit}`;
+                        if (idx === 0) item.isTopLive = true;
+                    }
+                });
             } else if (extremeIntent.category === "wind") {
-                // Sort all 4 wind contenders by live wind speed DESCENDING (windiest first)
                 matchedItems = allContenders.filter(c => c.catKey === "wind");
                 matchedItems.sort((a, b) => ((b.live?.wind ?? -999) - (a.live?.wind ?? -999)));
-                if (matchedItems[0] && matchedItems[0].live) {
-                    matchedItems[0].customLiveBadge = `💨 Windiest on Earth: ${Math.round(matchedItems[0].live.wind)} km/h`;
-                    matchedItems[0].isTopLive = true;
-                }
+                matchedItems.forEach((item, idx) => {
+                    if (item.live) {
+                        item.customLiveBadge = idx === 0 
+                            ? `💨 Today's Fastest Wind: ${Math.round(item.live.wind)} km/h`
+                            : `💨 Live: ${Math.round(item.live.wind)} km/h`;
+                        if (idx === 0) item.isTopLive = true;
+                    }
+                });
+            } else if (extremeIntent.category === "wind_slow") {
+                matchedItems = allContenders.filter(c => c.catKey === "wind_slow");
+                matchedItems.sort((a, b) => ((a.live?.wind ?? 999) - (b.live?.wind ?? 999)));
+                matchedItems.forEach((item, idx) => {
+                    if (item.live) {
+                        item.customLiveBadge = idx === 0 
+                            ? `🍃 Today's Calmest Wind: ${item.live.wind.toFixed(1)} km/h`
+                            : `🍃 Live: ${item.live.wind.toFixed(1)} km/h`;
+                        if (idx === 0) item.isTopLive = true;
+                    }
+                });
             } else if (extremeIntent.category === "rain") {
                 matchedItems = allContenders.filter(c => c.catKey === "rain");
+                matchedItems.sort((a, b) => ((b.live?.precip ?? 0) - (a.live?.precip ?? 0)));
+                matchedItems.forEach((item, idx) => {
+                    if (item.live) {
+                        item.customLiveBadge = item.live.precip > 0 
+                            ? `🌧️ Rain Today: ${item.live.precip}mm` 
+                            : `🌧️ Wettest Capital Today`;
+                        if (idx === 0) item.isTopLive = true;
+                    }
+                });
             } else if (extremeIntent.category === "snow") {
                 matchedItems = allContenders.filter(c => c.catKey === "snow");
+                matchedItems.sort((a, b) => ((a.live?.temp ?? 999) - (b.live?.temp ?? 999)));
+                matchedItems.forEach((item, idx) => {
+                    if (item.live) {
+                        item.customLiveBadge = idx === 0 
+                            ? `❄️ Cryo & Snow Today: ${formatTemp(item.live.temp)}°${currentUnit}`
+                            : `❄️ Live: ${formatTemp(item.live.temp)}°${currentUnit}`;
+                        if (idx === 0) item.isTopLive = true;
+                    }
+                });
             } else if (extremeIntent.category === "alert") {
                 matchedItems = allContenders.filter(c => c.catKey === "alert");
                 matchedItems.push({
@@ -3193,6 +3391,7 @@ function buildDropdownHTML(extremeItems, geoItems) {
             const live = item.live || getContenderLiveInfo(item.lat, item.lon);
             let liveRowHtml = "";
             let displayBadge = item.customLiveBadge || item.badge;
+            let subtitleHtml = "";
 
             if (live) {
                 const formattedTemp = formatTemp(live.temp);
@@ -3200,11 +3399,19 @@ function buildDropdownHTML(extremeItems, geoItems) {
                 const cond = getWeatherInfo(live.code, 1);
                 liveRowHtml = `
                     <div class="suggestion-live-row">
-                        <span class="suggestion-live-temp ${tempClass}">🌡️ Live: ${formattedTemp}°${currentUnit}</span>
-                        <span class="suggestion-live-wind">💨 ${Math.round(live.wind)} km/h</span>
+                        <span class="suggestion-live-temp ${tempClass}">🌡️ Live Today: ${formattedTemp}°${currentUnit}</span>
+                        <span class="suggestion-live-wind">💨 ${live.wind.toFixed(1)} km/h</span>
+                        ${live.precip > 0 ? `<span class="suggestion-live-precip">🌧️ ${live.precip}mm rain</span>` : ''}
                         <span class="suggestion-live-desc">${cond.icon} ${cond.description}</span>
                     </div>
                 `;
+                subtitleHtml = `
+                    <span class="suggestion-record-sub suggestion-today-telemetry">
+                        ⚡ Today's Live: Feels like ${formatTemp(live.apparent)}°${currentUnit} • Wind ${live.wind.toFixed(1)} km/h • Humidity ${live.humidity}%
+                    </span>
+                `;
+            } else {
+                subtitleHtml = `<span class="suggestion-record-sub">${escapeHtml(item.record)}</span>`;
             }
 
             html += `
@@ -3214,7 +3421,7 @@ function buildDropdownHTML(extremeItems, geoItems) {
                         <div class="suggestion-info">
                             <span class="suggestion-title">${escapeHtml(item.city)}</span>
                             ${liveRowHtml}
-                            <span class="suggestion-record-sub">Record: ${escapeHtml(item.record)}</span>
+                            ${subtitleHtml}
                         </div>
                     </div>
                     <span class="suggestion-badge ${item.isTopLive ? 'live-extreme-badge' : ''}">${escapeHtml(displayBadge)}</span>
